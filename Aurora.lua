@@ -13,7 +13,7 @@
 
 	-- [[ Locals ]]
 		local Name = "Aurora"
-		local Version = 1.0
+		local Version = 1.1
 		local DevName = "I3lackExo."
 		local GTAOVersion = "1.68"
 		require("lib/AuroraScript/Natives")
@@ -581,6 +581,15 @@
 			["0x161E9241"] = "Yusuf Amir Luxury Finish",
 			["0x11AE5C97"] = "Default Mag"}
 
+		MOSFHTunables = {
+                memory.tunable_offset("PSANDQS_HEALTH_REPLENISH_MULTIPLIER"),
+                memory.tunable_offset("EGOCHASER_HEALTH_REPLENISH_MULTIPLIER"),
+                memory.tunable_offset("METEORITE_HEALTH_REPLENISH_MULTIPLIER"),
+                memory.tunable_offset("REDWOOD_HEALTH_DEPLETE_MULTIPLIER"),
+                memory.tunable_offset("ORANGOTANG_HEALTH_REPLENISH_MULTIPLIER"),
+                memory.tunable_offset("BOURGEOIX_HEALTH_REPLENISH_MULTIPLIER"),
+                memory.tunable_offset("SPRUNK_HEALTH_REPLENISH_MULTIPLIER"),}
+
 		-- [[ 2Take1 Script ]]
 			local og_get_return_value_vector3 = native_invoker.get_return_value_vector3
 
@@ -1056,6 +1065,8 @@
 			return Stat end
 		function SET_INT_GLOBAL(Global, Value)
 			memory.write_int(memory.script_global(Global), Value)end
+		function SET_FLOAT_GLOBAL(global, value)
+            memory.write_float(memory.script_global(global), value)end
 		function STAT_SET_INT(Stat, Value)
 			STATS.STAT_SET_INT(util.joaat(ADD_MP_INDEX(Stat)), Value, true)end
 		function START_SCRIPT(ceo_mc, name)
@@ -1172,6 +1183,17 @@
 			else
 				util.toast(players.get_name(pid) .. " sent a message, but is on cooldown from translations. Consider kicking this player if they are spamming the chat to prevent a possible temporary ban from Google translate.")
 			end end
+
+		selectedplayer = {}
+			for b = 0, 31 do
+				selectedplayer[b] = false
+			end
+			excludeselected = false
+
+		cmd_id = {}
+			for i = 0, 31 do
+				cmd_id[i] = 0
+			end
 
 		get_vtable_entry_pointer = function(address, index)
 				return memory.read_long(memory.read_long(address) + (8 * index))end
@@ -1618,6 +1640,14 @@
 				STAT_SET_INT("MP_CHAR_ARMOUR_3_COUNT", 10)
 				STAT_SET_INT("MP_CHAR_ARMOUR_4_COUNT", 10)
 				STAT_SET_INT("MP_CHAR_ARMOUR_5_COUNT", 10)end)
+			menu.toggle_loop(selfoptions, "Make One Snack Full Health", {}, "Whatever you use a snack, will make you full health.", function()
+                for i = 1, 7 do
+                    SET_FLOAT_GLOBAL(262145 + MOSFHTunables[i], 99999)
+                end
+				end, function()
+					for i = 1, 7 do
+						SET_FLOAT_GLOBAL(262145 + MOSFHTunables[i], 1)
+					end end)
 			menu.toggle_loop(selfoptions, "Fast Respawn", {}, "", function()
 				local gwobaw = memory.script_global(2672524 + 1685 + 756) -- Global_2672524.f_1685.f_756
 					if PED.IS_PED_DEAD_OR_DYING(players.user_ped()) then
@@ -1638,6 +1668,71 @@
 
 		onlineoptions = menu.list(menu.my_root(), "> Online Options", {}, "", function(); end)
 			menu.divider(onlineoptions, "---> Online Options <---")
+			custselc = menu.list(onlineoptions, "> Custom Selection", {}, "", function(); end)
+				menu.toggle(custselc, "Exclude Selected", {}, "", function(on_toggle)
+					if on_toggle then
+						excludeselected = true
+					else
+						excludeselected = false
+					end end)
+				menu.divider(custselc, "~~~> Actions <~~~")
+				menu.action(custselc, "Smart Kick", {}, "", function()
+					for pids = 0, 31 do
+						if excludeselected then
+							if pids ~= players.user() and not selectedplayer[pids] and players.exists(pids) then
+								menu.trigger_commands("kick" .. PLAYER.GET_PLAYER_NAME(pids))
+								util.yield()
+							end
+						else
+							if pids ~= players.user() and selectedplayer[pids] and players.exists(pids) then
+								menu.trigger_commands("kick" .. PLAYER.GET_PLAYER_NAME(pids))
+								util.yield()
+							end
+						end
+					end end)
+				menu.action(custselc, "Host Kick", {}, "", function()
+					for pids = 0, 31 do
+						if excludeselected then
+							if pids ~= players.user() and not selectedplayer[pids] and players.exists(pids) then
+								if NETWORK.NETWORK_IS_HOST() then
+									local name = PLAYER.GET_PLAYER_NAME(pids)
+									log("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pids)..")")
+									NETWORK.NETWORK_SESSION_KICK_PLAYER(pids)
+								end
+							end
+						else
+							if pids ~= players.user() and selectedplayer[pids] and players.exists(pids) then
+								if NETWORK.NETWORK_IS_HOST() then
+									local name = PLAYER.GET_PLAYER_NAME(pids)
+									log("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pids)..")")
+									NETWORK.NETWORK_SESSION_KICK_PLAYER(pids)
+								end
+							end
+						end
+					end end)
+			menu.action(custselc, "Elegant Crash", {}, "", function()
+				for pids = 0, 31 do
+					if excludeselected then
+						if pids ~= players.user() and not selectedplayer[pids] and players.exists(pids) then
+							menu.trigger_commands("crash" .. PLAYER.GET_PLAYER_NAME(pids))
+						end
+					else
+						if pids ~= players.user() and selectedplayer[pids] and players.exists(pids) then
+							menu.trigger_commands("crash" .. PLAYER.GET_PLAYER_NAME(pids))
+						end
+					end
+				end end)
+			menu.divider(custselc, "~~~> Players <~~~")
+			for pids = 0, 31 do
+				if players.exists(pids) then
+					cmd_id[pids] = menu.toggle(custselc, tostring(PLAYER.GET_PLAYER_NAME(pids)), {}, "PID - ".. pids, function(on_toggle)
+						if on_toggle then
+							selectedplayer[pids] = true
+						else
+							selectedplayer[pids] = false
+						end
+					end)
+				end end
 			friendlist = menu.list(onlineoptions, "> Socialclub Friendlist", {}, "", function(); end)
 				menu.divider(friendlist, "---> Your Socialclub Friends <---")
 					for i = 0 , get_friend_count() do
@@ -1661,9 +1756,6 @@
 						START_SCRIPT("CEO", "apphackertruck")end)
 					menu.action(remoteaccess, "Master Control Terminal (Arcade)", {}, "", function()
 						START_SCRIPT("CEO", "apparcadebusinesshub")end)
-				
-				menu.divider(recoveryoptions, "---> Casino <---")
-
 				menu.divider(recoveryoptions, "---> Casino <---")
 				menu.toggle_loop(recoveryoptions, "Auto Black Jack", {}, "", function()
 					if not (isHelpMessageBeingDisplayed('BJACK_BET') or isHelpMessageBeingDisplayed('BJACK_TURN') or isHelpMessageBeingDisplayed('BJACK_TURN_D') or isHelpMessageBeingDisplayed('BJACK_TURN_S')) then return end
@@ -1682,19 +1774,7 @@
 							util.yield(250)
 						end
 					end end)
-			teleportoptions = menu.list(onlineoptions, "> Teleport Options", {}, "", function(); end)
-			menu.divider(teleportoptions, "---> Teleports <---")
-			for index, data in interiors do
-				local location_name = data[1]
-				local location_coords = data[2]
-				menu.action(teleportoptions, location_name, {}, "", function()
-					menu.trigger_commands("otr".." ".."on")
-					menu.trigger_commands("invisibility".." ".."on")
-					util.yield(1000)
-					ENTITY.SET_ENTITY_COORDS_NO_OFFSET(players.user_ped(), location_coords.x, location_coords.y, location_coords.z, false, false, false)
-					util.yield(100)
-					menu.trigger_commands("otr".." ".."off")
-					menu.trigger_commands("invisibility".." ".."off")end)end
+			
 			bountyoptions = menu.list(onlineoptions, "> Bounty Options", {}, "", function(); end)
 				menu.divider(bountyoptions, "---> Bounty Loop <---")
 				menu.slider(bountyoptions, "Bounty Amount", {}, "", 0, 10000, 10000, 1, function(s)
@@ -1809,7 +1889,21 @@
 					menu.trigger_commands("spoofhost".." ".."off")
 					util.toast("[Mira] <3\n".."> I have turned off the block you can now rejoin.")
 				end end)
-		
+
+		teleportoptions = menu.list(menu.my_root(), "> Teleport Options", {}, "", function(); end)
+			menu.divider(teleportoptions, "---> Teleports <---")
+			for index, data in interiors do
+				local location_name = data[1]
+				local location_coords = data[2]
+				menu.action(teleportoptions, location_name, {}, "", function()
+					menu.trigger_commands("otr".." ".."on")
+					menu.trigger_commands("invisibility".." ".."on")
+					util.yield(1000)
+					ENTITY.SET_ENTITY_COORDS_NO_OFFSET(players.user_ped(), location_coords.x, location_coords.y, location_coords.z, false, false, false)
+					util.yield(100)
+					menu.trigger_commands("otr".." ".."off")
+					menu.trigger_commands("invisibility".." ".."off")end)end
+
 		weaponsoptions = menu.list(menu.my_root(), "> Weapon Options", {}, "", function(); end)
 			menu.divider(weaponsoptions, "---> Weapon Options <---")
 			weaponattachments = menu.list(weaponsoptions, "> Weapon Attachment Manager", {}, "", function(); end)
