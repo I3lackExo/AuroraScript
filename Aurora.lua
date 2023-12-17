@@ -13,7 +13,7 @@
 
 	-- [[ Locals ]]
 		local Name = "Aurora"
-		local Version = 1.0
+		local Version = 1.1
 		local DevName = "I3lackExo."
 		local GTAOVersion = "1.68"
 		require("lib/AuroraScript/Natives")
