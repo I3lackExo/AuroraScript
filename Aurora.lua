@@ -13,7 +13,7 @@
 
 	-- [[ Locals ]]
 		local Name = "Aurora"
-		local Version = 1.1
+		local Version = 1.0
 		local DevName = "I3lackExo."
 		local GTAOVersion = "1.68"
 		require("lib/AuroraScript/Natives")
@@ -716,7 +716,7 @@
 				if Version ~= currentVer then
 					--util.show_corner_help("~h~~p~New ExoScript version is available!!!")
 					--util.toast("[Mira<3]\n".."> A new update is here!")
-					menu.action(menu.my_root(), "Update ExoScript", {}, "", function()
+					menu.action(menu.my_root(), "Update Aurora", {}, "", function()
 						async_http.init("raw.githubusercontent.com","/I3lackExo/AuroraScript/main/Aurora.lua",function(a)
 							local err = select(2,load(a))
 							if err then
