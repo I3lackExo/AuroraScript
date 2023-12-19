@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora"
-	local Version = 2.1
+	local Version = 2.2
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 
@@ -16,6 +16,85 @@
 	local LogFile = filesystem.scripts_dir() .. "lib\\AuroraScript\\" .. "Log" .. ".log"
 	local HistoryFile = filesystem.scripts_dir() .. "lib\\AuroraScript\\" .. "Playerhistory" .. ".log"
 	local DeathLog = filesystem.scripts_dir() .. "lib\\AuroraScript\\" .. "Deathlog" .. ".log"
+
+	-- [[ Github Update ]]
+	-- Script Updater
+		local response = false
+			async_http.init("raw.githubusercontent.com", "/I3lackExo/AuroraScript/main/lib/Version.lua", function(output)
+				currentVer = tonumber(output)
+				response = true
+				if Version ~= currentVer then
+					menu.action(menu.my_root(), "Update Aurora", {}, "", function()
+						async_http.init("raw.githubusercontent.com","/I3lackExo/AuroraScript/main/Aurora.lua",function(a)
+							local err = select(2,load(a))
+							if err then
+								--util.show_corner_help("~r~Script failed to download. Please try again later. If this continues to happen then manually update via github.")
+								util.toast("[Mira] <3\n".."> There seems to be an error... Please try again later.")
+							return end
+							local f = io.open(filesystem.scripts_dir()..SCRIPT_RELPATH, "wb")
+							f:write(a)
+							f:close()
+							--util.show_corner_help("~g~Successfully updated ExoScript.")
+							util.toast("[Mira] <3\n".."> Update is successfully downloaded.")
+							util.yield(1250)
+							util.restart_script()
+						end)
+						async_http.dispatch()
+					end)
+				end
+			end, function() response = true end)
+			async_http.dispatch()
+			repeat 
+				util.yield()
+			until response
+	-- Native Updater
+		local nativeresponse = false
+			async_http.init("raw.githubusercontent.com", "/I3lackExo/AuroraScript/main/lib/NativeVersion.lua", function(output)
+				currentVer = tonumber(output)
+				nativeresponse = true
+				if NativeVersion ~= currentVer then
+					local path_root = filesystem.scripts_dir() .."lib/AuroraScript/"
+						async_http.init("raw.githubusercontent.com","/I3lackExo/ExoScript/main/lib/Natives.lua",function(a)
+							local err = select(2,load(a))
+							if err then
+								--util.toast("Failed to update Natives.lua, please download it manually.\nThe link is copied in your clipboard.")
+								util.toast("[Mira] <3\n".."> There seems to be an error, please download it manually... I copied the link in your clipboard.")
+								util.copy_to_clipboard("https://github.com/I3lackExo/AuroraScript/blob/main/lib/Natives.lua", true)
+							return end
+							local f = io.open(path_root.."Natives.lua", "wb")
+							f:write(a)
+							f:close()
+							--util.toast("Successfully updated Natives.lua from the repository.")
+							util.toast("[Mira] <3\n".."> Successfully updated Natives.lua.")
+						end)
+						async_http.dispatch()
+				end
+			end, function() nativeresponse = true end)
+			async_http.dispatch()
+			repeat 
+				util.yield()
+			until nativeresponse
+	-- Logo Updater
+		local icon
+			if not filesystem.exists(filesystem.scripts_dir() .. "lib/AuroraScript/icon.png") then
+				local path_root = filesystem.scripts_dir() .."lib/AuroraScript/"
+				async_http.init("raw.githubusercontent.com", "/I3lackExo/AuroraScript/main/lib/icon.png", function(req)
+					if not req then
+						--util.toast("Failed to download C4tScripts/stand_icon.png, please download it manually.\nThe link is copied in your clipboard.")
+						util.copy_to_clipboard("https://github.com/I3lackExo/AuroraScript/blob/main/lib/icon.png", true)
+						return 
+					end
+					filesystem.mkdir(path_root)
+					local f = io.open(path_root.."icon.png", "wb")
+					f:write(req)
+					f:close()
+					--util.toast("Successfully downloaded icon.png from the repository.")
+					icon = directx.create_texture(filesystem.scripts_dir() .. "lib/AuroraScript/icon.png")
+				end)
+				async_http.dispatch()
+			else
+				icon = directx.create_texture(filesystem.scripts_dir() .. "lib/AuroraScript/icon.png")
+			end
 
 	menu.divider(menu.my_root(), "~~~> "..Name.." <~~~")
 	local selfoptions = menu.list(menu.my_root(), "Self Options")
@@ -176,7 +255,7 @@
 			{"Safe Space [AFK Room]", {x=-158.71494, y=-982.75885, z=149.13135}},
 			{"Mission Garage [AFK Room]", {x=402.0445, y=-970.0147, z=-99.00417}},
 			{"Snipespot-1 (Glitched/PVP)", {x=-1088.6375, y=-2721.819, z=13.978062}},
-			{"Snipespot-2 (Glitched/PVP))", {x=-1280.4398, y=-2655.9102, z=14.045677}},
+			{"Snipespot-2 (Glitched/PVP)", {x=-1280.4398, y=-2655.9102, z=14.045677}},
 			{"Alien Room (Halloween)", {x=-1876, y=3750, z=-100}},}
 		local station_name = {
 			["Blaine County Radio"] = "RADIO_11_TALK_02", 
@@ -688,87 +767,6 @@
 				return ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED(pid))end}
 			object = {create_object = function (model, pos, networked, dynamic)
 				return OBJECT.CREATE_OBJECT_NO_OFFSET(model, pos.x, pos.y, pos.z, networked, dynamic)end}			
-
-	-- [[ Github Update ]]
-		-- Script Updater
-			local response = false
-				async_http.init("raw.githubusercontent.com", "/I3lackExo/AuroraScript/main/lib/Version.lua", function(output)
-					currentVer = tonumber(output)
-					response = true
-					if Version ~= currentVer then
-						--util.show_corner_help("~h~~p~New ExoScript version is available!!!")
-						--util.toast("[Mira<3]\n".."> A new update is here!")
-						menu.action(menu.my_root(), "Update Aurora", {}, "", function()
-							async_http.init("raw.githubusercontent.com","/I3lackExo/AuroraScript/main/Aurora.lua",function(a)
-								local err = select(2,load(a))
-								if err then
-									--util.show_corner_help("~r~Script failed to download. Please try again later. If this continues to happen then manually update via github.")
-									util.toast("[Mira] <3\n".."> There seems to be an error... Please try again later.")
-								return end
-								local f = io.open(filesystem.scripts_dir()..SCRIPT_RELPATH, "wb")
-								f:write(a)
-								f:close()
-								--util.show_corner_help("~g~Successfully updated ExoScript.")
-								util.toast("[Mira] <3\n".."> Update is successfully downloaded.")
-								util.yield(1250)
-								util.restart_script()
-							end)
-							async_http.dispatch()
-						end)
-					end
-				end, function() response = true end)
-				async_http.dispatch()
-				repeat 
-					util.yield()
-				until response
-		-- Native Updater
-			local nativeresponse = false
-				async_http.init("raw.githubusercontent.com", "/I3lackExo/AuroraScript/main/lib/NativeVersion.lua", function(output)
-					currentVer = tonumber(output)
-					nativeresponse = true
-					if NativeVersion ~= currentVer then
-						local path_root = filesystem.scripts_dir() .."lib/AuroraScript/"
-							async_http.init("raw.githubusercontent.com","/I3lackExo/ExoScript/main/lib/Natives.lua",function(a)
-								local err = select(2,load(a))
-								if err then
-									--util.toast("Failed to update Natives.lua, please download it manually.\nThe link is copied in your clipboard.")
-									util.toast("[Mira] <3\n".."> There seems to be an error, please download it manually... I copied the link in your clipboard.")
-									util.copy_to_clipboard("https://github.com/I3lackExo/AuroraScript/blob/main/lib/Natives.lua", true)
-								return end
-								local f = io.open(path_root.."Natives.lua", "wb")
-								f:write(a)
-								f:close()
-								--util.toast("Successfully updated Natives.lua from the repository.")
-								util.toast("[Mira] <3\n".."> Successfully updated Natives.lua.")
-							end)
-							async_http.dispatch()
-					end
-				end, function() nativeresponse = true end)
-				async_http.dispatch()
-				repeat 
-					util.yield()
-				until nativeresponse
-		-- Logo Updater
-			local icon
-				if not filesystem.exists(filesystem.scripts_dir() .. "lib/AuroraScript/icon.png") then
-					local path_root = filesystem.scripts_dir() .."lib/AuroraScript/"
-					async_http.init("raw.githubusercontent.com", "/I3lackExo/AuroraScript/main/lib/icon.png", function(req)
-						if not req then
-							--util.toast("Failed to download C4tScripts/stand_icon.png, please download it manually.\nThe link is copied in your clipboard.")
-							util.copy_to_clipboard("https://github.com/I3lackExo/AuroraScript/blob/main/lib/icon.png", true)
-							return 
-						end
-						filesystem.mkdir(path_root)
-						local f = io.open(path_root.."icon.png", "wb")
-						f:write(req)
-						f:close()
-						--util.toast("Successfully downloaded icon.png from the repository.")
-						icon = directx.create_texture(filesystem.scripts_dir() .. "lib/AuroraScript/icon.png")
-					end)
-					async_http.dispatch()
-				else
-					icon = directx.create_texture(filesystem.scripts_dir() .. "lib/AuroraScript/icon.png")
-				end
 
 	-- [[ Functions ]]
 		local function player_list(pid)
