@@ -3,27 +3,40 @@
 -- Warning: Codes were taken from other scripts and are therefore not my codes. DO NOT PUBLISH THE SCRIPT!
 -- Creator: I3lackExo.
 ----------------------------------------------------------------------------------------------------------
-	-- Link: https://forge.plebmasters.de/objects?search=firework
-	-- Rocket = ind_prop_firework_01 - scr_indep_firework_starburst - place_firework_1_rocket
-	-- Cone = ind_prop_firework_02 - scr_indep_firework_shotburst - place_firework_2_cylinder
-	-- Box = ind_prop_firework_03 - scr_indep_firework_trailburst - place_firework_3_box
-	-- Fontain = ind_prop_firework_04 - scr_indep_firework_fountain - place_firework_2_cylinder
-
 -- [[ Aurora Script ]]
+	local Name = "Aurora"
+	local Version = 2.0
+	local DevName = "I3lackExo."
+	local GTAOVersion = "1.68"
+
+	require("lib/AuroraScript/Natives")
+	local required <const> = {"lib/AuroraScript/Natives.lua"}
+	local Natives = require "AuroraScript.Natives"
+
+	local LogFile = filesystem.scripts_dir() .. "lib\\AuroraScript\\" .. "Log" .. ".log"
+	local HistoryFile = filesystem.scripts_dir() .. "lib\\AuroraScript\\" .. "Playerhistory" .. ".log"
+	local DeathLog = filesystem.scripts_dir() .. "lib\\AuroraScript\\" .. "Deathlog" .. ".log"
+
+	menu.divider(menu.my_root(), "~~~> "..Name.." <~~~")
+	local selfoptions = menu.list(menu.my_root(), "Self Options")
+	local onlineoptions = menu.list(menu.my_root(), "Online Options")
+	local teleportoptions = menu.list(menu.my_root(), "Teleport Options")
+	local weaponsoptions = menu.list(menu.my_root(), "Weapon Options")
+	local vehicleoptions = menu.list(menu.my_root(), "Vehicle Options")
+	local miscoptions = menu.list(menu.my_root(), "Misc Options")
+	local settings = menu.list(menu.my_root(), "Settings")
+	local credits = menu.list(menu.my_root(), "Credits")
+	local bailOnAdminJoin = false
+	menu.toggle(menu.my_root(), "R* Admin Protection", {}, "", function(on)
+		if on then
+			bailOnAdminJoin = on
+			util.toast("[Mira] <3\n".."> Okay, I will notify you when I see an admin.")
+		else
+			bailOnAdminJoin = off
+			util.toast("[Mira] <3\n".."> Warning: If you meet an admin the risk of being banned is high.") end end)
 
 	-- [[ Locals ]]
-		local Name = "Aurora"
-		local Version = 1.1
-		local DevName = "I3lackExo."
-		local GTAOVersion = "1.68"
-		require("lib/AuroraScript/Natives")
-
-		local required <const> = {"lib/AuroraScript/Natives.lua"}
-		local Natives = require "AuroraScript.Natives"
-
-		local LogFile = filesystem.scripts_dir() .. "lib\\AuroraScript\\" .. "Log" .. ".log"
-		local HistoryFile = filesystem.scripts_dir() .. "lib\\AuroraScript\\" .. "Playerhistory" .. ".log"
-
+		local lockon
 		local x, y = 0.992, 0.008
 		local add_x = 0.0055
 		local add_y = 0.0
@@ -156,13 +169,14 @@
 		local deaths_ptr = memory.alloc_int()
 		local Int_PTR = memory.alloc_int()
 		local thrust_offset = 0x8
+		local last_equipped_weapon = WEAPON.GET_SELECTED_PED_WEAPON(PLAYER.GET_PLAYER_PED(players.user()))
 		local better_heli_handling_offsets = {["fYawMult"] = 0x18, ["fYawStabilise"] = 0x20, ["fSideSlipMult"] = 0x24, ["fRollStabilise"] = 0x30, ["fAttackLiftMult"] = 0x48, ["fAttackDiveMult"] = 0x4C, ["fWindMult"] = 0x58, ["fPitchStabilise"] = 0x3C}
 		local values = {[0] = 0, [1] = 50, [2] = 88, [3] = 160, [4] = 208,}
 		local interiors = {
 			{"Safe Space [AFK Room]", {x=-158.71494, y=-982.75885, z=149.13135}},
-			{"Snipespot-LosStantos (Glitched)", {x=402.0445, y=-970.0147, z=-99.00417}},
-			{"Snipespot-1 (Glitched)", {x=-1088.6375, y=-2721.819, z=13.978062}},
-			{"Snipespot-2 (Glitched)", {x=-1280.4398, y=-2655.9102, z=14.045677}},
+			{"Mission Garage [AFK Room]", {x=402.0445, y=-970.0147, z=-99.00417}},
+			{"Snipespot-1 (Glitched/PVP)", {x=-1088.6375, y=-2721.819, z=13.978062}},
+			{"Snipespot-2 (Glitched/PVP))", {x=-1280.4398, y=-2655.9102, z=14.045677}},
 			{"Alien Room (Halloween)", {x=-1876, y=3750, z=-100}},}
 		local station_name = {
 			["Blaine County Radio"] = "RADIO_11_TALK_02", 
@@ -197,7 +211,6 @@
 			[3] = { x = 325.95273, y = 4828.985, z = -59.368515 },
 			[4] = { x = 327.79208, y = 4831.288, z = -59.368515 },
 			[5] = { x = 330.61765, y = 4830.225, z = -59.368515 },}
-		local last_equipped_weapon = WEAPON.GET_SELECTED_PED_WEAPON(PLAYER.GET_PLAYER_PED(players.user()))
 		local attachments_table = {
 			["0xFED0FD71"] = "Default Mag", --Default Clip
 			["0xED265A1C"] = "Extended Mag", --Extended Clip
@@ -580,19 +593,24 @@
 			["0x1C221B1A"] = "Scope",
 			["0x161E9241"] = "Yusuf Amir Luxury Finish",
 			["0x11AE5C97"] = "Default Mag"}
-
 		MOSFHTunables = {
-                memory.tunable_offset("PSANDQS_HEALTH_REPLENISH_MULTIPLIER"),
-                memory.tunable_offset("EGOCHASER_HEALTH_REPLENISH_MULTIPLIER"),
-                memory.tunable_offset("METEORITE_HEALTH_REPLENISH_MULTIPLIER"),
-                memory.tunable_offset("REDWOOD_HEALTH_DEPLETE_MULTIPLIER"),
-                memory.tunable_offset("ORANGOTANG_HEALTH_REPLENISH_MULTIPLIER"),
-                memory.tunable_offset("BOURGEOIX_HEALTH_REPLENISH_MULTIPLIER"),
-                memory.tunable_offset("SPRUNK_HEALTH_REPLENISH_MULTIPLIER"),}
+			memory.tunable_offset("PSANDQS_HEALTH_REPLENISH_MULTIPLIER"),
+            memory.tunable_offset("EGOCHASER_HEALTH_REPLENISH_MULTIPLIER"),
+            memory.tunable_offset("METEORITE_HEALTH_REPLENISH_MULTIPLIER"),
+            memory.tunable_offset("REDWOOD_HEALTH_DEPLETE_MULTIPLIER"),
+            memory.tunable_offset("ORANGOTANG_HEALTH_REPLENISH_MULTIPLIER"),
+            memory.tunable_offset("BOURGEOIX_HEALTH_REPLENISH_MULTIPLIER"),
+            memory.tunable_offset("SPRUNK_HEALTH_REPLENISH_MULTIPLIER"),}
+
+		selectedplayer = {}
+			for b = 0, 31 do
+				selectedplayer[b] = false
+			end
+			excludeselected = false
+		local menus = {}
 
 		-- [[ 2Take1 Script ]]
 			local og_get_return_value_vector3 = native_invoker.get_return_value_vector3
-
 			vec3 = v3
 			local v3_meta = {
 				__is_const = true,
@@ -653,7 +671,7 @@
 					return "x:"..self.x.." y:"..self.y.." z:"..self.z
 				end,}
 
-		-- [[ 2Take1 Compat ]] 
+		-- [[ 2Take1 Compat ]]
 			vehicle = {create_vehicle = function (hash, pos, heading, networked, alwaysFalse)
 				local veh = entities.create_vehicle(hash, pos, heading)
 				ENTITY._SET_ENTITY_CLEANUP_BY_ENGINE(veh, true)
@@ -669,216 +687,108 @@
 			player = {get_player_ped = players.user_ped, player_id = players.user, get_player_coords = function (pid)
 				return ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED(pid))end}
 			object = {create_object = function (model, pos, networked, dynamic)
-				return OBJECT.CREATE_OBJECT_NO_OFFSET(model, pos.x, pos.y, pos.z, networked, dynamic)end}
-		
+				return OBJECT.CREATE_OBJECT_NO_OFFSET(model, pos.x, pos.y, pos.z, networked, dynamic)end}			
+
 	-- [[ Github Update ]]
-		local icon
-			if not filesystem.exists(filesystem.scripts_dir() .. "lib/AuroraScript/icon.png") then
-				local path_root = filesystem.scripts_dir() .."lib/AuroraScript/"
-				async_http.init("raw.githubusercontent.com", "/I3lackExo/AuroraScript/main/lib/icon.png", function(req)
-					if not req then
-						--util.toast("Failed to download C4tScripts/stand_icon.png, please download it manually.\nThe link is copied in your clipboard.")
-						util.copy_to_clipboard("https://github.com/I3lackExo/AuroraScript/blob/main/lib/icon.png", true)
-						return 
+		-- Script Updater
+			local response = false
+				async_http.init("raw.githubusercontent.com", "/I3lackExo/AuroraScript/main/lib/Version.lua", function(output)
+					currentVer = tonumber(output)
+					response = true
+					if Version ~= currentVer then
+						--util.show_corner_help("~h~~p~New ExoScript version is available!!!")
+						--util.toast("[Mira<3]\n".."> A new update is here!")
+						menu.action(menu.my_root(), "Update Aurora", {}, "", function()
+							async_http.init("raw.githubusercontent.com","/I3lackExo/AuroraScript/main/Aurora.lua",function(a)
+								local err = select(2,load(a))
+								if err then
+									--util.show_corner_help("~r~Script failed to download. Please try again later. If this continues to happen then manually update via github.")
+									util.toast("[Mira] <3\n".."> There seems to be an error... Please try again later.")
+								return end
+								local f = io.open(filesystem.scripts_dir()..SCRIPT_RELPATH, "wb")
+								f:write(a)
+								f:close()
+								--util.show_corner_help("~g~Successfully updated ExoScript.")
+								util.toast("[Mira] <3\n".."> Update is successfully downloaded.")
+								util.yield(1250)
+								util.restart_script()
+							end)
+							async_http.dispatch()
+						end)
 					end
-					filesystem.mkdir(path_root)
-					local f = io.open(path_root.."icon.png", "wb")
-					f:write(req)
-					f:close()
-					--util.toast("Successfully downloaded icon.png from the repository.")
-					icon = directx.create_texture(filesystem.scripts_dir() .. "lib/AuroraScript/icon.png")
-				end)
+				end, function() response = true end)
 				async_http.dispatch()
-			else
-				icon = directx.create_texture(filesystem.scripts_dir() .. "lib/AuroraScript/icon.png")
-			end
-		local nativeresponse = false
-			async_http.init("raw.githubusercontent.com", "/I3lackExo/AuroraScript/main/lib/NativeVersion.lua", function(output)
-				currentVer = tonumber(output)
-				nativeresponse = true
-				if NativeVersion ~= currentVer then
+				repeat 
+					util.yield()
+				until response
+		-- Native Updater
+			local nativeresponse = false
+				async_http.init("raw.githubusercontent.com", "/I3lackExo/AuroraScript/main/lib/NativeVersion.lua", function(output)
+					currentVer = tonumber(output)
+					nativeresponse = true
+					if NativeVersion ~= currentVer then
+						local path_root = filesystem.scripts_dir() .."lib/AuroraScript/"
+							async_http.init("raw.githubusercontent.com","/I3lackExo/ExoScript/main/lib/Natives.lua",function(a)
+								local err = select(2,load(a))
+								if err then
+									--util.toast("Failed to update Natives.lua, please download it manually.\nThe link is copied in your clipboard.")
+									util.toast("[Mira] <3\n".."> There seems to be an error, please download it manually... I copied the link in your clipboard.")
+									util.copy_to_clipboard("https://github.com/I3lackExo/AuroraScript/blob/main/lib/Natives.lua", true)
+								return end
+								local f = io.open(path_root.."Natives.lua", "wb")
+								f:write(a)
+								f:close()
+								--util.toast("Successfully updated Natives.lua from the repository.")
+								util.toast("[Mira] <3\n".."> Successfully updated Natives.lua.")
+							end)
+							async_http.dispatch()
+					end
+				end, function() nativeresponse = true end)
+				async_http.dispatch()
+				repeat 
+					util.yield()
+				until nativeresponse
+		-- Logo Updater
+			local icon
+				if not filesystem.exists(filesystem.scripts_dir() .. "lib/AuroraScript/icon.png") then
 					local path_root = filesystem.scripts_dir() .."lib/AuroraScript/"
-						async_http.init("raw.githubusercontent.com","/I3lackExo/ExoScript/main/lib/Natives.lua",function(a)
-							local err = select(2,load(a))
-							if err then
-								--util.toast("Failed to update Natives.lua, please download it manually.\nThe link is copied in your clipboard.")
-								util.toast("[Mira] <3\n".."> There seems to be an error, please download it manually... I copied the link in your clipboard.")
-								util.copy_to_clipboard("https://github.com/I3lackExo/AuroraScript/blob/main/lib/Natives.lua", true)
-							return end
-							local f = io.open(path_root.."Natives.lua", "wb")
-							f:write(a)
-							f:close()
-							--util.toast("Successfully updated Natives.lua from the repository.")
-							util.toast("[Mira] <3\n".."> Successfully updated Natives.lua.")
-						end)
-						async_http.dispatch()
-				end
-			end, function() nativeresponse = true end)
-			async_http.dispatch()
-			repeat 
-				util.yield()
-			until nativeresponse
-		local response = false
-			async_http.init("raw.githubusercontent.com", "/I3lackExo/AuroraScript/main/lib/Version.lua", function(output)
-				currentVer = tonumber(output)
-				response = true
-				if Version ~= currentVer then
-					--util.show_corner_help("~h~~p~New ExoScript version is available!!!")
-					--util.toast("[Mira<3]\n".."> A new update is here!")
-					menu.action(menu.my_root(), "Update Aurora", {}, "", function()
-						async_http.init("raw.githubusercontent.com","/I3lackExo/AuroraScript/main/Aurora.lua",function(a)
-							local err = select(2,load(a))
-							if err then
-								--util.show_corner_help("~r~Script failed to download. Please try again later. If this continues to happen then manually update via github.")
-								util.toast("[Mira] <3\n".."> There seems to be an error... Please try again later.")
-							return end
-							local f = io.open(filesystem.scripts_dir()..SCRIPT_RELPATH, "wb")
-							f:write(a)
-							f:close()
-							--util.show_corner_help("~g~Successfully updated ExoScript.")
-							util.toast("[Mira] <3\n".."> Update is successfully downloaded.")
-							util.yield(1250)
-							util.restart_script()
-						end)
-						async_http.dispatch()
+					async_http.init("raw.githubusercontent.com", "/I3lackExo/AuroraScript/main/lib/icon.png", function(req)
+						if not req then
+							--util.toast("Failed to download C4tScripts/stand_icon.png, please download it manually.\nThe link is copied in your clipboard.")
+							util.copy_to_clipboard("https://github.com/I3lackExo/AuroraScript/blob/main/lib/icon.png", true)
+							return 
+						end
+						filesystem.mkdir(path_root)
+						local f = io.open(path_root.."icon.png", "wb")
+						f:write(req)
+						f:close()
+						--util.toast("Successfully downloaded icon.png from the repository.")
+						icon = directx.create_texture(filesystem.scripts_dir() .. "lib/AuroraScript/icon.png")
 					end)
-				end
-			end, function() response = true end)
-			async_http.dispatch()
-			repeat 
-				util.yield()
-			until response
-
-	-- [[ Notification ]]
-
-		--[[local scriptdir = filesystem.scripts_dir()
-			local racDir = scriptdir .. "lib\\C4tScripts\\"
-				if not filesystem.exists(racDir) then
-					filesystem.mkdir(racDir)
-				end
-				if not filesystem.exists(racDir) then
-					util.toast("resource directory not found")
+					async_http.dispatch()
 				else
-					util.register_file(racDir .. "Resource_Pack.ytd")
+					icon = directx.create_texture(filesystem.scripts_dir() .. "lib/AuroraScript/icon.png")
 				end
-		function Developer(message, color) -- Main picture
-			HUD._THEFEED_SET_NEXT_POST_BACKGROUND_COLOR(color)
-				local picture
-					if not filesystem.exists(racDir) then
-						picture = "CHAR_SOCIAL_CLUB"
-					else
-						picture = "Resource_Pack"
-					end
-			GRAPHICS.REQUEST_STREAMED_TEXTURE_DICT(picture, 1)
-				while not GRAPHICS.HAS_STREAMED_TEXTURE_DICT_LOADED(picture) do
-					util.yield()
-				end
-			util.BEGIN_TEXT_COMMAND_THEFEED_POST(message)
-				if color == colors.green or color == colors.red then
-					subtitle = colorcodes.small.."~w~> [MiradeliaX Dev.]"
-				elseif color == colors.black then
-					subtitle = colorcodes.small.."~w~> [MiradeliaX Dev.]"
-				else
-					subtitle = colorcodes.small.."~w~> [MiradeliaX Dev.]"
-				end
-			HUD.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT(picture, "Developer", true, 1, colorcodes.middle.."xX-LulzSecC4t-Xx", subtitle)
 
-			HUD.END_TEXT_COMMAND_THEFEED_POST_TICKER(true, false)end
-		function Assistant(message, color) -- Mira picture
-			HUD._THEFEED_SET_NEXT_POST_BACKGROUND_COLOR(color)
-				local picture
-					if not filesystem.exists(racDir) then
-						picture = "CHAR_SOCIAL_CLUB"
-					else
-						picture = "Resource_Pack"
-					end
-			GRAPHICS.REQUEST_STREAMED_TEXTURE_DICT(picture, 1)
-				while not GRAPHICS.HAS_STREAMED_TEXTURE_DICT_LOADED(picture) do
-					util.yield()
-				end
-			util.BEGIN_TEXT_COMMAND_THEFEED_POST(message)
-				if color == colors.green or color == colors.red then
-					subtitle = colorcodes.small.."~w~> [MiradeliaX Assistant]"
-				elseif color == colors.black then
-					subtitle = colorcodes.small.."~w~> [MiradeliaX Assistant]"
-				else
-					subtitle = colorcodes.small.."~w~> [MiradeliaX Assistant]"
-				end
-			HUD.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT(picture, "Mira", true, 1, colorcodes.middle.."Mira", subtitle)
-
-			HUD.END_TEXT_COMMAND_THEFEED_POST_TICKER(true, false)end
-		function AssistantRAC(message, color) -- Mira picture
-			HUD._THEFEED_SET_NEXT_POST_BACKGROUND_COLOR(color)
-				local picture
-					if not filesystem.exists(racDir) then
-						picture = "CHAR_SOCIAL_CLUB"
-					else
-						picture = "Resource_Pack"
-					end
-			GRAPHICS.REQUEST_STREAMED_TEXTURE_DICT(picture, 1)
-				while not GRAPHICS.HAS_STREAMED_TEXTURE_DICT_LOADED(picture) do
-					util.yield()
-				end
-			util.BEGIN_TEXT_COMMAND_THEFEED_POST(message)
-				if color == colors.green or color == colors.red then
-					subtitle = colorcodes.small.."~w~> [Rockstar Protection]"
-				elseif color == colors.black then
-					subtitle = colorcodes.small.."~w~> [Rockstar Protection]"
-				else
-					subtitle = colorcodes.small.."~w~> [Rockstar Protection]"
-				end
-			HUD.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT(picture, "Mira", true, 1, colorcodes.middle.."Mira", subtitle)
-
-			HUD.END_TEXT_COMMAND_THEFEED_POST_TICKER(true, false)end
-		function GoogleAPI(message, color) --> GoogleAPI logo
-		    HUD._THEFEED_SET_NEXT_POST_BACKGROUND_COLOR(color)
-				local picture
-					if not filesystem.exists(racDir) then
-						picture = "CHAR_SOCIAL_CLUB"
-					else
-						picture = "Resource_Pack"
-					end
-		    GRAPHICS.REQUEST_STREAMED_TEXTURE_DICT(picture, 1)
-				while not GRAPHICS.HAS_STREAMED_TEXTURE_DICT_LOADED(picture) do
-					util.yield()
-				end
-		    util.BEGIN_TEXT_COMMAND_THEFEED_POST(message)
-				if color == colors.green or color == colors.red then
-					subtitle = colorcodes.small.."~u~GoogleAPI Translater"
-				elseif color == colors.black then
-					subtitle = colorcodes.small.."~c~GoogleAPI Translater"
-				else
-					subtitle = colorcodes.small.."~c~GoogleAPI Translater"
-				end
-		    HUD.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT(picture, "GoogleAPI", true, 4, colorcodes.middle.."GoogleAPI", subtitle)
-
-		    HUD.END_TEXT_COMMAND_THEFEED_POST_TICKER(true, false) end
-		function Multigaming(message, color) --> Multigaming logo
-		    HUD._THEFEED_SET_NEXT_POST_BACKGROUND_COLOR(color)
-				local picture
-					if not filesystem.exists(racDir) then
-						picture = "CHAR_SOCIAL_CLUB"
-					else
-						picture = "Resource_Pack"
-					end
-		    GRAPHICS.REQUEST_STREAMED_TEXTURE_DICT(picture, 1)
-				while not GRAPHICS.HAS_STREAMED_TEXTURE_DICT_LOADED(picture) do
-					util.yield()
-				end
-		    util.BEGIN_TEXT_COMMAND_THEFEED_POST(message)
-				if color == colors.green or color == colors.red then
-					subtitle = colorcodes.small.."~w~> [Multigaming Discord]"
-				elseif color == colors.black then
-					subtitle = colorcodes.small.."~w~> [Multigaming Discord]"
-				else
-					subtitle = colorcodes.small.."~w~> [Multigaming Discord]"
-				end
-		    HUD.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT(picture, "Multigaming", true, 4, colorcodes.middle.."Discord Invite", subtitle)
-
-		    HUD.END_TEXT_COMMAND_THEFEED_POST_TICKER(true, false) end--]]
-	
 	-- [[ Functions ]]
-		
+		local function player_list(pid)
+			if NETWORK.NETWORK_IS_SESSION_ACTIVE() then
+				menus[pid] = menu.toggle(playerslist, players.get_name(pid), {}, "ID = ".. pid, function(on_toggle)
+					if on_toggle then
+						selectedplayer[pid] = true
+					else
+						selectedplayer[pid] = false
+					end
+				end)
+			end end
+		local function handle_player_list(pid)
+			local ref = menus[pid]
+				if not players.exists(pid) then
+					if ref then
+						menu.delete(ref)
+						menus[pid] = nil
+					end
+			end end
 		local function get_session_code_for_user()
 			local applicable, code = util.get_session_code()
 			if applicable then
@@ -953,7 +863,7 @@
 					menu.trigger_commands("historyadd "..name)
 				end)end
 		function PlayerlistFeatures(pid)
-			menu.divider(menu.player_root(pid), "~~~> ExoScript <~~~")
+			--menu.divider(menu.player_root(pid), "~~~> "..Name.." <~~~")
 			end
 			for pid = 0,30 do
 				if players.exists(pid) then
@@ -1020,6 +930,23 @@
 					end
 					local currTime = os.date("*t")
 					local file = io.open(HistoryFile, "a")
+					for i=1,#args do
+						file:write(string.format("[%02d-%02d-%02d | %02d:%02d:%02d] %s\n", currTime.day, currTime.month, currTime.year, currTime.hour, currTime.min, currTime.sec, tostring(args[i])))
+					end  
+					file:close()
+				end, ...)
+				if not success then
+					basePrint("Error writing log: " .. result)
+				end end
+		local function deathlog(...)
+			basePrint(...)
+				local success, result = pcall(function(...)
+					local args = {...}
+					if #args == 0 then
+						return
+					end
+					local currTime = os.date("*t")
+					local file = io.open(DeathLog, "a")
 					for i=1,#args do
 						file:write(string.format("[%02d-%02d-%02d | %02d:%02d:%02d] %s\n", currTime.day, currTime.month, currTime.year, currTime.hour, currTime.min, currTime.sec, tostring(args[i])))
 					end  
@@ -1183,18 +1110,6 @@
 			else
 				util.toast(players.get_name(pid) .. " sent a message, but is on cooldown from translations. Consider kicking this player if they are spamming the chat to prevent a possible temporary ban from Google translate.")
 			end end
-
-		selectedplayer = {}
-			for b = 0, 31 do
-				selectedplayer[b] = false
-			end
-			excludeselected = false
-
-		cmd_id = {}
-			for i = 0, 31 do
-				cmd_id[i] = 0
-			end
-
 		get_vtable_entry_pointer = function(address, index)
 				return memory.read_long(memory.read_long(address) + (8 * index))end
 		get_sub_handling_types = function(vehicle, type)
@@ -1249,12 +1164,17 @@
 			setmetatable(vec, v3_meta)
 			return vec end
 
+	-- [[ Playerlist ]]
+		players.on_join(player_list)
+		players.on_leave(handle_player_list)
+
+	util.show_corner_help(colorcodes.small..colorcodes.red.."WARNING: Codes were taken from other scripts and are therefore not my codes. DO NOT PUBLISH THE SCRIPT!")
+	--util.toast("[Mira] <3\n".."> Hello @"..SOCIALCLUB._SC_GET_NICKNAME().."! :)")
+	util.toast("[Mira] <3\n".."> Hello "..SOCIALCLUB._SC_GET_NICKNAME().."! Welcome To Aurora!") 
+
 	-- [[ Source Code ]]
-		util.show_corner_help(colorcodes.small..colorcodes.red.."WARNING: Codes were taken from other scripts and are therefore not my codes. DO NOT PUBLISH THE SCRIPT!")
-		menu.divider(menu.my_root(), "~~~> "..Name.." <~~~")
-		selfoptions = menu.list(menu.my_root(), "> Self Options", {}, "", function(); end)
-			menu.divider(selfoptions, "~~~> Self Options <~~~")
-			animation = menu.list(selfoptions, "> Animation", {}, "", function(); end)
+		menu.divider(selfoptions, "~~~> Self Options <~~~")
+			animation = menu.list(selfoptions, "Animation", {}, "", function(); end)
 				menu.divider(animation, "---> Animation <---")
 				menu.action(animation, "Stop Animation", {}, "", function()
 					TASK.CLEAR_PED_TASKS(players.user_ped())end)
@@ -1627,7 +1547,7 @@
 						end
 						WEAPON.SET_CURRENT_PED_WEAPON(players.user_ped(), MISC.GET_HASH_KEY("WEAPON_UNARMED"), true)
 						TASK.TASK_PLAY_ANIM(players.user_ped(), dict, name, 8.0, 8.0, -1, 1, 0, false, false, false)end)
-			menu.divider(selfoptions, "~~~> PVP Options <~~~")
+		menu.divider(selfoptions, "~~~> PVP Options <~~~")
 			menu.toggle_loop(selfoptions, "Refill Snacks & Armours Automatically", {}, "", function(toggled)
 				STAT_SET_INT("NO_BOUGHT_YUM_SNACKS", 30)
 				STAT_SET_INT("NO_BOUGHT_HEALTH_SNACKS", 15)
@@ -1666,84 +1586,97 @@
 			menu.toggle_loop(selfoptions, "Modded Roll (PS3)", {}, "", function()
 				STATS.STAT_SET_INT(util.joaat("MP0_SHOOTING_ABILITY"), 200, true) end)
 
-		onlineoptions = menu.list(menu.my_root(), "> Online Options", {}, "", function(); end)
-			menu.divider(onlineoptions, "---> Online Options <---")
-			custselc = menu.list(onlineoptions, "> Custom Selection", {}, "", function(); end)
-				menu.toggle(custselc, "Exclude Selected", {}, "", function(on_toggle)
-					if on_toggle then
-						excludeselected = true
-					else
-						excludeselected = false
-					end end)
-				menu.divider(custselc, "~~~> Actions <~~~")
-				menu.action(custselc, "Smart Kick", {}, "", function()
-					for pids = 0, 31 do
-						if excludeselected then
-							if pids ~= players.user() and not selectedplayer[pids] and players.exists(pids) then
-								menu.trigger_commands("kick" .. PLAYER.GET_PLAYER_NAME(pids))
-								util.yield()
-							end
-						else
-							if pids ~= players.user() and selectedplayer[pids] and players.exists(pids) then
-								menu.trigger_commands("kick" .. PLAYER.GET_PLAYER_NAME(pids))
-								util.yield()
-							end
-						end
-					end end)
-				menu.action(custselc, "Host Kick", {}, "", function()
-					for pids = 0, 31 do
-						if excludeselected then
-							if pids ~= players.user() and not selectedplayer[pids] and players.exists(pids) then
-								if NETWORK.NETWORK_IS_HOST() then
-									local name = PLAYER.GET_PLAYER_NAME(pids)
-									log("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pids)..")")
-									NETWORK.NETWORK_SESSION_KICK_PLAYER(pids)
-								end
-							end
-						else
-							if pids ~= players.user() and selectedplayer[pids] and players.exists(pids) then
-								if NETWORK.NETWORK_IS_HOST() then
-									local name = PLAYER.GET_PLAYER_NAME(pids)
-									log("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pids)..")")
-									NETWORK.NETWORK_SESSION_KICK_PLAYER(pids)
-								end
-							end
-						end
-					end end)
-			menu.action(custselc, "Elegant Crash", {}, "", function()
-				for pids = 0, 31 do
-					if excludeselected then
-						if pids ~= players.user() and not selectedplayer[pids] and players.exists(pids) then
-							menu.trigger_commands("crash" .. PLAYER.GET_PLAYER_NAME(pids))
-						end
-					else
-						if pids ~= players.user() and selectedplayer[pids] and players.exists(pids) then
-							menu.trigger_commands("crash" .. PLAYER.GET_PLAYER_NAME(pids))
-						end
-					end
-				end end)
-			menu.divider(custselc, "~~~> Players <~~~")
-			for pids = 0, 31 do
-				if players.exists(pids) then
-					cmd_id[pids] = menu.toggle(custselc, tostring(PLAYER.GET_PLAYER_NAME(pids)), {}, "PID - ".. pids, function(on_toggle)
-						if on_toggle then
-							selectedplayer[pids] = true
-						else
-							selectedplayer[pids] = false
-						end
-					end)
-				end end
-			friendlist = menu.list(onlineoptions, "> Socialclub Friendlist", {}, "", function(); end)
-				menu.divider(friendlist, "---> Your Socialclub Friends <---")
+		menu.divider(onlineoptions, "~~~> Online Options <~~~")
+			friendlist = menu.list(onlineoptions, "Socialclub Friendlist", {}, "", function(); end)
+				menu.divider(friendlist, "~~~> Your Socialclub Friends <~~~")
 					for i = 0 , get_friend_count() do
 						local name = get_frined_name(i)
 						if name == "*****" then goto yes end
 						gen_fren_funcs(name)
 						::yes::
 					end
-			recoveryoptions = menu.list(onlineoptions, "> Recovery Options", {}, "Based on Heist Control Stuff", function(); end)
-				remoteaccess = menu.list(recoveryoptions, "> Remote Access Apps", {}, "", function(); end)
-					menu.divider(remoteaccess, "---> Remote Access Apps <---")
+			playerslist = menu.list(onlineoptions, "Custom Playerlist", {}, "", function(); end)
+			menu.divider(playerslist, "~~~> Custom Playerlist <~~~")
+			menu.toggle(playerslist, "Exclude Selected", {}, "", function(on_toggle)
+					if on_toggle then
+						excludeselected = true
+					else
+						excludeselected = false
+					end end)
+			menu.divider(playerslist, "~~~> Actions <~~~")
+			menu.action(playerslist, "Smart Kick", {}, "", function()
+				for pid = 0, 31 do
+					if excludeselected then
+						if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
+							menu.trigger_commands("kick" .. PLAYER.GET_PLAYER_NAME(pid))
+							util.yield()
+						end
+					else
+						if pid ~= players.user() and selectedplayer[pid] and players.exists(pid) then
+							menu.trigger_commands("kick" .. PLAYER.GET_PLAYER_NAME(pid))
+							util.yield()
+						end
+					end
+				end end)
+			menu.action(playerslist, "Host Kick", {}, "", function()
+					for pid = 0, 31 do
+						if excludeselected then
+							if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
+								if NETWORK.NETWORK_IS_HOST() then
+									local name = PLAYER.GET_PLAYER_NAME(pid)
+									log("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid)..")")
+									NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
+								end
+							end
+						else
+							if pid ~= players.user() and selectedplayer[pid] and players.exists(pid) then
+								if NETWORK.NETWORK_IS_HOST() then
+									local name = PLAYER.GET_PLAYER_NAME(pid)
+									log("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid)..")")
+									NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
+								end
+							end
+						end
+					end end)
+			menu.action(playerslist, "Elegant Crash", {}, "", function()
+				for pid = 0, 31 do
+					if excludeselected then
+						if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
+							menu.trigger_commands("crash" .. PLAYER.GET_PLAYER_NAME(pid))
+						end
+					else
+						if pid ~= players.user() and selectedplayer[pid] and players.exists(pid) then
+							menu.trigger_commands("crash" .. PLAYER.GET_PLAYER_NAME(pid))
+						end
+					end
+				end end)
+			menu.divider(playerslist, "~~~> Players <~~~")
+			players.dispatch_on_join()
+			--[[deathoptions = menu.list(onlineoptions, "Death Log", {}, "", function(); end)
+				menu.divider(deathoptions, "~~~> Death Log <~~~")
+				menu.toggle_loop(deathoptions, "Activate Death Log", {}, "", function(on)	
+					 if PED.IS_PED_DEAD_OR_DYING(players.user_ped()) then
+						killer = PED.GET_PED_SOURCE_OF_DEATH(players.user_ped())
+						if killer == players.user_ped() then return end
+						if STREAMING.IS_MODEL_A_PED(ENTITY.GET_ENTITY_MODEL(killer)) then
+							local pid = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(killer)
+							local pname = players.get_name(pid)
+							if pname != nil then
+								deathlog("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid)..")")
+							end
+						elseif STREAMING.IS_MODEL_A_VEHICLE(ENTITY.GET_ENTITY_MODEL(killer)) then
+							local vehowner = entities.get_owner(entities.handle_to_pointer(killer))
+							local pname = players.get_name(vehowner)
+							if pname != nil then
+								deathlog("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid)..")")
+							end
+						end
+					end	end)
+			menu.action(deathoptions, "Clear Death Log", {}, "", function()
+				io.remove(DeathLog) end)]]
+			recoveryoptions = menu.list(onlineoptions, "Recovery Options", {}, "Based on Heist Control Stuff", function(); end)
+				remoteaccess = menu.list(recoveryoptions, "Remote Access Apps", {}, "", function(); end)
+					menu.divider(remoteaccess, "~~~> Remote Access Apps <~~~")
 					menu.action(remoteaccess, "Smuggler (Air Cargo)", {}, "", function()
 						START_SCRIPT("CEO", "appsmuggler")end)
 					menu.action(remoteaccess, "Bunker", {}, "", function()
@@ -1756,33 +1689,32 @@
 						START_SCRIPT("CEO", "apphackertruck")end)
 					menu.action(remoteaccess, "Master Control Terminal (Arcade)", {}, "", function()
 						START_SCRIPT("CEO", "apparcadebusinesshub")end)
-				menu.divider(recoveryoptions, "---> Casino <---")
-				menu.toggle_loop(recoveryoptions, "Auto Black Jack", {}, "", function()
-					if not (isHelpMessageBeingDisplayed('BJACK_BET') or isHelpMessageBeingDisplayed('BJACK_TURN') or isHelpMessageBeingDisplayed('BJACK_TURN_D') or isHelpMessageBeingDisplayed('BJACK_TURN_S')) then return end
-					if isHelpMessageBeingDisplayed('BJACK_BET') then
-						PAD._SET_CONTROL_NORMAL(2, 204, 1) --max bet
-						PAD._SET_CONTROL_NORMAL(2, 201, 1) --bet
-					else
-						PAD._SET_CONTROL_NORMAL(2, 203, 1) --pass
-					end end)	
-				menu.divider(recoveryoptions, "---> Nightclub Options <---")
-				menu.toggle_loop(recoveryoptions, "Nightclub Popularity", {}, "Keeps the Nightclub Popularity at max", function ()
-					if util.is_session_started() then
-						local ncpop = math.floor(STAT_GET_INT("CLUB_POPULARITY") / 10)
-						if ncpop < 100 then
-							menu.trigger_commands("clubpopularity 100")
-							util.yield(250)
-						end
-					end end)
-			
-			bountyoptions = menu.list(onlineoptions, "> Bounty Options", {}, "", function(); end)
-				menu.divider(bountyoptions, "---> Bounty Loop <---")
+				menu.divider(recoveryoptions, "~~~> Casino <~~~")
+					menu.toggle_loop(recoveryoptions, "Auto Black Jack", {}, "", function()
+						if not (isHelpMessageBeingDisplayed('BJACK_BET') or isHelpMessageBeingDisplayed('BJACK_TURN') or isHelpMessageBeingDisplayed('BJACK_TURN_D') or isHelpMessageBeingDisplayed('BJACK_TURN_S')) then return end
+						if isHelpMessageBeingDisplayed('BJACK_BET') then
+							PAD._SET_CONTROL_NORMAL(2, 204, 1) --max bet
+							PAD._SET_CONTROL_NORMAL(2, 201, 1) --bet
+						else
+							PAD._SET_CONTROL_NORMAL(2, 203, 1) --pass
+						end end)
+				menu.divider(recoveryoptions, "~~~> Nightclub Options <~~~")
+					menu.toggle_loop(recoveryoptions, "Nightclub Popularity", {}, "Keeps the Nightclub Popularity at max", function ()
+						if util.is_session_started() then
+							local ncpop = math.floor(STAT_GET_INT("CLUB_POPULARITY") / 10)
+							if ncpop < 100 then
+								menu.trigger_commands("clubpopularity 100")
+								util.yield(250)
+							end
+						end end)
+			bountyoptions = menu.list(onlineoptions, "Bounty Options", {}, "", function(); end)	
+				menu.divider(bountyoptions, "~~~> Bounty Loop <~~~")
 				menu.slider(bountyoptions, "Bounty Amount", {}, "", 0, 10000, 10000, 1, function(s)
 					infibounty_amt = s end)
 				menu.toggle_loop(bountyoptions, "Place Infinite Bounty", {}, "", function(click_type)
 					menu.trigger_commands("bountyall" .. " " .. tostring(infibounty_amt))
 					util.yield(60000)end)
-				menu.divider(bountyoptions, "---> Bounty Remover <---")
+				menu.divider(bountyoptions, "~~~> Bounty Remover <~~~")
 				menu.toggle_loop(bountyoptions, "Auto Claim Bounties", {}, "Automatically claims bounties that are placed on you.", function ()
 					local bounty = players.get_bounty(players.user())
 						if bounty != nil then
@@ -1793,7 +1725,7 @@
 							until bounty == nil
 							util.toast("[Mira] <3\n".."> Bounty has been claimed.")
 						end end)
-			menu.divider(onlineoptions, "---> Protections<---")
+			menu.divider(onlineoptions, "~~~> Protections<~~~")
 			menu.list_select(onlineoptions, "Jammer Delay", {}, "The speed in which your name will flicker at for orbital cannon users.", {"Slow", "Medium", "Fast"}, 3, function(index, value)
 				switch value do
 					case "Slow":
@@ -1856,7 +1788,7 @@
 						end
 					end
 				end end)
-			menu.divider(onlineoptions, "---> Blocks <---")
+			menu.divider(onlineoptions, "~~~> Blocks <~~~")
 			menu.toggle_loop(onlineoptions, "Block Orbital Cannon Room", {}, "", function()
 				local mdl = util.joaat("h4_prop_h4_garage_door_01a")
 				RequestModel(mdl)
@@ -1890,23 +1822,21 @@
 					util.toast("[Mira] <3\n".."> I have turned off the block you can now rejoin.")
 				end end)
 
-		teleportoptions = menu.list(menu.my_root(), "> Teleport Options", {}, "", function(); end)
-			menu.divider(teleportoptions, "---> Teleports <---")
+		menu.divider(teleportoptions, "~~~> Teleport Options <~~~")
 			for index, data in interiors do
 				local location_name = data[1]
 				local location_coords = data[2]
-				menu.action(teleportoptions, location_name, {}, "", function()
-					menu.trigger_commands("otr".." ".."on")
-					menu.trigger_commands("invisibility".." ".."on")
-					util.yield(1000)
-					ENTITY.SET_ENTITY_COORDS_NO_OFFSET(players.user_ped(), location_coords.x, location_coords.y, location_coords.z, false, false, false)
-					util.yield(100)
-					menu.trigger_commands("otr".." ".."off")
-					menu.trigger_commands("invisibility".." ".."off")end)end
+			menu.action(teleportoptions, location_name, {}, "", function()
+				menu.trigger_commands("otr".." ".."on")
+				menu.trigger_commands("invisibility".." ".."on")
+				util.yield(1000)
+				ENTITY.SET_ENTITY_COORDS_NO_OFFSET(players.user_ped(), location_coords.x, location_coords.y, location_coords.z, false, false, false)
+				util.yield(100)
+				menu.trigger_commands("otr".." ".."off")
+				menu.trigger_commands("invisibility".." ".."off")end)end
 
-		weaponsoptions = menu.list(menu.my_root(), "> Weapon Options", {}, "", function(); end)
-			menu.divider(weaponsoptions, "---> Weapon Options <---")
-			weaponattachments = menu.list(weaponsoptions, "> Weapon Attachment Manager", {}, "", function(); end)
+		menu.divider(weaponsoptions, "~~~> Weapon Options <~~~")
+			weaponattachments = menu.list(weaponsoptions, "Weapon Attachment Manager", {}, "", function(); end)
 				menu.divider(weaponattachments, "---> Weapon Attachment Manager <---")
 				menu.action(weaponattachments, "Give Ammo", {}, "(Not working with special ammo)", function(on_click)
 					local curr_equipped_weapon = WEAPON.GET_SELECTED_PED_WEAPON(PLAYER.GET_PLAYER_PED(players.user()))
@@ -1932,7 +1862,7 @@
 							end)
 						end
 					end
-			menu.divider(weaponsoptions, "---> Buffs <---")
+			menu.divider(weaponsoptions, "~~~> Buffs <~~~")
 			menu.toggle_loop(weaponsoptions, "Double Tap", {""}, "", function()
 				if PED.IS_PED_SHOOTING(players.user_ped()) then
 					PED.FORCE_PED_AI_AND_ANIMATION_UPDATE(players.user_ped())
@@ -1968,19 +1898,18 @@
 					menu.trigger_commands("rangemultiplier".." ".."1.00")
 				end end)
 
-		vehicleoptions = menu.list(menu.my_root(), "> Vehicle Options", {}, "", function(); end)
-			menu.divider(vehicleoptions, "---> Zeromenu Drifting <---")
-			menu.action(vehicleoptions, "Drift", {}, "", function(toggle)
+		menu.divider(vehicleoptions, "~~~> Vehicle Options <~~~")
+			menu.action(vehicleoptions, "Apply Drift Ability", {}, "", function(toggle)
 				if not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(entities.get_user_vehicle_as_handle(pid)) then
 					NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(entities.get_user_vehicle_as_handle(pid))  
 				end
 				ENTITY.SET_ENTITY_MAX_SPEED(entities.get_user_vehicle_as_handle(), 30)
 				VEHICLE.MODIFY_VEHICLE_TOP_SPEED(entities.get_user_vehicle_as_handle(), 200)end)
-				menu.toggle(vehicleoptions, "Stance [Only LS Tuners]", {}, "", function(toggle)
+				menu.toggle(vehicleoptions, "Stance [Only LS Tuners Cars]", {}, "", function(toggle)
 					VEHICLE._SET_REDUCE_DRIFT_VEHICLE_SUSPENSION(players_car, toggle)end)
 				menu.toggle_loop(vehicleoptions, "Keep car clean", {}, "", function(toggled)
 					VEHICLE.SET_VEHICLE_DIRT_LEVEL(entities.get_user_vehicle_as_handle(), 0.0)end)
-			menu.divider(vehicleoptions, "---> Other Options <---")
+			menu.divider(vehicleoptions, "~~~> Other Options <~~~")
 			menu.toggle_loop(vehicleoptions, "Stealth Vehicle Godmode", {}, "Won't be detected as vehicle godmode by most menus", function(toggled)
 				ENTITY.SET_ENTITY_PROOFS(players_car, true, true, true, true, true, 0, 0, true)
 				end, function() ENTITY.SET_ENTITY_PROOFS(PED.GET_VEHICLE_PED_IS_IN(player), false, false, false, false, false, 0, 0, false)end)	
@@ -2002,7 +1931,7 @@
 						VEHICLE.SET_VEHICLE_INDICATOR_LIGHTS(vehicle, 1, false)
 					end
 				end end)
-			menu.divider(vehicleoptions, "---> Helicopter Options <---")
+			menu.divider(vehicleoptions, "~~~> Helicopter Options <~~~")
 			menu.action(vehicleoptions, "Disable Auto-Stablization", {}, "", function ()
 				local CflyingHandling = get_sub_handling_types(entities.get_user_vehicle_as_handle(), 1)
 				if CflyingHandling then
@@ -2011,11 +1940,10 @@
 					end
 					util.toast("Auto-Stablization off.")
 				end end)
-
-		miscoptions = menu.list(menu.my_root(), "> Misc Options", {}, "", function(); end)
-			menu.divider(miscoptions, "---> Misc Options <---")
-			funnyoptions = menu.list(miscoptions, "> Funny Options", {}, "", function(); end)
-				menu.divider(funnyoptions, "---> Funny Options <---")
+		
+		menu.divider(miscoptions, "~~~> Misc Options <~~~")
+			funnyoptions = menu.list(miscoptions, "Funny Options", {}, "", function(); end)
+				menu.divider(funnyoptions, "~~~> Funny Options <~~~")
 				menu.action(funnyoptions, "Cum", {}, "", function()
 					local ptfx_asset = "scr_indep_fireworks"
 					local effect_name = "scr_indep_firework_trailburst"
@@ -2046,8 +1974,8 @@
 					TASK.TASK_PLAY_ANIM(player, agroup, anim1, 8.0, 8.0, 3000, 0, 0, false, false, false)
 					util.yield(1000)
 					entities.create_object(rshit, c)end)
-			firework = menu.list(miscoptions, "> Firework (PS3)", {}, "", function(); end)
-				menu.divider(firework, "---> Firework Rocket <---")
+			firework = menu.list(miscoptions, "Firework (PS3)", {}, "", function(); end)
+				menu.divider(firework, "~~~> Firework Rocket <~~~")
 				menu.action(firework, "Place Firework Rocket", {}, "", function(click_type)
 					local animlib = "anim@mp_fireworks"
 					local ptfx_asset = "scr_indep_fireworks"
@@ -2086,7 +2014,7 @@
 						entities.delete_by_handle(rocket)
 						placed_firework_rockets[rocket] = nil
 					end end)
-				menu.divider(firework, "---> Firework Cone <---")
+				menu.divider(firework, "~~~> Firework Cone <~~~")
 				menu.action(firework, "Place Firework Cone", {}, "", function(click_type)
 					local animlib = "anim@mp_fireworks"
 					local ptfx_asset = "scr_indep_fireworks"
@@ -2125,7 +2053,7 @@
 						entities.delete_by_handle(cone)
 						placed_firework_cones[cone] = nil
 					end end)
-				menu.divider(firework, "---> Firework Fontain <---")		
+				menu.divider(firework, "~~~> Firework Fontain <~~~")		
 				menu.action(firework, "Place Firework Fontain", {}, "", function(click_type)
 					local animlib = "anim@mp_fireworks"
 					local ptfx_asset = "scr_indep_fireworks"
@@ -2164,7 +2092,7 @@
 						entities.delete_by_handle(fontain)
 						placed_firework_fontains[fontain] = nil
 					end end)
-				menu.divider(firework, "---> Firework Box <---")
+				menu.divider(firework, "~~~> Firework Box <~~~")
 				menu.action(firework, "Place Firework Box", {}, "", function(click_type)
 					local animlib = "anim@mp_fireworks"
 					local ptfx_asset = "scr_indep_fireworks"
@@ -2203,8 +2131,6 @@
 						entities.delete_by_handle(box)
 						placed_firework_boxes[box] = nil
 					end end)
-			menu.action(miscoptions, "Custom Fake Banner", {"banner"}, "", function(on_click) menu.show_command_box("banner ") end, function(text)
-				custom_alert(text)end)
 			menu.toggle_loop(miscoptions, "Hands Up", {}, "Press: X", function(toggled)
 				if PAD.IS_CONTROL_PRESSED(1, 323) then
 					while not STREAMING.HAS_ANIM_DICT_LOADED("random@mugging3") do
@@ -2223,7 +2149,9 @@
 					PED.SET_ENABLE_HANDCUFFS(PLAYER.PLAYER_PED_ID(), false)
 				end
 				util.yield()end)
-			menu.divider(miscoptions, "---> Lobby Settings <---")	
+			menu.action(miscoptions, "Custom Fake Banner", {"banner"}, "", function(on_click) menu.show_command_box("banner ") end, function(text)
+				custom_alert(text)end)
+			menu.divider(miscoptions, "~~~> Lobby Settings <~~~")	
 			menu.list_action(miscoptions, "Clear All...", {}, "", {"Peds", "Vehicles", "Objects", "Pickups", "Ropes", "Projectiles", "Sounds"}, function(index, name)
 				util.toast("Clearing "..name:lower().."...")
 				local counter = 0
@@ -2323,10 +2251,9 @@
 				--Assistant("> I have removed everything from your area.",colors.green)
 				end)
 
-		settings = menu.list(menu.my_root(), "> Settings", {}, "", function(); end)
-			menu.divider(settings, "~~~> Customizations <~~~")
-			translater = menu.list(settings, "> Translater", {}, "", function(); end)
-				menu.divider(translater, "---> Translater <---")
+		menu.divider(settings, "~~~> Customizations <~~~")
+			translater = menu.list(settings, "Translater", {}, "", function(); end)
+				menu.divider(translater, "~~~> Translater <~~~")
 				menu.toggle(translater, "On", {}, "Turns translating on/off", function(on)
 					do_translate = on end, false)
 				menu.toggle(translater, "Only translate foreign game lang", {}, "Only translates messages from users with a different game language, thus saving API calls. You should leave this on to prevent the chance of Google temporarily blocking your requests.", function(on)
@@ -2366,7 +2293,7 @@
 							-- credit to the original chat translator for the api code
 							google_translate(encoded_text, my_lang, sender, false)
 						end end)
-			watermark = menu.list(settings, "> Watermark", {}, "", function(); end)
+			watermark = menu.list(settings, "Watermark", {}, "", function(); end)
 				menu.divider(watermark, "~~~> Watermark <~~~")
 				local pos_settings = menu.list(watermark, "Position", {}, "", function(); end)
 				menu.slider(pos_settings, "X position", {"watermark-x"}, "Move the watermark in the x position", -100000, 100000, x * 10000, 1, function(x_)
@@ -2382,8 +2309,8 @@
 					bg_color = col end)
 				local rgb_text = menu.colour(color_settings, "Text Color", {"watermark-tx_color"}, "Select text color", tx_color, true, function(col)
 					tx_color = col end)
-				menu.divider(watermark, "Aditional Settings")
-				menu.list_select(watermark, "First Label", {}, "Change the first label in the watermak", {"Disable", "ExoScript", "Version", "Femboy Edition", "UwU"}, show_firstl, function (val)
+				menu.divider(watermark, "~~~> Settings <~~~")
+				menu.list_select(watermark, "First Label", {}, "Change the first label in the watermak", {"Disable", "Aurora", "Version", "Femboy Edition", "UwU"}, show_firstl, function (val)
 					show_firstl = val end)
 				menu.toggle(watermark, "Name", {}, "Show the name in the watermark", function(val)
 					show_name = val end, show_name)
@@ -2397,16 +2324,16 @@
 					show_players = val end, show_players)]]
 				menu.toggle(watermark, "Time", {}, "Show the name in the watermark", function(val)
 					show_time = val end, show_time)
-				menu.divider(watermark, "")
+				menu.divider(watermark, "~~~> Enabler <~~~")
 				menu.toggle_loop(watermark, "Enable Watermark", {}, "Enable/Disable Watermark", function()
 					if menu.is_in_screenshot_mode() then return end
-						local wm_text = (show_firstl == 2 and "ExoScript" or show_firstl == 5 and "UwU" or show_firstl == 4 and "Femboy Edition" or show_firstl == 3 and utils.editions[utils.edition+1] or "") .. (show_name and " | ".. SOCIALCLUB._SC_GET_NICKNAME() or "") .. (show_rid and " | ".. players.get_rockstar_id(players.user()) or "") .. (show_sessioncode and " | Session Code: ".. get_session_code_for_user() or "") .. (show_gtaversion and " | ".. NETWORK._GET_ONLINE_VERSION() or "") .. (show_players and NETWORK.NETWORK_IS_SESSION_STARTED() and " | Players: "..#players.list(true, true, true) or "") .. (show_time and os.date(" | %H:%M:%S ") or "")
+						local wm_text = (show_firstl == 2 and "Aurora" or show_firstl == 5 and "UwU" or show_firstl == 4 and "Femboy Edition" or show_firstl == 3 and utils.editions[utils.edition+1] or "") .. (show_name and " | ".. SOCIALCLUB._SC_GET_NICKNAME() or "") .. (show_rid and " | ".. players.get_rockstar_id(players.user()) or "") .. (show_sessioncode and " | Session Code: ".. get_session_code_for_user() or "") .. (show_gtaversion and " | ".. NETWORK._GET_ONLINE_VERSION() or "") .. (show_players and NETWORK.NETWORK_IS_SESSION_STARTED() and " | Players: "..#players.list(true, true, true) or "") .. (show_time and os.date(" | %H:%M:%S ") or "")
 						local tx_size = directx.get_text_size(wm_text, 0.5)
 						directx.draw_rect(x + add_x * 0.5, y, -(tx_size + 0.0105 + add_x), 0.025 + add_y, bg_color)
 						directx.draw_texture(icon, 0.0055, 0.0055, 0.5, 0.5, x - tx_size - 0.0055, y + 0.013, 0, {["r"] = 1.0,["g"] = 1.0,["b"] = 1.0,["a"] = 1.0})
 						directx.draw_text(x, y + 0.004, wm_text, ALIGN_TOP_RIGHT, 0.5, tx_color, false) end)
-			cameraoptions = menu.list(settings, "> Camera Options", {}, "", function(); end)
-				menu.divider(cameraoptions, "---> Camera Options <---")
+			cameraoptions = menu.list(settings, "Camera Options", {}, "", function(); end)
+				menu.divider(cameraoptions, "~~~> Camera Options <~~~")
 				menu.toggle(cameraoptions, "FOV Tryhard FP", {}, "", function(on_toggle)
 					if on_toggle then
 						menu.trigger_commands("fovfponfoot".." ".."60")
@@ -2421,7 +2348,7 @@
 					else
 						menu.trigger_commands("fovfpinveh".." ".."-1")
 					end end)
-			menu.divider(settings, "---> Game Features <---")
+			menu.divider(settings, "~~~> Game Features <~~~")
 			menu.toggle_loop(settings, "Auto Accept", {}, "Auto accepts join screens.", function(on_toggle)
 				local message_hash = HUD._GET_WARNING_MESSAGE_TITLE_HASH()
 				    if message_hash == 15890625 or message_hash == -587688989 then
@@ -2435,59 +2362,51 @@
 						log("Voice Chat: (Playername: "..players.get_name(pid).." / RID: "..players.get_rockstar_id(pid))
 					end
 				end end)
-			menu.divider(settings, "---> Settings <---")
+			menu.divider(settings, "~~~> Settings <~~~")
 			--menu.action(settings, "Command list", {}, "List all commands in this script.", function()
 				--util.toast("Command List:\n\n> Restart Script -> !ptrestart\n> Clean Everything -> !ptclean\n> Remove Bounty -> !ptbounty\n> Disable Ghost -> !ptghost\n> Remove Expsniper -> !ptexplo\n> Host Kick -> !pthost\n> Network Bail -> !ptbail\n> UWU Crash -> !ptuwu\n> MNCCrash -> !ptmncrash")end)
 			menu.action(settings, "Restart Script", {"ptrestart"}, "Restarts the script to clean the errors.", function()
 				util.restart_script()end)
+		
+		menu.readonly(credits, "Developer: ", DevName)
+		menu.readonly(credits, "Script Version: ", Version)
+		menu.readonly(credits, "GTA Online Version:", GTAOVersion)
+		menu.divider(credits, "~~~> Links <~~~")
+		menu.hyperlink(credits, "GitHub", "https://github.com/I3lackExo")
+		menu.hyperlink(credits, "NordVPN Tracker", "https://github.com/I3lackExo/NordVPN-Tracker")
 
-		credits = menu.list(menu.my_root(), "> Credits", {}, "", function(); end)
-			menu.readonly(credits, "Made by ", DevName)
-			menu.readonly(credits, "Script Version: ", Version)
-			menu.readonly(credits, "GTA Online Version:", GTAOVersion)
-			menu.divider(credits, "~~~> Links <~~~")
-			menu.hyperlink(credits, "GitHub", "https://github.com/I3lackExo")
-			menu.hyperlink(credits, "NordVPN Tracker", "https://github.com/I3lackExo/NordVPN-Tracker")
+		local bailOnAdminJoin = false
+			if bailOnAdminJoin then
+				if players.is_marked_as_admin(pid) then
+					util.toast("[Mira] <3\n".."> I have spotted an admin. Launch protective countermeasures. (Admin: "..players.get_name(pid)..")")
+					log("R* Admin Protection: (Playername: "..players.get_name(pid).." / RID: "..players.get_rockstar_id(pid))
+					util.yield(2500)
+					menu.trigger_commands("quickbail")
+					return
+				end end
 
-		menu.toggle(menu.my_root(), "R* Admin Protection", {}, "", function(on)
-			local bailOnAdminJoin = false
-					if bailOnAdminJoin then
-						if players.is_marked_as_admin(pid) then
-							util.toast("[Mira] <3\n".."> I have spotted an admin. Launch protective countermeasures. (Admin: "..players.get_name(pid)..")")
-							log("R* Admin Protection: (Playername: "..players.get_name(pid).." / RID: "..players.get_rockstar_id(pid))
-							util.yield(2500)
-							menu.trigger_commands("quickbail")
-							return
-						end end
-				if on then
-					bailOnAdminJoin = on
-					util.toast("[Mira] <3\n".."> Okay, I will notify you when I see an admin.")
-				else
-					bailOnAdminJoin = off
-					util.toast("[Mira] <3\n".."> Warning: If you meet an admin the risk of being banned is high.")
-				end end)
-			--
-
-		-- [ Playerlist ]
+		-- [[ Playerlist Options ]]
 			GenerateFeatures = function(pid)
-			menu.action(menu.player_root(pid), "Remove Godmode from Speedo", {}, "Turns off the godmode of the Speedo that was previously glitched.", function()
-				local vehicle = get_player_veh(pid,true)
-				if vehicle then	
-					ENTITY.SET_ENTITY_INVINCIBLE(vehicle, false) 
-					util.toast("[Mira] <3\n".."> (Target: "..PLAYER.GET_PLAYER_NAME(pid)..")".." his/her Speedo should not be in Godmode anymore.")
-				end end)
-			menu.toggle_loop(menu.player_root(pid), "Remove Vehicle Godmode", {}, "", function()
-				local vehicle = get_player_veh(pid,true)
-				if vehicle then	
-					ENTITY.SET_ENTITY_INVINCIBLE(vehicle, false) 
-				end end)
-			menu.toggle_loop(menu.player_root(pid), "Give Stealth Vehicle Godmode", {}, "Won't be detected as vehicle godmode by most menus", function(toggled)
-				ENTITY.SET_ENTITY_PROOFS(PED.GET_VEHICLE_PED_IS_IN(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)), true, true, true, true, true, 0, 0, true)
-				end, function() ENTITY.SET_ENTITY_PROOFS(PED.GET_VEHICLE_PED_IS_IN(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)), false, false, false, false, false, 0, 0, false)
-				end)
-			main = menu.list(menu.player_root(pid), "> Account Boosting", {}, "", function(); end)
-				menu.divider(main, "---> Account Boosting <---")
-				menu.action(main, "All Collectibles", {"racboost"}, "", function(on)
+			menu.divider(menu.player_root(pid), "~~~> "..Name.." (Player Options)".." <~~~")
+				menu.action(menu.player_root(pid), "Remove Godmode from Speedo", {}, "Turns off the godmode of the Speedo that was previously glitched.", function()
+					local vehicle = get_player_veh(pid,true)
+					if vehicle then	
+						ENTITY.SET_ENTITY_INVINCIBLE(vehicle, false) 
+						util.toast("[Mira] <3\n".."> (Target: "..PLAYER.GET_PLAYER_NAME(pid)..")".." his/her Speedo should not be in Godmode anymore.")
+					end end)
+				menu.toggle_loop(menu.player_root(pid), "Remove Vehicle Godmode", {}, "", function()
+					local vehicle = get_player_veh(pid,true)
+					if vehicle then	
+						ENTITY.SET_ENTITY_INVINCIBLE(vehicle, false) 
+					end end)
+				menu.toggle_loop(menu.player_root(pid), "Give Stealth Vehicle Godmode", {}, "Won't be detected as vehicle godmode by most menus", function(toggled)
+					ENTITY.SET_ENTITY_PROOFS(PED.GET_VEHICLE_PED_IS_IN(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)), true, true, true, true, true, 0, 0, true)
+					end, function() ENTITY.SET_ENTITY_PROOFS(PED.GET_VEHICLE_PED_IS_IN(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)), false, false, false, false, false, 0, 0, false)
+					end)
+			
+			main = menu.list(menu.player_root(pid), "Account Boosting", {}, "", function(); end)
+				menu.divider(main, "~~~> Account Boosting <~~~")
+					menu.action(main, "All Collectibles", {"racboost"}, "", function(on)
 					menu.trigger_commands("givecollectibles"..PLAYER.GET_PLAYER_NAME(pid))end)
 				menu.action(main, "Rank Them Up", {"rankboost"}, "Gives them ~175k RP. Can boost a lvl 1 ~25 levels.", function()
 					util.trigger_script_event(1 << pid, {-1178972880, pid, 5, 0, 1, 1, 1})
@@ -2508,10 +2427,10 @@
 						util.trigger_script_event(1 << pid, {-1178972880, pid, 9, i, 1, 1, 1})
 						util.yield()
 					end end)
-				menu.divider(main, "---> "..PLAYER.GET_PLAYER_NAME(pid).." | RID: "..players.get_rockstar_id(pid).." <---")
-			
-			phistory = menu.list(menu.player_root(pid), "> Player History", {}, "", function(); end)
-				menu.divider(phistory, "---> Add to Player History <---")
+				menu.divider(main, "~~~> "..PLAYER.GET_PLAYER_NAME(pid).." | RID: "..players.get_rockstar_id(pid).." <~~~")
+
+			phistory = menu.list(menu.player_root(pid), "Player History", {}, "", function(); end)
+				menu.divider(phistory, "~~~> Add to Player History <~~~")
 				menu.action(phistory, "Add to Friendlist", {"addfriend"}, "", function(on)
 					if players.exists(pid) then
 						menu.trigger_commands("historynote"..PLAYER.GET_PLAYER_NAME(pid).." > Friendlist")
@@ -2531,68 +2450,68 @@
 					menu.trigger_commands("track"..PLAYER.GET_PLAYER_NAME(pid).." on")
 					menu.trigger_commands("historyblock"..PLAYER.GET_PLAYER_NAME(pid).." on")
 					util.toast(PLAYER.GET_PLAYER_NAME(pid).." added to your blocklist.")end)
-				menu.divider(phistory, "---> Delete from Player History <---")
+				menu.divider(phistory, "~~~> Delete from Player History <~~~")
 				menu.action(phistory, "Delete Note", {"deletenote"}, "", function(on)
 					menu.trigger_commands("historynote"..PLAYER.GET_PLAYER_NAME(pid).."")
 					util.toast(PLAYER.GET_PLAYER_NAME(pid).." delete from your list.")end)
-				menu.divider(phistory, "---> "..PLAYER.GET_PLAYER_NAME(pid).." | RID: "..players.get_rockstar_id(pid).." <---")
-
-			trolling = menu.list(menu.player_root(pid), "> Trolling Options", {}, "", function(); end)
-			menu.divider(trolling, "---> Trolling Options <---")
-			twotakeone = menu.list(trolling, "> 2Take1 Trolling", {}, "", function(); end)
-				menu.divider(twotakeone, "---> Meteor <---")
-				menu.action(twotakeone, "Send to Gas Chamber", {}, "", function()
-					--TASK.CLEAR_PED_TASKS_IMMEDIATELY(players.user_ped(pid))
-					local object = object.create_object(959275690, player.get_player_coords(pid) - v3(0, 0, 0), true, false)
-					fire.add_explosion(player.get_player_coords(pid), 21, 1, 0, 0, pid)
-					fire.add_explosion(player.get_player_coords(pid), 21, 1, 0, 0, pid)
-					fire.add_explosion(player.get_player_coords(pid), 21, 1, 0, 0, pid)
-					fire.add_explosion(player.get_player_coords(pid), 21, 1, 0, 0, pid)
-					fire.add_explosion(player.get_player_coords(pid), 21, 1, 0, 0, pid)
-					util.yield(15000)
-					entities.delete_by_handle(object)end)
-				menu.action(twotakeone, "Atomize", {}, "", function()
-					for i = 1, 30 do
-						local pos = players.get_position(pid)
-						FIRE.ADD_EXPLOSION(pos.x + math.random(-2, 2), pos.y + math.random(-2, 2), pos.z + math.random(-2, 2), 70, 1, true, false, 0.2, false)
-						util.yield(math.random(0, 1))
-					end end)
-				menu.divider(twotakeone, "---> CRWX <---")
-				menu.action(twotakeone, "Send Orb", {"orb"}, "", function()
-					graphics.set_next_ptfx_asset("scr_xm_orbital")
-					while not graphics.has_named_ptfx_asset_loaded("scr_xm_orbital") do
-						graphics.request_named_ptfx_asset("scr_xm_orbital")
-						util.yield(0)
-					end
-					audio.play_sound_from_coord(1, "DLC_XM_Explosions_Orbital_Cannon", player.get_player_coords(pid), 0, true, 0, false)
-					fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
-					fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
-					fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
-					fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
-					fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
-					fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
-					graphics.start_networked_ptfx_non_looped_at_coord("scr_xm_orbital_blast", player.get_player_coords(pid), v3(0, 180, 0), 1, true, true, true)end)
-				menu.toggle(twotakeone, "Spam Cargoplanes", {}, "", function(on)
-					if on then
-						local pos = player.get_player_coords(pid)
-						local veh_hash = 0x15F27762
-						STREAMING.REQUEST_MODEL(veh_hash)
-						while (not STREAMING.HAS_MODEL_LOADED(veh_hash)) do
-						util.yield(10)
+				menu.divider(phistory, "~~~> "..PLAYER.GET_PLAYER_NAME(pid).." | RID: "..players.get_rockstar_id(pid).." <~~~")
+			
+			trolling = menu.list(menu.player_root(pid), "Trolling Options", {}, "", function(); end)
+				menu.divider(trolling, "~~~> Trolling Options <~~~")
+				twotakeone = menu.list(trolling, "2Take1 Trolling", {}, "", function(); end)
+					menu.divider(twotakeone, "~~~> Meteor <~~~")
+					menu.action(twotakeone, "Send to Gas Chamber", {}, "", function()
+						--TASK.CLEAR_PED_TASKS_IMMEDIATELY(players.user_ped(pid))
+						local object = object.create_object(959275690, player.get_player_coords(pid) - v3(0, 0, 0), true, false)
+						fire.add_explosion(player.get_player_coords(pid), 21, 1, 0, 0, pid)
+						fire.add_explosion(player.get_player_coords(pid), 21, 1, 0, 0, pid)
+						fire.add_explosion(player.get_player_coords(pid), 21, 1, 0, 0, pid)
+						fire.add_explosion(player.get_player_coords(pid), 21, 1, 0, 0, pid)
+						fire.add_explosion(player.get_player_coords(pid), 21, 1, 0, 0, pid)
+						util.yield(15000)
+						entities.delete_by_handle(object)end)
+					menu.action(twotakeone, "Atomize", {}, "", function()
+						for i = 1, 30 do
+							local pos = players.get_position(pid)
+							FIRE.ADD_EXPLOSION(pos.x + math.random(-2, 2), pos.y + math.random(-2, 2), pos.z + math.random(-2, 2), 70, 1, true, false, 0.2, false)
+							util.yield(math.random(0, 1))
+						end end)
+					menu.divider(twotakeone, "~~~> CRWX <~~~")
+					menu.action(twotakeone, "Send Orb", {"orb"}, "", function()
+						graphics.set_next_ptfx_asset("scr_xm_orbital")
+						while not graphics.has_named_ptfx_asset_loaded("scr_xm_orbital") do
+							graphics.request_named_ptfx_asset("scr_xm_orbital")
+							util.yield(0)
 						end
-						local tableOfVehicles = {}
-						for i = 1, 75 do
-						  tableOfVehicles[#tableOfVehicles + 1] = vehicle.create_vehicle(veh_hash, pos, pos.z, true, false)
-						end
-						util.yield(1000)
-						for i = 1, #tableOfVehicles do
-						  entities.delete_by_handle(tableOfVehicles[i])
-						end
-						tableOfVehicles = {}
-						STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(veh_hash)
-						end
-					return HANDLER_CONTINUE end)
-				menu.divider(trolling, "---> Tryharder Trolling <---")
+						audio.play_sound_from_coord(1, "DLC_XM_Explosions_Orbital_Cannon", player.get_player_coords(pid), 0, true, 0, false)
+						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
+						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
+						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
+						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
+						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
+						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
+						graphics.start_networked_ptfx_non_looped_at_coord("scr_xm_orbital_blast", player.get_player_coords(pid), v3(0, 180, 0), 1, true, true, true)end)
+					menu.toggle(twotakeone, "Spam Cargoplanes", {}, "", function(on)
+						if on then
+							local pos = player.get_player_coords(pid)
+							local veh_hash = 0x15F27762
+							STREAMING.REQUEST_MODEL(veh_hash)
+							while (not STREAMING.HAS_MODEL_LOADED(veh_hash)) do
+							util.yield(10)
+							end
+							local tableOfVehicles = {}
+							for i = 1, 75 do
+							  tableOfVehicles[#tableOfVehicles + 1] = vehicle.create_vehicle(veh_hash, pos, pos.z, true, false)
+							end
+							util.yield(1000)
+							for i = 1, #tableOfVehicles do
+							  entities.delete_by_handle(tableOfVehicles[i])
+							end
+							tableOfVehicles = {}
+							STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(veh_hash)
+							end
+						return HANDLER_CONTINUE end)
+				menu.divider(trolling, "~~~> Tryharder Trolling <~~~")
 				menu.action(trolling, "Remove Explosive Shit", {}, "", function(on)
 					WEAPON.REMOVE_WEAPON_FROM_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0xA914799)
 					WEAPON.GIVE_WEAPON_TO_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0xA914799)
@@ -2604,8 +2523,8 @@
 					WEAPON.REMOVE_WEAPON_FROM_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0xA914799)
 					WEAPON.REMOVE_WEAPON_FROM_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0x6D544C99)
 					WEAPON.REMOVE_WEAPON_FROM_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0xFEA23564)end)
-				menu.divider(trolling, "---> Trolling Options <---")
-				soundspam = menu.list(trolling, "> Sound Spam", {}, "")
+				menu.divider(trolling, "~~~> Trolling Options <~~~")
+				soundspam = menu.list(trolling, "Sound Spam", {}, "")
 					menu.toggle_loop(soundspam, "SMS Spam", {}, "", function()
 						util.trigger_script_event(1 << pid, {1670832796, pid, math.random(-2147483647, 2147483647)})end)
 					menu.toggle_loop(soundspam, "Interior Invite", {}, "", function()
@@ -2618,37 +2537,7 @@
 					menu.toggle_loop(soundspam, "Character Notification", {}, "", function()
 						util.trigger_script_event(1 << pid, {-634789188, pid, math.random(0, 178), 0, 0, 0})end)
 					menu.toggle_loop(soundspam, "Error Notification", {}, "", function()
-						util.trigger_script_event(1 << pid, {-1251171789, pid, math.random(-2147483647, 2147483647)})end)
-				local stations = {}
-					for station, name in pairs(station_name) do
-							stations[#stations + 1] = station
-					end
-				menu.list_action(trolling, "> Change Radio Station", {}, "", stations, function(index, value)
-					local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-					local pos = players.get_position(players.user())
-					local player_veh = PED.GET_VEHICLE_PED_IS_IN(ped)
-					if not PED.IS_PED_IN_VEHICLE(ped, player_veh, false) then
-						util.toast("Player isn't in a vehicle. :/")
-					return end
-					local radio_name = station_name[value]
-					if PED.IS_PED_IN_ANY_VEHICLE(ped, false) then 
-						if not VEHICLE.ARE_ANY_VEHICLE_SEATS_FREE(player_veh) then
-							util.toast("Failed to change players radio. :/")
-						return end
-						NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(player_veh)
-						if not PED.IS_PED_IN_VEHICLE(players.user_ped(), player_veh, false) then
-							ENTITY.SET_ENTITY_VISIBLE(players.user_ped(), false)
-							menu.trigger_commands("tpveh" .. players.get_name(pid))
-							util.yield(250)
-							AUDIO.SET_VEH_RADIO_STATION(player_veh, radio_name)
-							util.yield(750)
-							ENTITY.SET_ENTITY_COORDS_NO_OFFSET(players.user_ped(), pos, false, false, false)
-						else
-							util.yield(250)
-							AUDIO.SET_VEH_RADIO_STATION(player_veh, radio_name)
-						end
-					end end)
-				local lockon
+						util.trigger_script_event(1 << pid, {-1251171789, pid, math.random(-2147483647, 2147483647)})end)		
 				menu.toggle_loop(trolling, "Lock On Sound", {""}, "", function()
 					local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
 					local vehicle = PED.GET_VEHICLE_PED_IS_IN(ped, false)
@@ -2659,25 +2548,24 @@
 					end
 					VEHICLE.SET_VEHICLE_HOMING_LOCKEDONTO_STATE(vehicle, 1)end)
 				menu.toggle_loop(trolling, "Smokescreen", {""}, "Fills up their screen with black smoke.", function()
-						if smoke_notif then
-							if StandUser(pid) then 
-								toast(lang.get_localised(1729001290))
-								smoke_notif = false
-							end
+					if smoke_notif then
+						if StandUser(pid) then 
+							toast(lang.get_localised(1729001290))
+							smoke_notif = false
 						end
-						local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-						STREAMING.REQUEST_NAMED_PTFX_ASSET("scr_as_trans")
-						GRAPHICS.USE_PARTICLE_FX_ASSET("scr_as_trans")
-						if ptfx == nil or not GRAPHICS.DOES_PARTICLE_FX_LOOPED_EXIST(ptfx) then
-							ptfx = GRAPHICS.START_NETWORKED_PARTICLE_FX_LOOPED_ON_ENTITY("scr_as_trans_smoke", ped, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, false, false, false, 0, 0, 0, 255)
-						end
+					end
+					local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+					STREAMING.REQUEST_NAMED_PTFX_ASSET("scr_as_trans")
+					GRAPHICS.USE_PARTICLE_FX_ASSET("scr_as_trans")
+					if ptfx == nil or not GRAPHICS.DOES_PARTICLE_FX_LOOPED_EXIST(ptfx) then
+						ptfx = GRAPHICS.START_NETWORKED_PARTICLE_FX_LOOPED_ON_ENTITY("scr_as_trans_smoke", ped, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, false, false, false, 0, 0, 0, 255)
+					end
 					end, function()
 						local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
 						GRAPHICS.REMOVE_PARTICLE_FX(ptfx)
 						STREAMING.REMOVE_NAMED_PTFX_ASSET("scr_as_trans")
 					end)
-
-				menu.divider(trolling, "---> PVP Options <---")
+				menu.divider(trolling, "~~~> PVP Options <~~~")
 				menu.action(trolling, "Disable Ghost", {"ptghost"}, "", function(on)
 					--Assistant("> Please wait, while I transfer the bounty.\n\n> Target: "..PLAYER.GET_PLAYER_NAME(pid), colors.blue)
 					util.toast("[Mira] <3\n".."> Please wait, while I transfer the bounty. (Target: "..PLAYER.GET_PLAYER_NAME(pid)..")")
@@ -2685,9 +2573,9 @@
 					util.yield(10500)
 					--Assistant("> Transfer completed.\n\n> Target: "..PLAYER.GET_PLAYER_NAME(pid), colors.blue)end)
 					util.toast("[Mira] <3\n".."> Transfer completed. (Target: "..PLAYER.GET_PLAYER_NAME(pid)..")") end)
-		
-			crash = menu.list(menu.player_root(pid), "> Kicks & Crashes", {}, "", function(); end)
-				menu.divider(crash, "---> Basic Kicks <---")
+			
+			crash = menu.list(menu.player_root(pid), "Kicks & Crashes", {}, "", function(); end)
+				menu.divider(crash, "~~~> Basic Kicks <~~~")
 				menu.action(crash, "Host Kick", {"host"}, "Host Kick and logs player data in C4tScripts/Log.log", function()
 					--menu.trigger_commands("timeout"..PLAYER.GET_PLAYER_NAME(pid).." ".."on")
 					if NETWORK.NETWORK_IS_HOST() then
@@ -2720,9 +2608,7 @@
 					end end)
 				--[[menu.action(crash, "Network Bail", {"ptbail"}, "Network Bail.", function()
 					util.trigger_script_event(1 << pid, {1674887089, players.user(), memory.read_int(memory.script_global(1892703 + 1 + (pid * 599) + 510))})end)]]
-				menu.divider(crash, "---> Crashes <---")
-				--[[menu.action(crash, "Kick", {"ptkick"}, "Normal kick. Command: ptkick", function()
-					util.trigger_script_event(1 << pid, {111242367, pid, -210634234})end)]]
+				menu.divider(crash, "~~~> Crashes <~~~")
 				menu.action(crash, "Broken World Crash", {"ptbwc"}, "The crash remains after leaving the lobby.", function()
 					local pos = ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
 					local hakuchou = util.joaat("hakuchou2")
@@ -2766,125 +2652,255 @@
 						NETWORK.NETWORK_RESURRECT_LOCAL_PLAYER(oldPos.x, oldPos.y, oldPos.z, 0, false, false, 0)
 						ENTITY.SET_ENTITY_VISIBLE(user, true)
 					end)end)
-				menu.action(menu.player_root(pid), "Save Playerdata", {}, "", function(on)
-					local ip = players.get_connect_ip(pid)
-					local name = PLAYER.GET_PLAYER_NAME(pid)
-					history("Saved Playerdata: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid).." / IP: "..string.format("%i.%i.%i.%i)", ip >> 24 & 255, ip >> 16 & 255, ip >> 8 & 255, ip & 255))
-					util.toast("[Mira] <3\n".."> I have saved you all the important data of the player ("..name..").")
-				end)
-				menu.action(menu.player_root(pid), "Paste IP in NordVPN Tracker", {}, "", function(on)
-					local ip = players.get_connect_ip(pid)
-					local name = PLAYER.GET_PLAYER_NAME(pid)
-					util.copy_to_clipboard(string.format("%i.%i.%i.%i", ip >> 24 & 255, ip >> 16 & 255, ip >> 8 & 255, ip & 255), true)
-					util.toast("[Mira] <3\n".."> I have copied the IP of the player ("..name..") to the NordVPN tracker.")
-				end)end
-		local InitialPlayersList = players.list(true, true, true)
-			for i=1, #InitialPlayersList do
-    			GenerateFeatures(InitialPlayersList[i])
-			end
-			InitialPlayersList = nil
-			players.on_join(GenerateFeatures)
-	
-		-- [ End ]
-	util.toast("[Mira] <3\n".."> Hello @"..SOCIALCLUB._SC_GET_NICKNAME().."! :)")
-	util.on_stop(function()
-		util.toast("[Mira] <3\n".."> Bye @"..SOCIALCLUB._SC_GET_NICKNAME().."!")end)
-		--menu.divider(menu.my_root(), "---> Dev.: "..DevName.." | Version: "..Version.." / "..Hotfix.." <---")
-		--menu.divider(menu.my_root(), "~~~> Dev.: "..DevName.." / Version: "..Version.." <~~~")
+			menu.action(menu.player_root(pid), "Save Playerdata", {}, "", function(on)
+				local ip = players.get_connect_ip(pid)
+				local name = PLAYER.GET_PLAYER_NAME(pid)
+				history("Saved Playerdata: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid).." / IP: "..string.format("%i.%i.%i.%i)", ip >> 24 & 255, ip >> 16 & 255, ip >> 8 & 255, ip & 255))
+				util.toast("[Mira] <3\n".."> I have saved you all the important data of the player ("..name..").")end)
+			menu.action(menu.player_root(pid), "Paste IP in NordVPN Tracker", {}, "", function(on)
+				local ip = players.get_connect_ip(pid)
+				local name = PLAYER.GET_PLAYER_NAME(pid)
+				util.copy_to_clipboard(string.format("%i.%i.%i.%i", ip >> 24 & 255, ip >> 16 & 255, ip >> 8 & 255, ip & 255), true)
+				util.toast("[Mira] <3\n".."> I have copied the IP of the player ("..name..") to the NordVPN tracker.")end)end
 
-	util.create_tick_handler(function()
+			local InitialPlayersList = players.list(true, true, true)
+				for i=1, #InitialPlayersList do
+    				GenerateFeatures(InitialPlayersList[i])
+				end
+				InitialPlayersList = nil
+				players.on_join(GenerateFeatures)
+
+	-- [ End ]
+		util.on_stop(function()
+			util.toast("[Mira] <3\n".."> Bye "..SOCIALCLUB._SC_GET_NICKNAME().."!")end)
+
+		util.create_tick_handler(function()
 		if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 2) then --when exiting a car
-			setCarOptions(false)
-		end
+			setCarOptions(false)end
 		local carCheck = entities.get_user_vehicle_as_handle()
 		if players_car != carCheck then
 			players_car = carCheck
-			setCarOptions(true)
-		end end)	
-	while true do
-		if menu.is_open() == true then
-			local current_equipped_weapon = WEAPON.GET_SELECTED_PED_WEAPON(PLAYER.GET_PLAYER_PED(players.user()))
-				if current_equipped_weapon == last_equipped_weapon then
-				else
-					last_equipped_weapon = current_equipped_weapon
-					menu.delete(attachment_tab)
-					attachment_tab = menu.list(weaponattachments,"Attachments",{},"See available attachments for your equipped weapon")
-					for key, value in pairs(attachments_table) do
-						local curr_equipped_weapon = WEAPON.GET_SELECTED_PED_WEAPON(PLAYER.GET_PLAYER_PED(players.user()))
-						if WEAPON.DOES_WEAPON_TAKE_WEAPON_COMPONENT(curr_equipped_weapon, key) == true then
-							menu.action(attachment_tab,value,{value},"Attach " .. value .. "to your current weapon",function(on_click)
-									WEAPON.GIVE_WEAPON_COMPONENT_TO_PED(PLAYER.GET_PLAYER_PED(players.user()),curr_equipped_weapon,key)
-							end)
+			setCarOptions(true)end end)	
+		while true do
+			if menu.is_open() == true then
+				local current_equipped_weapon = WEAPON.GET_SELECTED_PED_WEAPON(PLAYER.GET_PLAYER_PED(players.user()))
+					if current_equipped_weapon == last_equipped_weapon then
+					else
+						last_equipped_weapon = current_equipped_weapon
+						menu.delete(attachment_tab)
+						attachment_tab = menu.list(weaponattachments,"Attachments",{},"See available attachments for your equipped weapon")
+						for key, value in pairs(attachments_table) do
+							local curr_equipped_weapon = WEAPON.GET_SELECTED_PED_WEAPON(PLAYER.GET_PLAYER_PED(players.user()))
+							if WEAPON.DOES_WEAPON_TAKE_WEAPON_COMPONENT(curr_equipped_weapon, key) == true then
+								menu.action(attachment_tab,value,{value},"Attach " .. value .. "to your current weapon",function(on_click)
+										WEAPON.GIVE_WEAPON_COMPONENT_TO_PED(PLAYER.GET_PLAYER_PED(players.user()),curr_equipped_weapon,key)
+								end)
+							end
 						end
 					end
+			end
+			util.yield() end
+
+----------------------------------------------------------------------------------------------------------
+	-- Link: https://forge.plebmasters.de/objects?search=firework
+	-- Rocket = ind_prop_firework_01 - scr_indep_firework_starburst - place_firework_1_rocket
+	-- Cone = ind_prop_firework_02 - scr_indep_firework_shotburst - place_firework_2_cylinder
+	-- Box = ind_prop_firework_03 - scr_indep_firework_trailburst - place_firework_3_box
+	-- Fontain = ind_prop_firework_04 - scr_indep_firework_fountain - place_firework_2_cylinder
+----------------------------------------------------------------------------------------------------------
+-- [[ Backups ]]
+
+	-- [[ Notification ]]
+		--[[local scriptdir = filesystem.scripts_dir()
+			local racDir = scriptdir .. "lib\\C4tScripts\\"
+				if not filesystem.exists(racDir) then
+					filesystem.mkdir(racDir)
 				end
-		end
-		util.yield() end
+				if not filesystem.exists(racDir) then
+					util.toast("resource directory not found")
+				else
+					util.register_file(racDir .. "Resource_Pack.ytd")
+				end
+		function Developer(message, color) -- Main picture
+			HUD._THEFEED_SET_NEXT_POST_BACKGROUND_COLOR(color)
+				local picture
+					if not filesystem.exists(racDir) then
+						picture = "CHAR_SOCIAL_CLUB"
+					else
+						picture = "Resource_Pack"
+					end
+			GRAPHICS.REQUEST_STREAMED_TEXTURE_DICT(picture, 1)
+				while not GRAPHICS.HAS_STREAMED_TEXTURE_DICT_LOADED(picture) do
+					util.yield()
+				end
+			util.BEGIN_TEXT_COMMAND_THEFEED_POST(message)
+				if color == colors.green or color == colors.red then
+					subtitle = colorcodes.small.."~w~> [MiradeliaX Dev.]"
+				elseif color == colors.black then
+					subtitle = colorcodes.small.."~w~> [MiradeliaX Dev.]"
+				else
+					subtitle = colorcodes.small.."~w~> [MiradeliaX Dev.]"
+				end
+			HUD.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT(picture, "Developer", true, 1, colorcodes.middle.."xX-LulzSecC4t-Xx", subtitle)
 
--- [[ Animation List ]]
-	--[[<Anim dict="anim@amb@clubhouse@boardroom@crew@male@var_c@base@" name="idle_a" />
-	<Anim dict="anim@amb@clubhouse@boardroom@crew@female@var_c@base_r@" name="base" />
-	<Anim dict="anim@amb@office@boardroom@crew@female@var_b@base@" name="base" />
-	<Anim dict="amb@world_human_leaning@female@wall@back@holding_elbow@base" name="base" />
-	<Anim dict="anim@amb@office@seating@female@var_a@base@" name="idle_b" />
-	<Anim dict="anim@amb@office@seating@female@var_b@base@" name="idle_a" />
-	<Anim dict="anim_heist@arcade_combined@" name="world_human_hang_out_street@_male_a@_idle_a_idle_c" />
-	<Anim dict="anim@amb@office@seating@male@var_c@base@" name="idle_c" />
-	<Anim dict="anim@amb@clubhouse@mini@darts@" name="wait_idle" />
-	<Anim dict="club_intro-100" name="csb_tonyprince_dual-100" />
-	<Anim dict="club_intro-101" name="mp_m_freemode_01_dual-101" />
-	<Anim dict="missheistdockssetup1ig_10@idle_b" name="talk_pipe_b_worker2" />
-	<Anim dict="missheistdockssetup1ig_10@idle_d" name="talk_pipe_d_worker2" />
-	<Anim dict="missheist_jewel_setup" name="idle_storeclerk" />
-	<Anim dict="amb@world_human_hang_out_street@female_hold_arm@idle_a" name="idle_a" />
-	<Anim dict="amb@world_human_hang_out_street@female_hold_arm@idle_a" name="idle_b" />
-	<Anim dict="amb@world_human_hang_out_street@female_hold_arm@idle_a" name="idle_c" />
-	<Anim dict="amb@world_human_leaning@female@smoke@idle_a" name="idle_c" />
-	<Anim dict="amb@world_human_leaning@female@smoke@idle_a" name="idle_a" />
-	<Anim dict="amb@world_human_leaning@female@wall@back@holding_elbow@idle_a" name="idle_a" />
-	<Anim dict="amb@world_human_picnic@female@idle_a" name="idle_b" />
-	<Anim dict="amb@world_human_picnic@female@idle_a" name="idle_c" />
-	<Anim dict="amb@world_human_seat_steps@female@hands_by_sides@idle_a" name="idle_a" />
-	<Anim dict="amb@world_human_seat_wall@female@hands_by_sides@idle_a" name="idle_c" />
-	<Anim dict="anim@amb@nightclub@dancers@crowddance_groups@" name="hi_dance_crowd_09_v1_female^3" />
-	<Anim dict="anim@amb@nightclub@peds@" name="mini_strip_club_lap_dance_ld_girl_a_song_a_p1" />
-	<Anim dict="anim@mp_yacht@shower@female@" name="shower_idle_a" />
-	<Anim dict="anim_casino_a@amb@casino@peds@" name="amb_world_human_hang_out_street_female_hold_arm_idle_b" />
-	<Anim dict="random@street_race" name="_car_a_flirt_girl" />
-	<Anim dict="bs_2a_mcs_10-2" name="csb_stripper_01_dual-2" />
-	<Anim dict="move_f@sexy@a" name="idle" />
-	<Anim dict="switch@michael@sitting_on_car_bonnet" name="sitting_on_car_bonnet_loop" />
-	<Anim dict="amb@world_human_hang_out_street@female_hold_arm@base" name="base" />
-	<Anim dict="anim@amb@casino@hangout@ped_female@stand@03a@base" name="base" />
-	<Anim dict="anim@amb@casino@hangout@ped_female@stand@03b@base" name="base" />
-	<Anim dict="amb@world_human_seat_wall@male@hands_in_lap@base" name="base" />
-	<Anim dict="amb@world_human_seat_wall_eating@female@sandwich_right_hand@base" name="base" />
-	<Anim dict="amb@world_human_seat_wall_eating@female@sandwich_right_hand@idle_a" name="idle_a" />
-	<Anim dict="amb@world_human_prostitute@crackhooker@idle_a" name="idle_b" />
-	<Anim dict="anim@amb@business@bgen@bgen_no_work@" name="sit_phone_phonepickup-noworkfemale" />
-	<Anim dict="anim@amb@business@bgen@bgen_no_work@" name="sit_phone_phonepickup_nowork" />
-	<Anim dict="anim@amb@business@bgen@bgen_no_work@" name="sit_phone_phoneputdown_fallasleep_nowork" />
-	<Anim dict="cellphone@self@franklin@" name="peace" />
-	<Anim dict="armenian_1_int-0" name="a_f_y_beach_01^2-0" />
-	<Anim dict="armenian_1_int-0" name="a_m_y_surfer_01-0" />
-	<Anim dict="armenian_1_int-0" name="cs_drfriedlander_dual-0" />
-	<Anim dict="amb@world_human_prostitute@cokehead@base" name="base" />
-	<Anim dict="amb@world_human_prostitute@french@base" name="base" />
-	<Anim dict="amb@world_human_prostitute@hooker@base" name="base" />
-	<Anim dict="mp_move@prostitute@f@cokehead" name="idle" />
-	<Anim dict="mp_move@prostitute@f@hooker" name="idle" />
-	<Anim dict="mp_move@prostitute@m@hooker" name="idle" />]]
+			HUD.END_TEXT_COMMAND_THEFEED_POST_TICKER(true, false)end
+		function Assistant(message, color) -- Mira picture
+			HUD._THEFEED_SET_NEXT_POST_BACKGROUND_COLOR(color)
+				local picture
+					if not filesystem.exists(racDir) then
+						picture = "CHAR_SOCIAL_CLUB"
+					else
+						picture = "Resource_Pack"
+					end
+			GRAPHICS.REQUEST_STREAMED_TEXTURE_DICT(picture, 1)
+				while not GRAPHICS.HAS_STREAMED_TEXTURE_DICT_LOADED(picture) do
+					util.yield()
+				end
+			util.BEGIN_TEXT_COMMAND_THEFEED_POST(message)
+				if color == colors.green or color == colors.red then
+					subtitle = colorcodes.small.."~w~> [MiradeliaX Assistant]"
+				elseif color == colors.black then
+					subtitle = colorcodes.small.."~w~> [MiradeliaX Assistant]"
+				else
+					subtitle = colorcodes.small.."~w~> [MiradeliaX Assistant]"
+				end
+			HUD.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT(picture, "Mira", true, 1, colorcodes.middle.."Mira", subtitle)
 
--- [[ Code saving ]]
-	--[[requestoptions = menu.list(onlineoptions, "> Request's", {}, "", function(); end)
-		MX.divider(requestoptions, "---> Request's <---")
-			MX.action(requestoptions, "MOC", {}, "", function(on)
-				SET_INT_GLOBAL(2815059 + 913, 1)end)
-			MX.action(requestoptions, "Avenger", {}, "", function(on)
-				SET_INT_GLOBAL(2815059 + 921, 1)end)
-			MX.action(requestoptions, "Terrorbyte", {}, "", function(on)
-				SET_INT_GLOBAL(2815059 + 925, 1)end)
-			MX.action(requestoptions, "Kosatka", {}, "", function(on)
-				SET_INT_GLOBAL(2815059 + 933, 1)end)
-			MX.action(requestoptions, "Ballistic Armor", {}, "", function(on)
-				SET_INT_GLOBAL(2815059 + 884, 1)end)]]
+			HUD.END_TEXT_COMMAND_THEFEED_POST_TICKER(true, false)end
+		function AssistantRAC(message, color) -- Mira picture
+			HUD._THEFEED_SET_NEXT_POST_BACKGROUND_COLOR(color)
+				local picture
+					if not filesystem.exists(racDir) then
+						picture = "CHAR_SOCIAL_CLUB"
+					else
+						picture = "Resource_Pack"
+					end
+			GRAPHICS.REQUEST_STREAMED_TEXTURE_DICT(picture, 1)
+				while not GRAPHICS.HAS_STREAMED_TEXTURE_DICT_LOADED(picture) do
+					util.yield()
+				end
+			util.BEGIN_TEXT_COMMAND_THEFEED_POST(message)
+				if color == colors.green or color == colors.red then
+					subtitle = colorcodes.small.."~w~> [Rockstar Protection]"
+				elseif color == colors.black then
+					subtitle = colorcodes.small.."~w~> [Rockstar Protection]"
+				else
+					subtitle = colorcodes.small.."~w~> [Rockstar Protection]"
+				end
+			HUD.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT(picture, "Mira", true, 1, colorcodes.middle.."Mira", subtitle)
+
+			HUD.END_TEXT_COMMAND_THEFEED_POST_TICKER(true, false)end
+		function GoogleAPI(message, color) --> GoogleAPI logo
+		    HUD._THEFEED_SET_NEXT_POST_BACKGROUND_COLOR(color)
+				local picture
+					if not filesystem.exists(racDir) then
+						picture = "CHAR_SOCIAL_CLUB"
+					else
+						picture = "Resource_Pack"
+					end
+		    GRAPHICS.REQUEST_STREAMED_TEXTURE_DICT(picture, 1)
+				while not GRAPHICS.HAS_STREAMED_TEXTURE_DICT_LOADED(picture) do
+					util.yield()
+				end
+		    util.BEGIN_TEXT_COMMAND_THEFEED_POST(message)
+				if color == colors.green or color == colors.red then
+					subtitle = colorcodes.small.."~u~GoogleAPI Translater"
+				elseif color == colors.black then
+					subtitle = colorcodes.small.."~c~GoogleAPI Translater"
+				else
+					subtitle = colorcodes.small.."~c~GoogleAPI Translater"
+				end
+		    HUD.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT(picture, "GoogleAPI", true, 4, colorcodes.middle.."GoogleAPI", subtitle)
+
+		    HUD.END_TEXT_COMMAND_THEFEED_POST_TICKER(true, false) end
+		function Multigaming(message, color) --> Multigaming logo
+		    HUD._THEFEED_SET_NEXT_POST_BACKGROUND_COLOR(color)
+				local picture
+					if not filesystem.exists(racDir) then
+						picture = "CHAR_SOCIAL_CLUB"
+					else
+						picture = "Resource_Pack"
+					end
+		    GRAPHICS.REQUEST_STREAMED_TEXTURE_DICT(picture, 1)
+				while not GRAPHICS.HAS_STREAMED_TEXTURE_DICT_LOADED(picture) do
+					util.yield()
+				end
+		    util.BEGIN_TEXT_COMMAND_THEFEED_POST(message)
+				if color == colors.green or color == colors.red then
+					subtitle = colorcodes.small.."~w~> [Multigaming Discord]"
+				elseif color == colors.black then
+					subtitle = colorcodes.small.."~w~> [Multigaming Discord]"
+				else
+					subtitle = colorcodes.small.."~w~> [Multigaming Discord]"
+				end
+		    HUD.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT(picture, "Multigaming", true, 4, colorcodes.middle.."Discord Invite", subtitle)
+
+		    HUD.END_TEXT_COMMAND_THEFEED_POST_TICKER(true, false) end--]]
+
+	-- [[ Animation List ]]
+		--[[<Anim dict="anim@amb@clubhouse@boardroom@crew@male@var_c@base@" name="idle_a" />
+		<Anim dict="anim@amb@clubhouse@boardroom@crew@female@var_c@base_r@" name="base" />
+		<Anim dict="anim@amb@office@boardroom@crew@female@var_b@base@" name="base" />
+		<Anim dict="amb@world_human_leaning@female@wall@back@holding_elbow@base" name="base" />
+		<Anim dict="anim@amb@office@seating@female@var_a@base@" name="idle_b" />
+		<Anim dict="anim@amb@office@seating@female@var_b@base@" name="idle_a" />
+		<Anim dict="anim_heist@arcade_combined@" name="world_human_hang_out_street@_male_a@_idle_a_idle_c" />
+		<Anim dict="anim@amb@office@seating@male@var_c@base@" name="idle_c" />
+		<Anim dict="anim@amb@clubhouse@mini@darts@" name="wait_idle" />
+		<Anim dict="club_intro-100" name="csb_tonyprince_dual-100" />
+		<Anim dict="club_intro-101" name="mp_m_freemode_01_dual-101" />
+		<Anim dict="missheistdockssetup1ig_10@idle_b" name="talk_pipe_b_worker2" />
+		<Anim dict="missheistdockssetup1ig_10@idle_d" name="talk_pipe_d_worker2" />
+		<Anim dict="missheist_jewel_setup" name="idle_storeclerk" />
+		<Anim dict="amb@world_human_hang_out_street@female_hold_arm@idle_a" name="idle_a" />
+		<Anim dict="amb@world_human_hang_out_street@female_hold_arm@idle_a" name="idle_b" />
+		<Anim dict="amb@world_human_hang_out_street@female_hold_arm@idle_a" name="idle_c" />
+		<Anim dict="amb@world_human_leaning@female@smoke@idle_a" name="idle_c" />
+		<Anim dict="amb@world_human_leaning@female@smoke@idle_a" name="idle_a" />
+		<Anim dict="amb@world_human_leaning@female@wall@back@holding_elbow@idle_a" name="idle_a" />
+		<Anim dict="amb@world_human_picnic@female@idle_a" name="idle_b" />
+		<Anim dict="amb@world_human_picnic@female@idle_a" name="idle_c" />
+		<Anim dict="amb@world_human_seat_steps@female@hands_by_sides@idle_a" name="idle_a" />
+		<Anim dict="amb@world_human_seat_wall@female@hands_by_sides@idle_a" name="idle_c" />
+		<Anim dict="anim@amb@nightclub@dancers@crowddance_groups@" name="hi_dance_crowd_09_v1_female^3" />
+		<Anim dict="anim@amb@nightclub@peds@" name="mini_strip_club_lap_dance_ld_girl_a_song_a_p1" />
+		<Anim dict="anim@mp_yacht@shower@female@" name="shower_idle_a" />
+		<Anim dict="anim_casino_a@amb@casino@peds@" name="amb_world_human_hang_out_street_female_hold_arm_idle_b" />
+		<Anim dict="random@street_race" name="_car_a_flirt_girl" />
+		<Anim dict="bs_2a_mcs_10-2" name="csb_stripper_01_dual-2" />
+		<Anim dict="move_f@sexy@a" name="idle" />
+		<Anim dict="switch@michael@sitting_on_car_bonnet" name="sitting_on_car_bonnet_loop" />
+		<Anim dict="amb@world_human_hang_out_street@female_hold_arm@base" name="base" />
+		<Anim dict="anim@amb@casino@hangout@ped_female@stand@03a@base" name="base" />
+		<Anim dict="anim@amb@casino@hangout@ped_female@stand@03b@base" name="base" />
+		<Anim dict="amb@world_human_seat_wall@male@hands_in_lap@base" name="base" />
+		<Anim dict="amb@world_human_seat_wall_eating@female@sandwich_right_hand@base" name="base" />
+		<Anim dict="amb@world_human_seat_wall_eating@female@sandwich_right_hand@idle_a" name="idle_a" />
+		<Anim dict="amb@world_human_prostitute@crackhooker@idle_a" name="idle_b" />
+		<Anim dict="anim@amb@business@bgen@bgen_no_work@" name="sit_phone_phonepickup-noworkfemale" />
+		<Anim dict="anim@amb@business@bgen@bgen_no_work@" name="sit_phone_phonepickup_nowork" />
+		<Anim dict="anim@amb@business@bgen@bgen_no_work@" name="sit_phone_phoneputdown_fallasleep_nowork" />
+		<Anim dict="cellphone@self@franklin@" name="peace" />
+		<Anim dict="armenian_1_int-0" name="a_f_y_beach_01^2-0" />
+		<Anim dict="armenian_1_int-0" name="a_m_y_surfer_01-0" />
+		<Anim dict="armenian_1_int-0" name="cs_drfriedlander_dual-0" />
+		<Anim dict="amb@world_human_prostitute@cokehead@base" name="base" />
+		<Anim dict="amb@world_human_prostitute@french@base" name="base" />
+		<Anim dict="amb@world_human_prostitute@hooker@base" name="base" />
+		<Anim dict="mp_move@prostitute@f@cokehead" name="idle" />
+		<Anim dict="mp_move@prostitute@f@hooker" name="idle" />
+		<Anim dict="mp_move@prostitute@m@hooker" name="idle" />]]
+	
+	-- [[ Request Options ]]
+		--[[requestoptions = menu.list(onlineoptions, "> Request's", {}, "", function(); end)
+			menu.divider(requestoptions, "---> Request's <---")
+				menu.action(requestoptions, "MOC", {}, "", function(on)
+					SET_INT_GLOBAL(2815059 + 913, 1)end)
+				menu.action(requestoptions, "Avenger", {}, "", function(on)
+					SET_INT_GLOBAL(2815059 + 921, 1)end)
+				menu.action(requestoptions, "Terrorbyte", {}, "", function(on)
+					SET_INT_GLOBAL(2815059 + 925, 1)end)
+				menu.action(requestoptions, "Kosatka", {}, "", function(on)
+					SET_INT_GLOBAL(2815059 + 933, 1)end)
+				menu.action(requestoptions, "Ballistic Armor", {}, "", function(on)
+					SET_INT_GLOBAL(2815059 + 884, 1)end)]]
