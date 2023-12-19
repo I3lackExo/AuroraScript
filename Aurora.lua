@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora"
-	local Version = 2.0
+	local Version = 2.1
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 
@@ -1168,9 +1168,10 @@
 		players.on_join(player_list)
 		players.on_leave(handle_player_list)
 
-	util.show_corner_help(colorcodes.small..colorcodes.red.."WARNING: Codes were taken from other scripts and are therefore not my codes. DO NOT PUBLISH THE SCRIPT!")
-	--util.toast("[Mira] <3\n".."> Hello @"..SOCIALCLUB._SC_GET_NICKNAME().."! :)")
-	util.toast("[Mira] <3\n".."> Hello "..SOCIALCLUB._SC_GET_NICKNAME().."! Welcome To Aurora!") 
+	--[[ Start ]]
+		util.show_corner_help(colorcodes.small..colorcodes.red.."WARNING: Codes were taken from other scripts and are therefore not my codes. DO NOT PUBLISH THE SCRIPT!")
+		--util.toast("[Mira] <3\n".."> Hello @"..SOCIALCLUB._SC_GET_NICKNAME().."! :)")
+		util.toast("[Mira] <3\n".."> Hello "..SOCIALCLUB._SC_GET_NICKNAME().."! Welcome To Aurora!") 
 
 	-- [[ Source Code ]]
 		menu.divider(selfoptions, "~~~> Self Options <~~~")
@@ -2670,7 +2671,7 @@
 				InitialPlayersList = nil
 				players.on_join(GenerateFeatures)
 
-	-- [ End ]
+	-- [[ End ]]
 		util.on_stop(function()
 			util.toast("[Mira] <3\n".."> Bye "..SOCIALCLUB._SC_GET_NICKNAME().."!")end)
 
