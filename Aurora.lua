@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora"
-	local Version = 2.2
+	local Version = 2.3
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 
@@ -771,7 +771,7 @@
 	-- [[ Functions ]]
 		local function player_list(pid)
 			if NETWORK.NETWORK_IS_SESSION_ACTIVE() then
-				menus[pid] = menu.toggle(playerslist, players.get_name(pid), {}, "ID = ".. pid, function(on_toggle)
+				menus[pid] = menu.toggle(playerslist, players.get_name(pid).." [ "..players.get_tags_string(pid).."]", {}, "ID = ".. pid, function(on_toggle)
 					if on_toggle then
 						selectedplayer[pid] = true
 					else
@@ -843,22 +843,21 @@
 		local function get_frined_name(friendIndex)
 			native_invoker.begin_call();native_invoker.push_arg_int(friendIndex);native_invoker.end_call("4164F227D052E293");return native_invoker.get_return_value_string();end
 		local function gen_fren_funcs(name)
-			balls = menu.list(friendlist, name, {"friend "..name}, "", function(); end)
-				menu.divider(balls, "---> "..name.. " <---")
-				menu.action(balls,"Join", {"jf "..name}, "",function()
+			bfriendlist = menu.list(friendlist, name, {"friend "..name}, "", function(); end)
+				menu.divider(bfriendlist, "~~~> Your Socialclub Friends <~~~")
+				menu.readonly(bfriendlist, "Friend: ", name)
+				menu.divider(bfriendlist, "~~~> Actions <~~~")
+				menu.action(bfriendlist,"Join", {"jf "..name}, "",function()
 					menu.trigger_commands("join "..name)
 				end)
-				menu.action(balls,"Spectate", {"sf "..name}, "",function()
+				--[[menu.action(bfriendlist,"Spectate", {"sf "..name}, "",function()
 					menu.trigger_commands("namespectate "..name)
-				end)
-				menu.action(balls,"Invite", {"if "..name}, "",function()
+				end)]]
+				menu.action(bfriendlist,"Invite", {"if "..name}, "",function()
 					menu.trigger_commands("invite "..name)
 				end)
-				menu.action(balls,"Open Profile", {"pf "..name}, "",function()
+				menu.action(bfriendlist,"Open Profile", {"pf "..name}, "",function()
 					menu.trigger_commands("nameprofile "..name)
-				end)
-				menu.action(balls,"Add to History", {"ath "..name}, "",function()
-					menu.trigger_commands("historyadd "..name)
 				end)end
 		function PlayerlistFeatures(pid)
 			--menu.divider(menu.player_root(pid), "~~~> "..Name.." <~~~")
@@ -959,7 +958,8 @@
 			decimals = 10 ^ decimals
 			return math.floor(float * decimals) / decimals end
 		local function IsPlayerUsingOrbitalCannon(player)
-			return BitTest(memory.read_int(memory.script_global((2657704 + (player * 463 + 1) + 424))), 0) end
+			return BitTest(memory.read_int(memory.script_global((2657921 + (player * 463 + 1) + 424))), 0) end
+			--return BitTest(memory.read_int(memory.script_global((2657704 + (player * 463 + 1) + 424))), 0) end
 			--return BitTest(memory.read_int(memory.script_global((2657589 + (player * 466 + 1) + 427))), 0) end
 		local function isHelpMessageBeingDisplayed(label)
 			HUD.BEGIN_TEXT_COMMAND_IS_THIS_HELP_MESSAGE_BEING_DISPLAYED(label)
@@ -1169,7 +1169,7 @@
 	--[[ Start ]]
 		util.show_corner_help(colorcodes.small..colorcodes.red.."WARNING: Codes were taken from other scripts and are therefore not my codes. DO NOT PUBLISH THE SCRIPT!")
 		--util.toast("[Mira] <3\n".."> Hello @"..SOCIALCLUB._SC_GET_NICKNAME().."! :)")
-		util.toast("[Mira] <3\n".."> Hello "..SOCIALCLUB._SC_GET_NICKNAME().."! Welcome To Aurora!") 
+		util.toast("[Mira] <3\n".."> Hello "..SOCIALCLUB._SC_GET_NICKNAME().."! Welcome to Aurora!")
 
 	-- [[ Source Code ]]
 		menu.divider(selfoptions, "~~~> Self Options <~~~")
@@ -1603,7 +1603,7 @@
 						excludeselected = false
 					end end)
 			menu.divider(playerslist, "~~~> Actions <~~~")
-			menu.action(playerslist, "Smart Kick", {}, "", function()
+			menu.action(playerslist, "Smart Kick", {}, "Smartkick from Stand.", function()
 				for pid = 0, 31 do
 					if excludeselected then
 						if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
@@ -1617,7 +1617,7 @@
 						end
 					end
 				end end)
-			menu.action(playerslist, "Host Kick", {}, "", function()
+			menu.action(playerslist, "Host Kick", {}, "Only works if you are the host.", function()
 					for pid = 0, 31 do
 						if excludeselected then
 							if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
@@ -1637,7 +1637,7 @@
 							end
 						end
 					end end)
-			menu.action(playerslist, "Elegant Crash", {}, "", function()
+			menu.action(playerslist, "Elegant Crash", {}, "Elegant Crash from Stand.", function()
 				for pid = 0, 31 do
 					if excludeselected then
 						if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
