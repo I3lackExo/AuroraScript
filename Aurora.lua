@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora"
-	local Version = 2.4
+	local Version = 2.5
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 
@@ -1636,6 +1636,20 @@
 							end
 						end
 					end end)
+			menu.action(playerslist, "Ban Kick", {}, "Only works if you are the host.", function()
+					for pid = 0, 31 do
+						if excludeselected then
+							if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
+								menu.trigger_commands("ban" .. PLAYER.GET_PLAYER_NAME(pid))
+								util.yield()
+							end
+						else
+							if pid ~= players.user() and selectedplayer[pid] and players.exists(pid) then
+								menu.trigger_commands("ban" .. PLAYER.GET_PLAYER_NAME(pid))
+								util.yield()
+							end
+						end
+					end end)
 			menu.action(playerslist, "Elegant Crash", {}, "Elegant Crash from Stand.", function()
 				for pid = 0, 31 do
 					if excludeselected then
@@ -1648,6 +1662,20 @@
 						end
 					end
 				end end)
+			--[[menu.action(playerslist, "Block Passivemode", {}, "", function()
+					for pid = 0, 31 do
+						if excludeselected then
+							if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
+								menu.trigger_commands("nopassivemode" .. PLAYER.GET_PLAYER_NAME(pid))
+								util.yield()
+							end
+						else
+							if pid ~= players.user() and selectedplayer[pid] and players.exists(pid) then
+								menu.trigger_commands("nopassivemode" .. PLAYER.GET_PLAYER_NAME(pid))
+								util.yield()
+							end
+						end
+					end end)]]
 			menu.divider(playerslist, "~~~> Players <~~~")
 			players.dispatch_on_join()
 			--[[deathoptions = menu.list(onlineoptions, "Death Log", {}, "", function(); end)
@@ -1896,17 +1924,17 @@
 					menu.trigger_commands("rangemultiplier".." ".."1.00")
 				end end)
 
-		menu.divider(vehicleoptions, "~~~> Vehicle Options <~~~")
+		menu.divider(vehicleoptions, "~~~> Vehicle Options <~~~")	
 			menu.action(vehicleoptions, "Apply Drift Ability", {}, "", function(toggle)
 				if not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(entities.get_user_vehicle_as_handle(pid)) then
 					NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(entities.get_user_vehicle_as_handle(pid))  
 				end
 				ENTITY.SET_ENTITY_MAX_SPEED(entities.get_user_vehicle_as_handle(), 30)
 				VEHICLE.MODIFY_VEHICLE_TOP_SPEED(entities.get_user_vehicle_as_handle(), 200)end)
-				menu.toggle(vehicleoptions, "Stance [Only LS Tuners Cars]", {}, "", function(toggle)
-					VEHICLE._SET_REDUCE_DRIFT_VEHICLE_SUSPENSION(players_car, toggle)end)
-				menu.toggle_loop(vehicleoptions, "Keep car clean", {}, "", function(toggled)
-					VEHICLE.SET_VEHICLE_DIRT_LEVEL(entities.get_user_vehicle_as_handle(), 0.0)end)
+			menu.toggle(vehicleoptions, "Stance [Only LS Tuners Cars]", {}, "", function(toggle)
+				VEHICLE._SET_REDUCE_DRIFT_VEHICLE_SUSPENSION(players_car, toggle)end)
+			menu.toggle_loop(vehicleoptions, "Keep car clean", {}, "", function(toggled)
+				VEHICLE.SET_VEHICLE_DIRT_LEVEL(entities.get_user_vehicle_as_handle(), 0.0)end)
 			menu.divider(vehicleoptions, "~~~> Other Options <~~~")
 			menu.toggle_loop(vehicleoptions, "Stealth Vehicle Godmode", {}, "Won't be detected as vehicle godmode by most menus", function(toggled)
 				ENTITY.SET_ENTITY_PROOFS(players_car, true, true, true, true, true, 0, 0, true)
@@ -2147,6 +2175,8 @@
 					PED.SET_ENABLE_HANDCUFFS(PLAYER.PLAYER_PED_ID(), false)
 				end
 				util.yield()end)
+			menu.action(miscoptions, "Real localized \"DOX\"", {"dox"}, "", function(on_click)
+				chat.send_message("${name}: ${ip} | ${geoip.city}, ${geoip.region}, ${geoip.country}", false, true, true)end)
 			menu.action(miscoptions, "Custom Fake Banner", {"banner"}, "", function(on_click) menu.show_command_box("banner ") end, function(text)
 				custom_alert(text)end)
 			menu.divider(miscoptions, "~~~> Lobby Settings <~~~")	
@@ -2386,6 +2416,21 @@
 		-- [[ Playerlist Options ]]
 			GenerateFeatures = function(pid)
 			menu.divider(menu.player_root(pid), "~~~> "..Name.." <~~~")
+				menu.action(menu.player_root(pid), "Send Private Message", {"pm"}, "Send a message to a player and the other players can´t see it.", function()
+					menu.show_command_box("pm" .. players.get_name(pid) ..  " ")
+					end, function(message)
+						if #message == 0 then 
+							util.toast("[Mira] <3\n".."The message was blank.")
+							return 
+						end
+						local from_msg = "[To you] " .. message
+						local to_msg = "[To " .. players.get_name(pid) .. '] ' .. message
+						if string.len(from_msg) > 254 or string.len(to_msg) > 254 then 
+							util.toast("[Mira] <3\n".."PM too long!")
+						else
+							chat.send_targeted_message(pid, players.user(), from_msg, true)
+							chat.send_message(to_msg, true, true, false)
+						end end)
 				menu.action(menu.player_root(pid), "Remove Godmode from Speedo", {}, "Turns off the godmode of the Speedo that was previously glitched.", function()
 					local vehicle = get_player_veh(pid,true)
 					if vehicle then	
@@ -2489,6 +2534,18 @@
 						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
 						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
 						graphics.start_networked_ptfx_non_looped_at_coord("scr_xm_orbital_blast", player.get_player_coords(pid), v3(0, 180, 0), 1, true, true, true)end)
+					menu.action(twotakeone, "Fling vehicles at player", {}, "", function()
+						local p_c = players.get_position(pid)
+							for _, v in pairs(entities.get_all_vehicles_as_handles()) do 
+								if not PED.IS_PED_A_PLAYER(VEHICLE.GET_PED_IN_VEHICLE_SEAT(v, -1, false)) then 
+									local v_c = ENTITY.GET_ENTITY_COORDS(v)
+									local c = {}
+									c.x = (p_c.x - v_c.x)*2
+									c.y = (p_c.y - v_c.y )*2
+									c.z = (p_c.z - v_c.z)*2
+									ENTITY.APPLY_FORCE_TO_ENTITY(v, 1, c.x, c.y, c.z, 0, 0, 0, 0, false, false, true, false, false)
+								end
+							end end)
 					menu.toggle(twotakeone, "Spam Cargoplanes", {}, "", function(on)
 						if on then
 							local pos = player.get_player_coords(pid)
