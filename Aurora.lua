@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora"
-	local Version = 2.3
+	local Version = 2.4
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 
@@ -15,7 +15,7 @@
 
 	local LogFile = filesystem.scripts_dir() .. "lib\\AuroraScript\\" .. "Log" .. ".log"
 	local HistoryFile = filesystem.scripts_dir() .. "lib\\AuroraScript\\" .. "Playerhistory" .. ".log"
-	local DeathLog = filesystem.scripts_dir() .. "lib\\AuroraScript\\" .. "Deathlog" .. ".log"
+	--local DeathLog = filesystem.scripts_dir() .. "lib\\AuroraScript\\" .. "Deathlog" .. ".log"
 
 	-- [[ Github Update ]]
 	-- Script Updater
@@ -771,7 +771,7 @@
 	-- [[ Functions ]]
 		local function player_list(pid)
 			if NETWORK.NETWORK_IS_SESSION_ACTIVE() then
-				menus[pid] = menu.toggle(playerslist, players.get_name(pid).." [ "..players.get_tags_string(pid).."]", {}, "ID = ".. pid, function(on_toggle)
+				menus[pid] = menu.toggle(playerslist, players.get_name(pid), {}, "ID = ".. pid, function(on_toggle)
 					if on_toggle then
 						selectedplayer[pid] = true
 					else
@@ -838,10 +838,9 @@
 				end
 			end end
 		local function get_friend_count()
-			native_invoker.begin_call();native_invoker.end_call("203F1CFD823B27A4");
-			return native_invoker.get_return_value_int();end
+			native_invoker.begin_call();native_invoker.end_call("203F1CFD823B27A4"); return native_invoker.get_return_value_int();end
 		local function get_frined_name(friendIndex)
-			native_invoker.begin_call();native_invoker.push_arg_int(friendIndex);native_invoker.end_call("4164F227D052E293");return native_invoker.get_return_value_string();end
+			native_invoker.begin_call();native_invoker.push_arg_int(friendIndex);native_invoker.end_call("4164F227D052E293"); return native_invoker.get_return_value_string();end
 		local function gen_fren_funcs(name)
 			bfriendlist = menu.list(friendlist, name, {"friend "..name}, "", function(); end)
 				menu.divider(bfriendlist, "~~~> Your Socialclub Friends <~~~")
@@ -2386,7 +2385,7 @@
 
 		-- [[ Playerlist Options ]]
 			GenerateFeatures = function(pid)
-			menu.divider(menu.player_root(pid), "~~~> "..Name.." (Player Options)".." <~~~")
+			menu.divider(menu.player_root(pid), "~~~> "..Name.." <~~~")
 				menu.action(menu.player_root(pid), "Remove Godmode from Speedo", {}, "Turns off the godmode of the Speedo that was previously glitched.", function()
 					local vehicle = get_player_veh(pid,true)
 					if vehicle then	
