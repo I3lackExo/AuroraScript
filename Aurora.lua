@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora"
-	local Version = 2.5
+	local Version = 2.6
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 
@@ -1168,6 +1168,7 @@
 	--[[ Start ]]
 		util.show_corner_help(colorcodes.small..colorcodes.red.."WARNING: Codes were taken from other scripts and are therefore not my codes. DO NOT PUBLISH THE SCRIPT!")
 		--util.toast("[Mira] <3\n".."> Hello @"..SOCIALCLUB._SC_GET_NICKNAME().."! :)")
+		menu.trigger_commands("edithudlbdfmp".." ".."Universe "..tostring(math.random(1, 999999)).." (Public, ~1~)")
 		util.toast("[Mira] <3\n".."> Hello "..SOCIALCLUB._SC_GET_NICKNAME().."! Welcome to Aurora!")
 
 	-- [[ Source Code ]]
@@ -1662,6 +1663,22 @@
 						end
 					end
 				end end)
+			--plactions = menu.list(playerslist, "Other Actions", {}, "", function(); end)
+			menu.action(playerslist, "Give Collectibles", {}, "", function()
+				for pid = 0, 31 do
+					if excludeselected then
+						if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
+							menu.trigger_commands("givecollectibles"..PLAYER.GET_PLAYER_NAME(pid))
+							util.yield()
+						end
+					else
+						if pid ~= players.user() and selectedplayer[pid] and players.exists(pid) then
+							menu.trigger_commands("givecollectibles"..PLAYER.GET_PLAYER_NAME(pid))
+							util.yield()
+						end
+					end
+				end end)
+
 			--[[menu.action(playerslist, "Block Passivemode", {}, "", function()
 					for pid = 0, 31 do
 						if excludeselected then
@@ -2449,27 +2466,8 @@
 			
 			main = menu.list(menu.player_root(pid), "Account Boosting", {}, "", function(); end)
 				menu.divider(main, "~~~> Account Boosting <~~~")
-					menu.action(main, "All Collectibles", {"racboost"}, "", function(on)
-					menu.trigger_commands("givecollectibles"..PLAYER.GET_PLAYER_NAME(pid))end)
 				menu.action(main, "Rank Them Up", {"rankboost"}, "Gives them ~175k RP. Can boost a lvl 1 ~25 levels.", function()
-					util.trigger_script_event(1 << pid, {-1178972880, pid, 5, 0, 1, 1, 1})
-					for i = 0, 9 do
-						util.trigger_script_event(1 << pid, {-1178972880, pid, 0, i, 1, 1, 1})
-						util.trigger_script_event(1 << pid, {-1178972880, pid, 1, i, 1, 1, 1})
-						util.trigger_script_event(1 << pid, {-1178972880, pid, 3, i, 1, 1, 1})
-						util.trigger_script_event(1 << pid, {-1178972880, pid, 10, i, 1, 1, 1})
-					end
-					for i = 0, 1 do
-						util.trigger_script_event(1 << pid, {-1178972880, pid, 2, i, 1, 1, 1})
-						util.trigger_script_event(1 << pid, {-1178972880, pid, 6, i, 1, 1, 1})
-					end
-					for i = 0, 19 do
-						util.trigger_script_event(1 << pid, {-1178972880, pid, 4, i, 1, 1, 1})
-					end
-					for i = 0, 99 do
-						util.trigger_script_event(1 << pid, {-1178972880, pid, 9, i, 1, 1, 1})
-						util.yield()
-					end end)
+					menu.trigger_commands("givecollectibles"..PLAYER.GET_PLAYER_NAME(pid)) end)
 				menu.divider(main, "~~~> "..PLAYER.GET_PLAYER_NAME(pid).." | RID: "..players.get_rockstar_id(pid).." <~~~")
 
 			phistory = menu.list(menu.player_root(pid), "Player History", {}, "", function(); end)
