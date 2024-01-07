@@ -47,6 +47,7 @@
 			repeat 
 				util.yield()
 			until response
+
 	-- Native Updater
 		local nativeresponse = false
 			async_http.init("raw.githubusercontent.com", "/I3lackExo/AuroraScript/main/lib/NativeVersion.lua", function(output)
@@ -179,7 +180,6 @@
 		local players_on_cooldown = {}
 
 		local chatColor = 27
-		local 
 		local colors = {
 			{-1, "Default"},
 			{1, "White"},
