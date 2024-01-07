@@ -4,8 +4,8 @@
 -- Creator: I3lackExo.
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
-	local Name = "Aurora"
-	local Version = 2.6
+	local Name = "Aurora for Stand"
+	local Version = 2.7
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 
@@ -15,7 +15,7 @@
 
 	local LogFile = filesystem.scripts_dir() .. "lib\\AuroraScript\\" .. "Log" .. ".log"
 	local HistoryFile = filesystem.scripts_dir() .. "lib\\AuroraScript\\" .. "Playerhistory" .. ".log"
-	--local DeathLog = filesystem.scripts_dir() .. "lib\\AuroraScript\\" .. "Deathlog" .. ".log"
+	local DeathLog = filesystem.scripts_dir() .. "lib\\AuroraScript\\" .. "Deathlog" .. ".log"
 
 	-- [[ Github Update ]]
 	-- Script Updater
@@ -178,7 +178,23 @@
 		local only_translate_foreign = true
 		local players_on_cooldown = {}
 
+		local chatColor = 27
+		local 
 		local colors = {
+			{-1, "Default"},
+			{1, "White"},
+			{27, "Red"},
+			{26, "Blue"},
+			{18, "Green"},
+			{37, "Teal"},
+			{21, "Purple"},
+			{24, "Magenta"},
+			{30, "Pink"},
+			{45, "Pastel Pink"},
+			{46, "Lime Green"},
+			{12, "Yellow"},
+			{15, "Orange"},}
+		local color = {
 			green = 184, 
 			red = 6,
 			orange = 15,
@@ -771,7 +787,7 @@
 	-- [[ Functions ]]
 		local function player_list(pid)
 			if NETWORK.NETWORK_IS_SESSION_ACTIVE() then
-				menus[pid] = menu.toggle(playerslist, players.get_name(pid), {}, "ID = ".. pid, function(on_toggle)
+				menus[pid] = menu.toggle(playerslist, players.get_name(pid), {}, "Tags: "..players.get_tags_string(pid), function(on_toggle)
 					if on_toggle then
 						selectedplayer[pid] = true
 					else
@@ -1122,8 +1138,7 @@
 					if type and type == result then return sub_handling_data end
 					types[#types+1] = {type = result, address = sub_handling_data}
 					types.found = types.found + 1
-				end
-			end
+				end end
 			if type then return nil else return types end end
 		native_invoker.get_return_value_vector3 = function ()
 			local table = og_get_return_value_vector3()
@@ -1567,6 +1582,11 @@
 					for i = 1, 7 do
 						SET_FLOAT_GLOBAL(262145 + MOSFHTunables[i], 1)
 					end end)
+			menu.toggle(selfoptions, "BST Mode", {}, "BST without the Post FX and sound effects.", function(toggled)
+				PLAYER.SET_PLAYER_WEAPON_DAMAGE_MODIFIER(players.user(), toggled ? 1.44 : 0.72)
+				PLAYER.SET_PLAYER_MELEE_WEAPON_DAMAGE_MODIFIER(players.user(), toggled ? 2.0 : 1.0)
+				PLAYER.SET_PLAYER_MELEE_WEAPON_DEFENSE_MODIFIER(players.user(), toggled ? 0.5 : 1.0)end)
+
 			menu.toggle_loop(selfoptions, "Fast Respawn", {}, "", function()
 				local gwobaw = memory.script_global(2672524 + 1685 + 756) -- Global_2672524.f_1685.f_756
 					if PED.IS_PED_DEAD_OR_DYING(players.user_ped()) then
@@ -1678,45 +1698,31 @@
 						end
 					end
 				end end)
-
-			--[[menu.action(playerslist, "Block Passivemode", {}, "", function()
-					for pid = 0, 31 do
-						if excludeselected then
-							if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
-								menu.trigger_commands("nopassivemode" .. PLAYER.GET_PLAYER_NAME(pid))
-								util.yield()
-							end
-						else
-							if pid ~= players.user() and selectedplayer[pid] and players.exists(pid) then
-								menu.trigger_commands("nopassivemode" .. PLAYER.GET_PLAYER_NAME(pid))
-								util.yield()
-							end
-						end
-					end end)]]
 			menu.divider(playerslist, "~~~> Players <~~~")
 			players.dispatch_on_join()
 			--[[deathoptions = menu.list(onlineoptions, "Death Log", {}, "", function(); end)
 				menu.divider(deathoptions, "~~~> Death Log <~~~")
-				menu.toggle_loop(deathoptions, "Activate Death Log", {}, "", function(on)	
+				menu.toggle_loop(deathoptions, "Activate Death Log", {}, "", function()
 					 if PED.IS_PED_DEAD_OR_DYING(players.user_ped()) then
 						killer = PED.GET_PED_SOURCE_OF_DEATH(players.user_ped())
 						if killer == players.user_ped() then return end
 						if STREAMING.IS_MODEL_A_PED(ENTITY.GET_ENTITY_MODEL(killer)) then
 							local pid = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(killer)
 							local pname = players.get_name(pid)
+							local prid = players.get_rockstar_id(pid)
 							if pname != nil then
-								deathlog("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid)..")")
+								deathlog("Deathlog: (Playername: "..pname.." / RID: "..prid..")")
 							end
 						elseif STREAMING.IS_MODEL_A_VEHICLE(ENTITY.GET_ENTITY_MODEL(killer)) then
 							local vehowner = entities.get_owner(entities.handle_to_pointer(killer))
 							local pname = players.get_name(vehowner)
+							local prid = players.get_rockstar_id(vehowner)
 							if pname != nil then
-								deathlog("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid)..")")
+								deathlog("Deathlog: (Playername: "..pnamename.." / RID: "..prid..")")
 							end
-						end
-					end	end)
-			menu.action(deathoptions, "Clear Death Log", {}, "", function()
-				io.remove(DeathLog) end)]]
+						end	end	end)
+				menu.action(deathoptions, "Clear Death Log", {}, "", function()
+					io.remove(DeathLog) end)]]
 			recoveryoptions = menu.list(onlineoptions, "Recovery Options", {}, "Based on Heist Control Stuff", function(); end)
 				remoteaccess = menu.list(recoveryoptions, "Remote Access Apps", {}, "", function(); end)
 					menu.divider(remoteaccess, "~~~> Remote Access Apps <~~~")
@@ -1757,7 +1763,6 @@
 				menu.toggle_loop(bountyoptions, "Place Infinite Bounty", {}, "", function(click_type)
 					menu.trigger_commands("bountyall" .. " " .. tostring(infibounty_amt))
 					util.yield(60000)end)
-				menu.divider(bountyoptions, "~~~> Bounty Remover <~~~")
 				menu.toggle_loop(bountyoptions, "Auto Claim Bounties", {}, "Automatically claims bounties that are placed on you.", function ()
 					local bounty = players.get_bounty(players.user())
 						if bounty != nil then
@@ -2393,6 +2398,14 @@
 					else
 						menu.trigger_commands("fovfpinveh".." ".."-1")
 					end end)
+			nametag = menu.list(settings, "Change Nametag Color", {}, "", function(); end)
+				menu.list_select(nametag, "Color", {}, "", colors, chatColor, function(color)
+					chatColor = color end)
+				menu.toggle_loop(nametag, "Change Nametag Color", {}, "", function()
+					HUD._OVERRIDE_MULTIPLAYER_CHAT_COLOUR(1, chatColor)
+					end, function()
+					HUD._OVERRIDE_MULTIPLAYER_CHAT_COLOUR(0, chatColor)end)
+
 			menu.divider(settings, "~~~> Game Features <~~~")
 			menu.toggle_loop(settings, "Auto Accept", {}, "Auto accepts join screens.", function(on_toggle)
 				local message_hash = HUD._GET_WARNING_MESSAGE_TITLE_HASH()
@@ -2408,8 +2421,6 @@
 					end
 				end end)
 			menu.divider(settings, "~~~> Settings <~~~")
-			--menu.action(settings, "Command list", {}, "List all commands in this script.", function()
-				--util.toast("Command List:\n\n> Restart Script -> !ptrestart\n> Clean Everything -> !ptclean\n> Remove Bounty -> !ptbounty\n> Disable Ghost -> !ptghost\n> Remove Expsniper -> !ptexplo\n> Host Kick -> !pthost\n> Network Bail -> !ptbail\n> UWU Crash -> !ptuwu\n> MNCCrash -> !ptmncrash")end)
 			menu.action(settings, "Restart Script", {"ptrestart"}, "Restarts the script to clean the errors.", function()
 				util.restart_script()end)
 		
@@ -2441,7 +2452,7 @@
 							return 
 						end
 						local from_msg = "[To you] " .. message
-						local to_msg = "[To " .. players.get_name(pid) .. '] ' .. message
+						local to_msg = "[To " .. players.get_name(pid) .. "] " .. message
 						if string.len(from_msg) > 254 or string.len(to_msg) > 254 then 
 							util.toast("[Mira] <3\n".."PM too long!")
 						else
@@ -2453,7 +2464,7 @@
 					if vehicle then	
 						ENTITY.SET_ENTITY_INVINCIBLE(vehicle, false) 
 						util.toast("[Mira] <3\n".."> (Target: "..PLAYER.GET_PLAYER_NAME(pid)..")".." his/her Speedo should not be in Godmode anymore.")
-					end end)
+					end end)	
 				menu.toggle_loop(menu.player_root(pid), "Remove Vehicle Godmode", {}, "", function()
 					local vehicle = get_player_veh(pid,true)
 					if vehicle then	
@@ -2463,14 +2474,13 @@
 					ENTITY.SET_ENTITY_PROOFS(PED.GET_VEHICLE_PED_IS_IN(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)), true, true, true, true, true, 0, 0, true)
 					end, function() ENTITY.SET_ENTITY_PROOFS(PED.GET_VEHICLE_PED_IS_IN(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)), false, false, false, false, false, 0, 0, false)
 					end)
-			
-			main = menu.list(menu.player_root(pid), "Account Boosting", {}, "", function(); end)
-				menu.divider(main, "~~~> Account Boosting <~~~")
-				menu.action(main, "Rank Them Up", {"rankboost"}, "Gives them ~175k RP. Can boost a lvl 1 ~25 levels.", function()
+				
+			accountoptions = menu.list(menu.player_root(pid), "Account Options", {}, "", function(); end)
+				menu.divider(accountoptions, "~~~> Account Options <~~~")
+				menu.action(accountoptions, "Rank Them Up", {"rankboost"}, "Gives them ~175k RP. Can boost a lvl 1 ~25 levels.", function()
 					menu.trigger_commands("givecollectibles"..PLAYER.GET_PLAYER_NAME(pid)) end)
-				menu.divider(main, "~~~> "..PLAYER.GET_PLAYER_NAME(pid).." | RID: "..players.get_rockstar_id(pid).." <~~~")
 
-			phistory = menu.list(menu.player_root(pid), "Player History", {}, "", function(); end)
+			--[[phistory = menu.list(menu.player_root(pid), "Player History", {}, "", function(); end)
 				menu.divider(phistory, "~~~> Add to Player History <~~~")
 				menu.action(phistory, "Add to Friendlist", {"addfriend"}, "", function(on)
 					if players.exists(pid) then
@@ -2495,7 +2505,7 @@
 				menu.action(phistory, "Delete Note", {"deletenote"}, "", function(on)
 					menu.trigger_commands("historynote"..PLAYER.GET_PLAYER_NAME(pid).."")
 					util.toast(PLAYER.GET_PLAYER_NAME(pid).." delete from your list.")end)
-				menu.divider(phistory, "~~~> "..PLAYER.GET_PLAYER_NAME(pid).." | RID: "..players.get_rockstar_id(pid).." <~~~")
+				menu.divider(phistory, "~~~> "..PLAYER.GET_PLAYER_NAME(pid).." | RID: "..players.get_rockstar_id(pid).." <~~~")]]
 			
 			trolling = menu.list(menu.player_root(pid), "Trolling Options", {}, "", function(); end)
 				menu.divider(trolling, "~~~> Trolling Options <~~~")
@@ -2705,16 +2715,16 @@
 						NETWORK.NETWORK_RESURRECT_LOCAL_PLAYER(oldPos.x, oldPos.y, oldPos.z, 0, false, false, 0)
 						ENTITY.SET_ENTITY_VISIBLE(user, true)
 					end)end)
-			menu.action(menu.player_root(pid), "Save Playerdata", {}, "", function(on)
-				local ip = players.get_connect_ip(pid)
-				local name = PLAYER.GET_PLAYER_NAME(pid)
-				history("Saved Playerdata: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid).." / IP: "..string.format("%i.%i.%i.%i)", ip >> 24 & 255, ip >> 16 & 255, ip >> 8 & 255, ip & 255))
-				util.toast("[Mira] <3\n".."> I have saved you all the important data of the player ("..name..").")end)
-			menu.action(menu.player_root(pid), "Paste IP in NordVPN Tracker", {}, "", function(on)
+				menu.action(menu.player_root(pid), "Save Playerdata", {"save"}, "", function(on)
+					local ip = players.get_connect_ip(pid)
+					local name = PLAYER.GET_PLAYER_NAME(pid)
+					history("Saved Playerdata: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid).." / IP: "..string.format("%i.%i.%i.%i)", ip >> 24 & 255, ip >> 16 & 255, ip >> 8 & 255, ip & 255))
+					util.toast("[Mira] <3\n".."> I have saved you all the important data of the player ("..name..").")end)
+			--[[menu.action(menu.player_root(pid), "Paste IP in NordVPN Tracker", {}, "", function(on)
 				local ip = players.get_connect_ip(pid)
 				local name = PLAYER.GET_PLAYER_NAME(pid)
 				util.copy_to_clipboard(string.format("%i.%i.%i.%i", ip >> 24 & 255, ip >> 16 & 255, ip >> 8 & 255, ip & 255), true)
-				util.toast("[Mira] <3\n".."> I have copied the IP of the player ("..name..") to the NordVPN tracker.")end)end
+				util.toast("[Mira] <3\n".."> I have copied the IP of the player ("..name..") to the NordVPN tracker.")end)]]end
 
 			local InitialPlayersList = players.list(true, true, true)
 				for i=1, #InitialPlayersList do
