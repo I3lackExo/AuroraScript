@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora for Stand"
-	local Version = 2.7
+	local Version = 2.8
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 
