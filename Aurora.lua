@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora for Stand"
-	local Version = 2.9
+	local Version = 3.0
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 
@@ -47,7 +47,6 @@
 			repeat 
 				util.yield()
 			until response
-
 	-- Native Updater
 		local nativeresponse = false
 			async_http.init("raw.githubusercontent.com", "/I3lackExo/AuroraScript/main/lib/NativeVersion.lua", function(output)
@@ -273,33 +272,6 @@
 			{"Snipespot-1 (Glitched/PVP)", {x=-1088.6375, y=-2721.819, z=13.978062}},
 			{"Snipespot-2 (Glitched/PVP)", {x=-1280.4398, y=-2655.9102, z=14.045677}},
 			{"Alien Room (Halloween)", {x=-1876, y=3750, z=-100}},}
-		local station_name = {
-			["Blaine County Radio"] = "RADIO_11_TALK_02", 
-			["The Blue Ark"] = "RADIO_12_REGGAE",
-			["Worldwide FM"] = "RADIO_13_JAZZ",
-			["FlyLo FM"] = "RADIO_14_DANCE_02",
-			["The Lowdown 9.11"] = "RADIO_15_MOTOWN",
-			["The Lab"] = "RADIO_20_THELAB",
-			["Radio Mirror Park"] = "RADIO_16_SILVERLAKE",
-			["Space 103.2"] = "RADIO_17_FUNK",
-			["Vinewood Boulevard Radio"] = "RADIO_18_90S_ROCK",
-			["Blonded Los Santos 97.8 FM"] = "RADIO_21_DLC_XM17",
-			["Los Santos Underground Radio"] = "RADIO_22_DLC_BATTLE_MIX1_RADIO",
-			["iFruit Radio"] = "RADIO_23_DLC_XM19_RADIO",
-			["Motomami Lost Santos"] = "RADIO_19_USER",
-			["Los Santos Rock Radio"] = "RADIO_01_CLASS_ROCK",
-			["Non-Stop-Pop FM"] = "RADIO_02_POP",
-			["Radio Los Santos"] = "RADIO_03_HIPHOP_NEW",
-			["Channel X"] = "RADIO_04_PUNK",
-			["West Coast Talk Radio"] = "RADIO_05_TALK_01",
-			["Rebel Radio"] = "RADIO_06_COUNTRY", 
-			["Soulwax FM"] = "RADIO_07_DANCE_01",
-			["East Los FM"] = "RADIO_08_MEXICAN",
-			["West Coast Classics"] = "RADIO_09_HIPHOP_OLD",
-			["Media Player"] = "RADIO_36_AUDIOPLAYER",
-			["The Music Locker"] = "RADIO_35_DLC_HEI4_MLR",
-			["Kult FM"] = "RADIO_34_DLC_HEI4_KULT",
-			["Still Slipping Los Santos"] = "RADIO_27_DLC_PRHEI4",}
 		local orbitalTableCords = {
 			[1] = { x = 330.48312, y = 4827.281, z = -59.368515 },
 			[2] = { x = 327.5724,  y = 4826.48,  z = -59.368515 },
@@ -1586,7 +1558,6 @@
 				PLAYER.SET_PLAYER_WEAPON_DAMAGE_MODIFIER(players.user(), toggled ? 1.44 : 0.72)
 				PLAYER.SET_PLAYER_MELEE_WEAPON_DAMAGE_MODIFIER(players.user(), toggled ? 2.0 : 1.0)
 				PLAYER.SET_PLAYER_MELEE_WEAPON_DEFENSE_MODIFIER(players.user(), toggled ? 0.5 : 1.0)end)
-
 			menu.toggle_loop(selfoptions, "Fast Respawn", {}, "", function()
 				local gwobaw = memory.script_global(2672524 + 1685 + 756) -- Global_2672524.f_1685.f_756
 					if PED.IS_PED_DEAD_OR_DYING(players.user_ped()) then
@@ -1683,21 +1654,6 @@
 						end
 					end
 				end end)
-			--plactions = menu.list(playerslist, "Other Actions", {}, "", function(); end)
-			menu.action(playerslist, "Give Collectibles", {}, "", function()
-				for pid = 0, 31 do
-					if excludeselected then
-						if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
-							menu.trigger_commands("givecollectibles"..PLAYER.GET_PLAYER_NAME(pid))
-							util.yield()
-						end
-					else
-						if pid ~= players.user() and selectedplayer[pid] and players.exists(pid) then
-							menu.trigger_commands("givecollectibles"..PLAYER.GET_PLAYER_NAME(pid))
-							util.yield()
-						end
-					end
-				end end)
 			menu.divider(playerslist, "~~~> Players <~~~")
 			players.dispatch_on_join()
 			--[[deathoptions = menu.list(onlineoptions, "Death Log", {}, "", function(); end)
@@ -1724,19 +1680,18 @@
 				menu.action(deathoptions, "Clear Death Log", {}, "", function()
 					io.remove(DeathLog) end)]]
 			recoveryoptions = menu.list(onlineoptions, "Recovery Options", {}, "Based on Heist Control Stuff", function(); end)
-				remoteaccess = menu.list(recoveryoptions, "Remote Access Apps", {}, "", function(); end)
-					menu.divider(remoteaccess, "~~~> Remote Access Apps <~~~")
-					menu.action(remoteaccess, "Smuggler (Air Cargo)", {}, "", function()
-						START_SCRIPT("CEO", "appsmuggler")end)
-					menu.action(remoteaccess, "Bunker", {}, "", function()
-						START_SCRIPT("CEO", "appbunkerbusiness")end)
-					menu.action(remoteaccess, "Nightclub", {}, "", function()
-						START_SCRIPT("CEO", "appbusinesshub")end)
-					menu.action(remoteaccess, "Biker Business (Only MC)", {}, "", function()
-						START_SCRIPT("MC", "appbikerbusiness")end)
-					menu.action(remoteaccess, "Touchscreen Terminal (Terrorbyte)", {}, "", function()
-						START_SCRIPT("CEO", "apphackertruck")end)
-					menu.action(remoteaccess, "Master Control Terminal (Arcade)", {}, "", function()
+				menu.divider(recoveryoptions, "~~~> Remote Access Apps <~~~")
+				menu.action(recoveryoptions, "Smuggler (Air Cargo)", {}, "", function()
+					START_SCRIPT("CEO", "appsmuggler")end)
+				menu.action(recoveryoptions, "Bunker", {}, "", function()
+					START_SCRIPT("CEO", "appbunkerbusiness")end)
+				menu.action(recoveryoptions, "Nightclub", {}, "", function()
+					START_SCRIPT("CEO", "appbusinesshub")end)
+				menu.action(recoveryoptions, "Biker Business (Only MC)", {}, "", function()
+					START_SCRIPT("MC", "appbikerbusiness")end)
+				menu.action(recoveryoptions, "Touchscreen Terminal (Terrorbyte)", {}, "", function()
+					START_SCRIPT("CEO", "apphackertruck")end)
+				menu.action(recoveryoptions, "Master Control Terminal (Arcade)", {}, "", function()
 						START_SCRIPT("CEO", "apparcadebusinesshub")end)
 				menu.divider(recoveryoptions, "~~~> Casino <~~~")
 					menu.toggle_loop(recoveryoptions, "Auto Black Jack", {}, "", function()
@@ -1747,15 +1702,7 @@
 						else
 							PAD._SET_CONTROL_NORMAL(2, 203, 1) --pass
 						end end)
-				menu.divider(recoveryoptions, "~~~> Nightclub Options <~~~")
-					menu.toggle_loop(recoveryoptions, "Nightclub Popularity", {}, "Keeps the Nightclub Popularity at max", function ()
-						if util.is_session_started() then
-							local ncpop = math.floor(STAT_GET_INT("CLUB_POPULARITY") / 10)
-							if ncpop < 100 then
-								menu.trigger_commands("clubpopularity 100")
-								util.yield(250)
-							end
-						end end)
+
 			bountyoptions = menu.list(onlineoptions, "Bounty Options", {}, "", function(); end)	
 				menu.divider(bountyoptions, "~~~> Bounty Loop <~~~")
 				menu.slider(bountyoptions, "Bounty Amount", {}, "", 0, 10000, 10000, 1, function(s)
@@ -1958,7 +1905,7 @@
 			menu.toggle_loop(vehicleoptions, "Keep car clean", {}, "", function(toggled)
 				VEHICLE.SET_VEHICLE_DIRT_LEVEL(entities.get_user_vehicle_as_handle(), 0.0)end)
 			menu.divider(vehicleoptions, "~~~> Other Options <~~~")
-			menu.toggle_loop(vehicleoptions, "Stealth Vehicle Godmode", {}, "Won't be detected as vehicle godmode by most menus", function(toggled)
+			menu.toggle_loop(vehicleoptions, "Vehicle Godmode", {}, "", function(toggled)
 				ENTITY.SET_ENTITY_PROOFS(players_car, true, true, true, true, true, 0, 0, true)
 				end, function() ENTITY.SET_ENTITY_PROOFS(PED.GET_VEHICLE_PED_IS_IN(player), false, false, false, false, false, 0, 0, false)end)	
 			menu.toggle_loop(vehicleoptions, "Indicator Lights", {}, "", function()
@@ -2405,7 +2352,6 @@
 					HUD._OVERRIDE_MULTIPLAYER_CHAT_COLOUR(1, chatColor)
 					end, function()
 					HUD._OVERRIDE_MULTIPLAYER_CHAT_COLOUR(0, chatColor)end)
-
 			menu.divider(settings, "~~~> Game Features <~~~")
 			menu.toggle_loop(settings, "Auto Accept", {}, "Auto accepts join screens.", function(on_toggle)
 				local message_hash = HUD._GET_WARNING_MESSAGE_TITLE_HASH()
@@ -2421,6 +2367,10 @@
 					end
 				end end)
 			menu.divider(settings, "~~~> Settings <~~~")
+			menu.action(settings, "Clear Log", {}, "", function()
+				io.remove(LogFile) end)
+			menu.action(settings, "Clear Playerhistory", {}, "", function()
+				io.remove(HistoryFile) end)
 			menu.action(settings, "Restart Script", {"ptrestart"}, "Restarts the script to clean the errors.", function()
 				util.restart_script()end)
 		
@@ -2470,7 +2420,7 @@
 					if vehicle then	
 						ENTITY.SET_ENTITY_INVINCIBLE(vehicle, false) 
 					end end)
-				menu.toggle_loop(menu.player_root(pid), "Give Stealth Vehicle Godmode", {}, "Won't be detected as vehicle godmode by most menus", function(toggled)
+				menu.toggle_loop(menu.player_root(pid), "Give Vehicle Godmode", {}, "", function(toggled)
 					ENTITY.SET_ENTITY_PROOFS(PED.GET_VEHICLE_PED_IS_IN(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)), true, true, true, true, true, 0, 0, true)
 					end, function() ENTITY.SET_ENTITY_PROOFS(PED.GET_VEHICLE_PED_IS_IN(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)), false, false, false, false, false, 0, 0, false)
 					end)
@@ -2508,10 +2458,8 @@
 				menu.divider(phistory, "~~~> "..PLAYER.GET_PLAYER_NAME(pid).." | RID: "..players.get_rockstar_id(pid).." <~~~")]]
 			
 			trolling = menu.list(menu.player_root(pid), "Trolling Options", {}, "", function(); end)
-				menu.divider(trolling, "~~~> Trolling Options <~~~")
-				twotakeone = menu.list(trolling, "2Take1 Trolling", {}, "", function(); end)
-					menu.divider(twotakeone, "~~~> Meteor <~~~")
-					menu.action(twotakeone, "Send to Gas Chamber", {}, "", function()
+				menu.divider(trolling, "~~~> 2Take1 Meteor <~~~")
+				menu.action(trolling, "Send to Gas Chamber", {}, "", function()
 						--TASK.CLEAR_PED_TASKS_IMMEDIATELY(players.user_ped(pid))
 						local object = object.create_object(959275690, player.get_player_coords(pid) - v3(0, 0, 0), true, false)
 						fire.add_explosion(player.get_player_coords(pid), 21, 1, 0, 0, pid)
@@ -2521,14 +2469,14 @@
 						fire.add_explosion(player.get_player_coords(pid), 21, 1, 0, 0, pid)
 						util.yield(15000)
 						entities.delete_by_handle(object)end)
-					menu.action(twotakeone, "Atomize", {}, "", function()
+				menu.action(trolling, "Atomize", {}, "", function()
 						for i = 1, 30 do
 							local pos = players.get_position(pid)
 							FIRE.ADD_EXPLOSION(pos.x + math.random(-2, 2), pos.y + math.random(-2, 2), pos.z + math.random(-2, 2), 70, 1, true, false, 0.2, false)
 							util.yield(math.random(0, 1))
 						end end)
-					menu.divider(twotakeone, "~~~> CRWX <~~~")
-					menu.action(twotakeone, "Send Orb", {"orb"}, "", function()
+				menu.divider(trolling, "~~~> 2Take1 CRWX <~~~")
+				menu.action(trolling, "Send Orb", {"orb"}, "", function()
 						graphics.set_next_ptfx_asset("scr_xm_orbital")
 						while not graphics.has_named_ptfx_asset_loaded("scr_xm_orbital") do
 							graphics.request_named_ptfx_asset("scr_xm_orbital")
@@ -2542,7 +2490,7 @@
 						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
 						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
 						graphics.start_networked_ptfx_non_looped_at_coord("scr_xm_orbital_blast", player.get_player_coords(pid), v3(0, 180, 0), 1, true, true, true)end)
-					menu.action(twotakeone, "Fling vehicles at player", {}, "", function()
+				menu.action(trolling, "Fling vehicles at player", {}, "", function()
 						local p_c = players.get_position(pid)
 							for _, v in pairs(entities.get_all_vehicles_as_handles()) do 
 								if not PED.IS_PED_A_PLAYER(VEHICLE.GET_PED_IN_VEHICLE_SEAT(v, -1, false)) then 
@@ -2554,7 +2502,7 @@
 									ENTITY.APPLY_FORCE_TO_ENTITY(v, 1, c.x, c.y, c.z, 0, 0, 0, 0, false, false, true, false, false)
 								end
 							end end)
-					menu.toggle(twotakeone, "Spam Cargoplanes", {}, "", function(on)
+				menu.toggle(trolling, "Spam Cargoplanes", {}, "", function(on)
 						if on then
 							local pos = player.get_player_coords(pid)
 							local veh_hash = 0x15F27762
@@ -2574,7 +2522,12 @@
 							STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(veh_hash)
 							end
 						return HANDLER_CONTINUE end)
-				menu.divider(trolling, "~~~> Tryharder Trolling <~~~")
+				menu.divider(trolling, "~~~> Trolling Options <~~~")
+				menu.action(trolling, "Disable Ghost", {"ptghost"}, "", function(on)
+					util.toast("[Mira] <3\n".."> Please wait, while I transfer the bounty. (Target: "..PLAYER.GET_PLAYER_NAME(pid)..")")
+					menu.trigger_commands("bounty"..PLAYER.GET_PLAYER_NAME(pid).." 1000")
+					util.yield(10500)
+					util.toast("[Mira] <3\n".."> Transfer completed. (Target: "..PLAYER.GET_PLAYER_NAME(pid)..")")end)
 				menu.action(trolling, "Remove Explosive Shit", {}, "", function(on)
 					WEAPON.REMOVE_WEAPON_FROM_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0xA914799)
 					WEAPON.GIVE_WEAPON_TO_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0xA914799)
@@ -2585,22 +2538,7 @@
 				menu.toggle_loop(trolling, "Remove Explosive Shit (Loop)", {}, "", function(on)
 					WEAPON.REMOVE_WEAPON_FROM_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0xA914799)
 					WEAPON.REMOVE_WEAPON_FROM_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0x6D544C99)
-					WEAPON.REMOVE_WEAPON_FROM_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0xFEA23564)end)
-				menu.divider(trolling, "~~~> Trolling Options <~~~")
-				soundspam = menu.list(trolling, "Sound Spam", {}, "")
-					menu.toggle_loop(soundspam, "SMS Spam", {}, "", function()
-						util.trigger_script_event(1 << pid, {1670832796, pid, math.random(-2147483647, 2147483647)})end)
-					menu.toggle_loop(soundspam, "Interior Invite", {}, "", function()
-						util.trigger_script_event(1 << pid, {1111927333, pid, math.random(1, 6)})end)
-					menu.toggle_loop(soundspam, "Invite Notification", {}, "", function()
-						util.trigger_script_event(1 << pid, {-668341698, pid, math.random(1, 150), -1, -1})end)
-					menu.toggle_loop(soundspam, "Collected Checkpoint", {}, "", function()
-						util.trigger_script_event(1 << pid, {-1529596656, pid, -547323955, 0, 0, 0, 0, 0, 0, 0, pid, 0, 0, 0})
-						util.yield(25)end)
-					menu.toggle_loop(soundspam, "Character Notification", {}, "", function()
-						util.trigger_script_event(1 << pid, {-634789188, pid, math.random(0, 178), 0, 0, 0})end)
-					menu.toggle_loop(soundspam, "Error Notification", {}, "", function()
-						util.trigger_script_event(1 << pid, {-1251171789, pid, math.random(-2147483647, 2147483647)})end)		
+					WEAPON.REMOVE_WEAPON_FROM_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0xFEA23564)end)		
 				menu.toggle_loop(trolling, "Lock On Sound", {""}, "", function()
 					local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
 					local vehicle = PED.GET_VEHICLE_PED_IS_IN(ped, false)
@@ -2610,36 +2548,10 @@
 						return 
 					end
 					VEHICLE.SET_VEHICLE_HOMING_LOCKEDONTO_STATE(vehicle, 1)end)
-				menu.toggle_loop(trolling, "Smokescreen", {""}, "Fills up their screen with black smoke.", function()
-					if smoke_notif then
-						if StandUser(pid) then 
-							toast(lang.get_localised(1729001290))
-							smoke_notif = false
-						end
-					end
-					local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-					STREAMING.REQUEST_NAMED_PTFX_ASSET("scr_as_trans")
-					GRAPHICS.USE_PARTICLE_FX_ASSET("scr_as_trans")
-					if ptfx == nil or not GRAPHICS.DOES_PARTICLE_FX_LOOPED_EXIST(ptfx) then
-						ptfx = GRAPHICS.START_NETWORKED_PARTICLE_FX_LOOPED_ON_ENTITY("scr_as_trans_smoke", ped, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, false, false, false, 0, 0, 0, 255)
-					end
-					end, function()
-						local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-						GRAPHICS.REMOVE_PARTICLE_FX(ptfx)
-						STREAMING.REMOVE_NAMED_PTFX_ASSET("scr_as_trans")
-					end)
-				menu.divider(trolling, "~~~> PVP Options <~~~")
-				menu.action(trolling, "Disable Ghost", {"ptghost"}, "", function(on)
-					--Assistant("> Please wait, while I transfer the bounty.\n\n> Target: "..PLAYER.GET_PLAYER_NAME(pid), colors.blue)
-					util.toast("[Mira] <3\n".."> Please wait, while I transfer the bounty. (Target: "..PLAYER.GET_PLAYER_NAME(pid)..")")
-					menu.trigger_commands("bounty"..PLAYER.GET_PLAYER_NAME(pid).." 1000")
-					util.yield(10500)
-					--Assistant("> Transfer completed.\n\n> Target: "..PLAYER.GET_PLAYER_NAME(pid), colors.blue)end)
-					util.toast("[Mira] <3\n".."> Transfer completed. (Target: "..PLAYER.GET_PLAYER_NAME(pid)..")") end)
-			
+				
 			crash = menu.list(menu.player_root(pid), "Kicks & Crashes", {}, "", function(); end)
 				menu.divider(crash, "~~~> Basic Kicks <~~~")
-				menu.action(crash, "Host Kick", {"host"}, "Host Kick and logs player data in C4tScripts/Log.log", function()
+				menu.action(crash, "Host Kick", {"host"}, "", function()
 					--menu.trigger_commands("timeout"..PLAYER.GET_PLAYER_NAME(pid).." ".."on")
 					if NETWORK.NETWORK_IS_HOST() then
 						local ip = players.get_connect_ip(pid)
@@ -2647,7 +2559,7 @@
 						log("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid)..")")
 						NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
 					end end)
-				menu.action(crash, "Orbital Host Kick", {"orbhost"}, "Orbital Host Kick and logs player data in C4tScripts/Log.log", function()
+				menu.action(crash, "Orbital Host Kick", {"orbhost"}, "", function()
 					--menu.trigger_commands("timeout"..PLAYER.GET_PLAYER_NAME(pid).." ".."on")
 					if NETWORK.NETWORK_IS_HOST() then
 						local ip = players.get_connect_ip(pid)
@@ -2669,10 +2581,8 @@
 						util.yield(500)
 						NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
 					end end)
-				--[[menu.action(crash, "Network Bail", {"ptbail"}, "Network Bail.", function()
-					util.trigger_script_event(1 << pid, {1674887089, players.user(), memory.read_int(memory.script_global(1892703 + 1 + (pid * 599) + 510))})end)]]
 				menu.divider(crash, "~~~> Crashes <~~~")
-				menu.action(crash, "Broken World Crash", {"ptbwc"}, "The crash remains after leaving the lobby.", function()
+				--[[menu.action(crash, "Broken World Crash", {"ptbwc"}, "The crash remains after leaving the lobby.", function()
 					local pos = ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
 					local hakuchou = util.joaat("hakuchou2")
     
@@ -2684,8 +2594,8 @@
 					local vehicle = entities.create_vehicle(hakuchou, pos, 0)
 					VEHICLE.SET_VEHICLE_MOD(vehicle, 34, 3, false)
 					util.yield(1000)
-					entities.delete_by_handle(vehicle)end)
-				menu.action(crash, "AI Generated Crash", {"ptai"}, "", function()
+					entities.delete_by_handle(vehicle)end)]]
+				menu.action(crash, "AI Generated Crash", {"ptai"}, "Most mod menus will block this.", function()
 					local player_position = players.get_position(pid)
 					local joaat_hash = util.joaat("prop_fragtest_cnst_04")
 					util.request_model(joaat_hash)
@@ -2693,7 +2603,7 @@
 					OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object_handle, 3, false)
 					util.yield(1000)
 					entities.delete_by_handle(object_handle)end)
-				menu.action(crash, "Mother Nature Crash", {"ptmncrash"}, "(FIXED) Can crash 2Take1, Cherax etc.", function()
+				menu.action(crash, "Mother Nature Crash", {"ptmncrash"}, "Most mod menus will block this.", function()
 					local user = PLAYER.GET_PLAYER_PED(players.user())
 					local model = util.joaat("h4_prop_bush_mang_ad")
 					local pos = players.get_position(pid)
@@ -2720,11 +2630,7 @@
 					local name = PLAYER.GET_PLAYER_NAME(pid)
 					history("Saved Playerdata: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid).." / IP: "..string.format("%i.%i.%i.%i)", ip >> 24 & 255, ip >> 16 & 255, ip >> 8 & 255, ip & 255))
 					util.toast("[Mira] <3\n".."> I have saved you all the important data of the player ("..name..").")end)
-			--[[menu.action(menu.player_root(pid), "Paste IP in NordVPN Tracker", {}, "", function(on)
-				local ip = players.get_connect_ip(pid)
-				local name = PLAYER.GET_PLAYER_NAME(pid)
-				util.copy_to_clipboard(string.format("%i.%i.%i.%i", ip >> 24 & 255, ip >> 16 & 255, ip >> 8 & 255, ip & 255), true)
-				util.toast("[Mira] <3\n".."> I have copied the IP of the player ("..name..") to the NordVPN tracker.")end)]]end
+			end
 
 			local InitialPlayersList = players.list(true, true, true)
 				for i=1, #InitialPlayersList do
@@ -2954,6 +2860,32 @@
 		<Anim dict="mp_move@prostitute@f@hooker" name="idle" />
 		<Anim dict="mp_move@prostitute@m@hooker" name="idle" />]]
 	
+	-- [[ Soundspam ]]
+		--[[soundspam = menu.list(trolling, "Sound Spam", {}, "")
+				menu.toggle_loop(soundspam, "SMS Spam", {}, "", function()
+					util.trigger_script_event(1 << pid, {1670832796, pid, math.random(-2147483647, 2147483647)})end)
+				menu.toggle_loop(soundspam, "Interior Invite", {}, "", function()
+					util.trigger_script_event(1 << pid, {1111927333, pid, math.random(1, 6)})end)
+				menu.toggle_loop(soundspam, "Invite Notification", {}, "", function()
+					util.trigger_script_event(1 << pid, {-668341698, pid, math.random(1, 150), -1, -1})end)
+				menu.toggle_loop(soundspam, "Collected Checkpoint", {}, "", function()
+					util.trigger_script_event(1 << pid, {-1529596656, pid, -547323955, 0, 0, 0, 0, 0, 0, 0, pid, 0, 0, 0})
+					util.yield(25)end)
+				menu.toggle_loop(soundspam, "Character Notification", {}, "", function()
+					util.trigger_script_event(1 << pid, {-634789188, pid, math.random(0, 178), 0, 0, 0})end)
+				menu.toggle_loop(soundspam, "Error Notification", {}, "", function()
+					util.trigger_script_event(1 << pid, {-1251171789, pid, math.random(-2147483647, 2147483647)})end)]]
+
+	--[[ Nightclub Popularity ]]
+		--[[menu.toggle_loop(recoveryoptions, "Nightclub Popularity", {}, "Keeps the Nightclub Popularity at max", function ()
+			if util.is_session_started() then
+				local ncpop = math.floor(STAT_GET_INT("CLUB_POPULARITY") / 10)
+				if ncpop < 100 then
+					menu.trigger_commands("clubpopularity 100")
+					util.yield(250)
+				end
+			end end)]]
+
 	-- [[ Request Options ]]
 		--[[requestoptions = menu.list(onlineoptions, "> Request's", {}, "", function(); end)
 			menu.divider(requestoptions, "---> Request's <---")
