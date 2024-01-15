@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora for Stand"
-	local Version = 3.0
+	local Version = 3.1
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 
@@ -98,8 +98,8 @@
 
 	menu.divider(menu.my_root(), "~~~> "..Name.." <~~~")
 	local selfoptions = menu.list(menu.my_root(), "Self Options")
+	local playerslist = menu.list(menu.my_root(), "Custom Playerlist")
 	local onlineoptions = menu.list(menu.my_root(), "Online Options")
-	local teleportoptions = menu.list(menu.my_root(), "Teleport Options")
 	local weaponsoptions = menu.list(menu.my_root(), "Weapon Options")
 	local vehicleoptions = menu.list(menu.my_root(), "Vehicle Options")
 	local miscoptions = menu.list(menu.my_root(), "Misc Options")
@@ -115,6 +115,21 @@
 			util.toast("[Mira] <3\n".."> Warning: If you meet an admin the risk of being banned is high.") end end)
 
 	-- [[ Locals ]]
+		--local pidlist = players.user()
+
+		--local host = players.get_host(pidlist)
+		--local scripthost = players.get_script_host()
+		--local playername = players.get_name(pidlist)
+		--local rid = players.get_rockstar_id(pidlist)
+		--local vpn = players.is_using_vpn()
+		--local ip = players.get_ip()
+		--local ipport = players.get_port()
+		--local connectedip = players.get_connect_ip()
+		--local connectedipport = players.get_connect_port()
+		--local lanip = players.get_lan_ip()
+		--local lanipport = players.get_lan_port()
+		--local hosttoken = players.get_host_token()
+
 		local lockon
 		local x, y = 0.992, 0.008
 		local add_x = 0.0055
@@ -1533,7 +1548,11 @@
 						end
 						WEAPON.SET_CURRENT_PED_WEAPON(players.user_ped(), MISC.GET_HASH_KEY("WEAPON_UNARMED"), true)
 						TASK.TASK_PLAY_ANIM(players.user_ped(), dict, name, 8.0, 8.0, -1, 1, 0, false, false, false)end)
-		menu.divider(selfoptions, "~~~> PVP Options <~~~")
+			menu.toggle_loop(selfoptions, "Keep me clean", {}, "", function(toggled)
+				PED.CLEAR_PED_BLOOD_DAMAGE(players.user_ped())
+				PED.CLEAR_PED_WETNESS(players.user_ped())
+				PED.CLEAR_PED_ENV_DIRT(players.user_ped())end)
+			menu.divider(selfoptions, "~~~> PVP Options <~~~")
 			menu.toggle_loop(selfoptions, "Refill Snacks & Armours Automatically", {}, "", function(toggled)
 				STAT_SET_INT("NO_BOUGHT_YUM_SNACKS", 30)
 				STAT_SET_INT("NO_BOUGHT_HEALTH_SNACKS", 15)
@@ -1575,18 +1594,8 @@
 				end end)
 			menu.toggle_loop(selfoptions, "Modded Roll (PS3)", {}, "", function()
 				STATS.STAT_SET_INT(util.joaat("MP0_SHOOTING_ABILITY"), 200, true) end)
-
-		menu.divider(onlineoptions, "~~~> Online Options <~~~")
-			friendlist = menu.list(onlineoptions, "Socialclub Friendlist", {}, "", function(); end)
-				menu.divider(friendlist, "~~~> Your Socialclub Friends <~~~")
-					for i = 0 , get_friend_count() do
-						local name = get_frined_name(i)
-						if name == "*****" then goto yes end
-						gen_fren_funcs(name)
-						::yes::
-					end
-			playerslist = menu.list(onlineoptions, "Custom Playerlist", {}, "", function(); end)
-			menu.divider(playerslist, "~~~> Custom Playerlist <~~~")
+		
+		menu.divider(playerslist, "~~~> Custom Playerlist <~~~")
 			menu.toggle(playerslist, "Exclude Selected", {}, "", function(on_toggle)
 					if on_toggle then
 						excludeselected = true
@@ -1656,179 +1665,271 @@
 				end end)
 			menu.divider(playerslist, "~~~> Players <~~~")
 			players.dispatch_on_join()
-			--[[deathoptions = menu.list(onlineoptions, "Death Log", {}, "", function(); end)
-				menu.divider(deathoptions, "~~~> Death Log <~~~")
-				menu.toggle_loop(deathoptions, "Activate Death Log", {}, "", function()
-					 if PED.IS_PED_DEAD_OR_DYING(players.user_ped()) then
-						killer = PED.GET_PED_SOURCE_OF_DEATH(players.user_ped())
-						if killer == players.user_ped() then return end
-						if STREAMING.IS_MODEL_A_PED(ENTITY.GET_ENTITY_MODEL(killer)) then
-							local pid = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(killer)
-							local pname = players.get_name(pid)
-							local prid = players.get_rockstar_id(pid)
-							if pname != nil then
-								deathlog("Deathlog: (Playername: "..pname.." / RID: "..prid..")")
-							end
-						elseif STREAMING.IS_MODEL_A_VEHICLE(ENTITY.GET_ENTITY_MODEL(killer)) then
-							local vehowner = entities.get_owner(entities.handle_to_pointer(killer))
-							local pname = players.get_name(vehowner)
-							local prid = players.get_rockstar_id(vehowner)
-							if pname != nil then
-								deathlog("Deathlog: (Playername: "..pnamename.." / RID: "..prid..")")
-							end
-						end	end	end)
-				menu.action(deathoptions, "Clear Death Log", {}, "", function()
-					io.remove(DeathLog) end)]]
-			recoveryoptions = menu.list(onlineoptions, "Recovery Options", {}, "Based on Heist Control Stuff", function(); end)
-				menu.divider(recoveryoptions, "~~~> Remote Access Apps <~~~")
-				menu.action(recoveryoptions, "Smuggler (Air Cargo)", {}, "", function()
-					START_SCRIPT("CEO", "appsmuggler")end)
-				menu.action(recoveryoptions, "Bunker", {}, "", function()
-					START_SCRIPT("CEO", "appbunkerbusiness")end)
-				menu.action(recoveryoptions, "Nightclub", {}, "", function()
-					START_SCRIPT("CEO", "appbusinesshub")end)
-				menu.action(recoveryoptions, "Biker Business (Only MC)", {}, "", function()
-					START_SCRIPT("MC", "appbikerbusiness")end)
-				menu.action(recoveryoptions, "Touchscreen Terminal (Terrorbyte)", {}, "", function()
-					START_SCRIPT("CEO", "apphackertruck")end)
-				menu.action(recoveryoptions, "Master Control Terminal (Arcade)", {}, "", function()
-						START_SCRIPT("CEO", "apparcadebusinesshub")end)
-				menu.divider(recoveryoptions, "~~~> Casino <~~~")
-					menu.toggle_loop(recoveryoptions, "Auto Black Jack", {}, "", function()
-						if not (isHelpMessageBeingDisplayed('BJACK_BET') or isHelpMessageBeingDisplayed('BJACK_TURN') or isHelpMessageBeingDisplayed('BJACK_TURN_D') or isHelpMessageBeingDisplayed('BJACK_TURN_S')) then return end
-						if isHelpMessageBeingDisplayed('BJACK_BET') then
-							PAD._SET_CONTROL_NORMAL(2, 204, 1) --max bet
-							PAD._SET_CONTROL_NORMAL(2, 201, 1) --bet
-						else
-							PAD._SET_CONTROL_NORMAL(2, 203, 1) --pass
-						end end)
 
-			bountyoptions = menu.list(onlineoptions, "Bounty Options", {}, "", function(); end)	
-				menu.divider(bountyoptions, "~~~> Bounty Loop <~~~")
-				menu.slider(bountyoptions, "Bounty Amount", {}, "", 0, 10000, 10000, 1, function(s)
-					infibounty_amt = s end)
-				menu.toggle_loop(bountyoptions, "Place Infinite Bounty", {}, "", function(click_type)
-					menu.trigger_commands("bountyall" .. " " .. tostring(infibounty_amt))
-					util.yield(60000)end)
-				menu.toggle_loop(bountyoptions, "Auto Claim Bounties", {}, "Automatically claims bounties that are placed on you.", function ()
-					local bounty = players.get_bounty(players.user())
-						if bounty != nil then
-							repeat
-								menu.trigger_commands("removebounty")
-								util.yield(1000)
-								bounty = players.get_bounty(players.user())
-							until bounty == nil
-							util.toast("[Mira] <3\n".."> Bounty has been claimed.")
-						end end)
-			menu.divider(onlineoptions, "~~~> Protections<~~~")
-			menu.list_select(onlineoptions, "Jammer Delay", {}, "The speed in which your name will flicker at for orbital cannon users.", {"Slow", "Medium", "Fast"}, 3, function(index, value)
-				switch value do
-					case "Slow":
-						orb_delay = 100
-						break
-					case "Medium":
-						orb_delay = 500
-						break
-					case "Fast":
-						orb_delay = 1000
-						break
-					end end)
-			annoy_tgl = menu.toggle_loop(onlineoptions, "Enable Orbital Jammer", {}, "", function()
-				for _, pid in ipairs(players.list(false, true, true)) do
-					if IsPlayerUsingOrbitalCannon(pid) then
-						NETWORK._SET_RELATIONSHIP_TO_PLAYER(pid, true)
-						util.yield(orb_delay)
-						NETWORK._SET_RELATIONSHIP_TO_PLAYER(pid, false)
-						util.yield(orb_delay)
-					else
-						NETWORK._SET_RELATIONSHIP_TO_PLAYER(pid, false)
+		menu.divider(onlineoptions, "~~~> Online Options <~~~")
+			friendlist = menu.list(onlineoptions, "Socialclub Friendlist", {}, "", function(); end)
+				menu.divider(friendlist, "~~~> Your Socialclub Friends <~~~")
+					for i = 0 , get_friend_count() do
+						local name = get_frined_name(i)
+						if name == "*****" then goto yes end
+						gen_fren_funcs(name)
+						::yes::
 					end
-				end
-				end, function()
+			translater = menu.list(onlineoptions, "Translater", {}, "", function(); end)
+				menu.divider(translater, "~~~> Translater <~~~")
+				menu.toggle(translater, "On", {}, "Turns translating on/off", function(on)
+					do_translate = on end, false)
+				menu.toggle(translater, "Only translate foreign game lang", {}, "Only translates messages from users with a different game language, thus saving API calls. You should leave this on to prevent the chance of Google temporarily blocking your requests.", function(on)
+					only_translate_foreign = on end, true)
+				local outgoing_list = menu.list(translater, "Send translation", {"nexttranslateout"}, "Send a translated, outgoing chat")
+					outgoing_list:divider("Select lang to translate to")
+					for lang_index, lang in pairs(language_display_names_by_enum) do
+						local cmd = "translateto" .. string.lower(lang):gsub(' ', ''):gsub('%(', ''):gsub('%)', '')
+						outgoing_list:action(lang, {cmd}, "", function()
+							util.toast("Enter text to translate")
+							menu.show_command_box(cmd .. " ")
+						end, function(entry)
+							if string.len(entry) > 254 then 
+								util.toast("That text is too long to be sent in chat, nerd")
+								return 
+							end
+							util.toast("Translating...")
+							google_translate(entry, language_codes_by_enum[lang_index], players.user(), true)
+						end)end
+						local whitelist_list = menu.list(translater, "Translation whitelist", {}, "Only translate languages toggled on in this list")
+						for id, iso_code in pairs(language_codes_by_enum) do
+							whitelist_list:toggle(language_display_names_by_enum[id], {}, "", function(on)
+								whitelisted_langs[iso_code] = on
+							end, true)end
+					chat.on_message(function(sender, reserved, text, team_chat, networked, is_auto)
+						if do_translate and networked then
+							local encoded_text = encode_for_web(text)
+							local player_lang = language_codes_by_enum[players.get_language(sender)]
+							if (only_translate_foreign and player_lang == my_lang) then
+								return
+							end
+							if not debug then 
+								if players.user() == sender then 
+									return 
+								end
+							end
+							-- credit to the original chat translator for the api code
+							google_translate(encoded_text, my_lang, sender, false)
+						end end)
+			paboptions = menu.list(onlineoptions, "Protections & Blocks", {}, "", function(); end)
+				menu.divider(paboptions, "~~~> Protections<~~~")
+				menu.list_select(paboptions, "Jammer Delay", {}, "The speed in which your name will flicker at for orbital cannon users.", {"Slow", "Medium", "Fast"}, 3, function(index, value)
+					switch value do
+						case "Slow":
+							orb_delay = 100
+							break
+						case "Medium":
+							orb_delay = 500
+							break
+						case "Fast":
+							orb_delay = 1000
+							break
+						end end)
+				annoy_tgl = menu.toggle_loop(paboptions, "Enable Orbital Jammer", {}, "", function()
 					for _, pid in ipairs(players.list(false, true, true)) do
-						NETWORK._SET_RELATIONSHIP_TO_PLAYER(pid, false)
-					end end)
-			menu.toggle_loop(onlineoptions, "Orbital Cannon Detection", {}, "Tells you when anyone starts using the orbital cannon", function()
-				local playerList = players.list(false, true, true)
-				for i = 1, #playerList do
-					local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(playerList[i])
-					if TASK.GET_IS_TASK_ACTIVE(ped, 135) and ENTITY.GET_ENTITY_SPEED(ped) == 0 then
-						local pos = NETWORK._NETWORK_GET_PLAYER_COORDS(playerList[i])
-						for j = 1, #orbitalTableCords do
-							if roundDecimals(pos.x, 1) == roundDecimals(orbitalTableCords[j].x, 1) and roundDecimals(pos.y, 1) == roundDecimals(orbitalTableCords[j].y, 1) and roundDecimals(pos.z, 1) == roundDecimals(orbitalTableCords[j].z, 1) then
-								--Assistant("> "..players.get_name(playerList[i]).." is using the orbital cannon.",colors.red)
-								util.toast("[Mira] <3\n".."> "..players.get_name(playerList[i]).." is using the orbital cannon.")
-								HUD.FLASH_MINIMAP_DISPLAY_WITH_COLOR(hud_rgb_colors[hud_rgb_index])
-								hud_rgb_index = hud_rgb_index + 1
-									if hud_rgb_index == 4 then
-										hud_rgb_index = 1
-									end
-								util.yield(250)
-							end
+						if IsPlayerUsingOrbitalCannon(pid) then
+							NETWORK._SET_RELATIONSHIP_TO_PLAYER(pid, true)
+							util.yield(orb_delay)
+							NETWORK._SET_RELATIONSHIP_TO_PLAYER(pid, false)
+							util.yield(orb_delay)
+						else
+							NETWORK._SET_RELATIONSHIP_TO_PLAYER(pid, false)
 						end
 					end
-				end end)
-			menu.toggle_loop(onlineoptions, "Orbital Cannon Detection (Only Notify)", {}, "Tells you when anyone starts using the orbital cannon", function()
-				local playerList = players.list(false, true, true)
-				for i = 1, #playerList do
-					local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(playerList[i])
-					if TASK.GET_IS_TASK_ACTIVE(ped, 135) and ENTITY.GET_ENTITY_SPEED(ped) == 0 then
-						local pos = NETWORK._NETWORK_GET_PLAYER_COORDS(playerList[i])
-						for j = 1, #orbitalTableCords do
-							if roundDecimals(pos.x, 1) == roundDecimals(orbitalTableCords[j].x, 1) and roundDecimals(pos.y, 1) == roundDecimals(orbitalTableCords[j].y, 1) and roundDecimals(pos.z, 1) == roundDecimals(orbitalTableCords[j].z, 1) then
-								--Assistant("> "..players.get_name(playerList[i]).." is using the orbital cannon.",colors.red)
-								util.toast("[Mira] <3\n".."> "..players.get_name(playerList[i]).." is using the orbital cannon.")
-								util.yield(250)
+					end, function()
+						for _, pid in ipairs(players.list(false, true, true)) do
+							NETWORK._SET_RELATIONSHIP_TO_PLAYER(pid, false)
+						end end)
+				menu.toggle_loop(paboptions, "Orbital Cannon Detection", {}, "Tells you when anyone starts using the orbital cannon", function()
+					local playerList = players.list(false, true, true)
+					for i = 1, #playerList do
+						local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(playerList[i])
+						if TASK.GET_IS_TASK_ACTIVE(ped, 135) and ENTITY.GET_ENTITY_SPEED(ped) == 0 then
+							local pos = NETWORK._NETWORK_GET_PLAYER_COORDS(playerList[i])
+							for j = 1, #orbitalTableCords do
+								if roundDecimals(pos.x, 1) == roundDecimals(orbitalTableCords[j].x, 1) and roundDecimals(pos.y, 1) == roundDecimals(orbitalTableCords[j].y, 1) and roundDecimals(pos.z, 1) == roundDecimals(orbitalTableCords[j].z, 1) then
+									--Assistant("> "..players.get_name(playerList[i]).." is using the orbital cannon.",colors.red)
+									util.toast("[Mira] <3\n".."> "..players.get_name(playerList[i]).." is using the orbital cannon.")
+									HUD.FLASH_MINIMAP_DISPLAY_WITH_COLOR(hud_rgb_colors[hud_rgb_index])
+									hud_rgb_index = hud_rgb_index + 1
+										if hud_rgb_index == 4 then
+											hud_rgb_index = 1
+										end
+									util.yield(250)
+								end
 							end
 						end
-					end
-				end end)
-			menu.divider(onlineoptions, "~~~> Blocks <~~~")
-			menu.toggle_loop(onlineoptions, "Block Orbital Cannon Room", {}, "", function()
-				local mdl = util.joaat("h4_prop_h4_garage_door_01a")
-				RequestModel(mdl)
-				if orb_obj == nil or not ENTITY.DOES_ENTITY_EXIST(orb_obj) then
-					orb_obj = entities.create_object(mdl, v3(335.9, 4833.9, -59.0))
-					entities.set_can_migrate(orb_obj, false)
-					ENTITY.SET_ENTITY_HEADING(orb_obj, 125.0)
-					ENTITY.FREEZE_ENTITY_POSITION(orb_obj, true)
-					ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(orb_obj, players.user_ped(), false)
-					ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(players.user_ped(), orb_obj, false)
-				end
-					util.yield(50)
-				end, function()
-					if orb_obj != nil then
-						entities.delete(orb_obj)
 					end end)
-			menu.toggle(onlineoptions, "Block Scripthost Migration", {}, "Only works when you are the host.", function(on)
-				if util.is_session_started() and NETWORK.NETWORK_IS_HOST() then
-					NETWORK.NETWORK_PREVENT_SCRIPT_HOST_MIGRATION()
-					--util.toast("[Mira] <3\n".."> Script Host Migration blocked.")
-				end end)
-			menu.toggle(onlineoptions, "Block Join (Session Spoof)", {}, "", function(on_toggle)
-				if on_toggle then
-					menu.trigger_commands("spoofsession".." ".."fake")
-					menu.trigger_commands("spoofedhostrid".." ".."1337")
-					menu.trigger_commands("spoofhost".." ".."on")
-					util.toast("[Mira] <3\n".."> I have marked your session as fake so other modders can't join you.")
-				else
-					menu.trigger_commands("spoofsession".." ".."off")
-					menu.trigger_commands("spoofhost".." ".."off")
-					util.toast("[Mira] <3\n".."> I have turned off the block you can now rejoin.")
-				end end)
+				menu.toggle_loop(paboptions, "Orbital Cannon Detection (Only Notify)", {}, "Tells you when anyone starts using the orbital cannon", function()
+					local playerList = players.list(false, true, true)
+					for i = 1, #playerList do
+						local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(playerList[i])
+						if TASK.GET_IS_TASK_ACTIVE(ped, 135) and ENTITY.GET_ENTITY_SPEED(ped) == 0 then
+							local pos = NETWORK._NETWORK_GET_PLAYER_COORDS(playerList[i])
+							for j = 1, #orbitalTableCords do
+								if roundDecimals(pos.x, 1) == roundDecimals(orbitalTableCords[j].x, 1) and roundDecimals(pos.y, 1) == roundDecimals(orbitalTableCords[j].y, 1) and roundDecimals(pos.z, 1) == roundDecimals(orbitalTableCords[j].z, 1) then
+									--Assistant("> "..players.get_name(playerList[i]).." is using the orbital cannon.",colors.red)
+									util.toast("[Mira] <3\n".."> "..players.get_name(playerList[i]).." is using the orbital cannon.")
+									util.yield(250)
+								end
+							end
+						end
+					end end)
+				menu.divider(paboptions, "~~~> Blocks <~~~")
+				menu.toggle_loop(paboptions, "Block Orbital Cannon Room", {}, "", function()
+					local mdl = util.joaat("h4_prop_h4_garage_door_01a")
+					RequestModel(mdl)
+					if orb_obj == nil or not ENTITY.DOES_ENTITY_EXIST(orb_obj) then
+						orb_obj = entities.create_object(mdl, v3(335.9, 4833.9, -59.0))
+						entities.set_can_migrate(orb_obj, false)
+						ENTITY.SET_ENTITY_HEADING(orb_obj, 125.0)
+						ENTITY.FREEZE_ENTITY_POSITION(orb_obj, true)
+						ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(orb_obj, players.user_ped(), false)
+						ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(players.user_ped(), orb_obj, false)
+					end
+						util.yield(50)
+					end, function()
+						if orb_obj != nil then
+							entities.delete(orb_obj)
+						end end)
+				menu.toggle(paboptions, "Block Scripthost Migration", {}, "Only works when you are the host.", function(on)
+					if util.is_session_started() and NETWORK.NETWORK_IS_HOST() then
+						NETWORK.NETWORK_PREVENT_SCRIPT_HOST_MIGRATION()
+						--util.toast("[Mira] <3\n".."> Script Host Migration blocked.")
+					end end)
+				menu.toggle(paboptions, "Block Join (Session Spoof)", {}, "", function(on_toggle)
+					if on_toggle then
+						menu.trigger_commands("spoofsession".." ".."fake")
+						menu.trigger_commands("spoofedhostrid".." ".."1337")
+						menu.trigger_commands("spoofhost".." ".."on")
+						util.toast("[Mira] <3\n".."> I have marked your session as fake so other modders can't join you.")
+					else
+						menu.trigger_commands("spoofsession".." ".."off")
+						menu.trigger_commands("spoofhost".." ".."off")
+						util.toast("[Mira] <3\n".."> I have turned off the block you can now rejoin.")
+					end end)
+			lobbyoptions = menu.list(onlineoptions, "Lobby Options", {}, "", function(); end)
+				menu.divider(lobbyoptions, "~~~> Lobby Options <~~~")
+				lobbyinfo = menu.list(lobbyoptions, "Session Info (Next Update)", {}, "", function(); end)
+					--menu.readonly(lobbyinfo, "Session Host Name: ", host)
+					--menu.readonly(lobbyinfo, "Session Host RID: ", rid)
 
-		menu.divider(teleportoptions, "~~~> Teleport Options <~~~")
-			for index, data in interiors do
-				local location_name = data[1]
-				local location_coords = data[2]
-			menu.action(teleportoptions, location_name, {}, "", function()
-				menu.trigger_commands("otr".." ".."on")
-				menu.trigger_commands("invisibility".." ".."on")
-				util.yield(1000)
-				ENTITY.SET_ENTITY_COORDS_NO_OFFSET(players.user_ped(), location_coords.x, location_coords.y, location_coords.z, false, false, false)
-				util.yield(100)
-				menu.trigger_commands("otr".." ".."off")
-				menu.trigger_commands("invisibility".." ".."off")end)end
+				lastplayerinfo = menu.list(lobbyoptions, "Last Joined Player (Next Update)", {}, "", function(); end)
+				menu.divider(lobbyoptions, "~~~> Bounty Options <~~~")
+				bountyloop = menu.list(lobbyoptions, "Bounty loop", {}, "", function(); end)	
+					menu.divider(bountyloop, "~~~> Bounty Loop <~~~")
+					menu.slider(bountyloop, "Bounty Amount", {}, "", 0, 10000, 10000, 1, function(s)
+						infibounty_amt = s end)
+					menu.toggle_loop(bountyloop, "Place Infinite Bounty", {}, "", function(click_type)
+						menu.trigger_commands("bountyall" .. " " .. tostring(infibounty_amt))
+						util.yield(60000)end)
+				menu.divider(lobbyoptions, "~~~> World Cleaning <~~~")	
+				menu.list_action(lobbyoptions, "Clear All...", {}, "", {"Peds", "Vehicles", "Objects", "Pickups", "Ropes", "Projectiles", "Sounds"}, function(index, name)
+					util.toast("Clearing "..name:lower().."...")
+					local counter = 0
+					pluto_switch index do
+						case 1:
+							for _, ped in ipairs(entities.get_all_peds_as_handles()) do
+								if ped ~= players.user_ped() and not PED.IS_PED_A_PLAYER(ped) then
+									entities.delete_by_handle(ped)
+									counter += 1
+									util.yield()
+								end
+							end
+							break
+						case 2:
+							for _, vehicle in ipairs(entities.get_all_vehicles_as_handles()) do
+								if vehicle ~= PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false) and DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle") == 0 and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
+									entities.delete_by_handle(vehicle)
+									counter += 1
+								end
+								util.yield()
+							end
+							break
+						case 3:
+							for _, object in ipairs(entities.get_all_objects_as_handles()) do
+								entities.delete_by_handle(object)
+								counter += 1
+								util.yield()
+							end
+							break
+						case 4:
+							for _, pickup in ipairs(entities.get_all_pickups_as_handles()) do
+								entities.delete_by_handle(pickup)
+								counter += 1
+								util.yield()
+							end
+							break
+						case 5:
+							local temp = memory.alloc(4)
+							for i = 0, 101 do
+								memory.write_int(temp, i)
+								if PHYSICS.DOES_ROPE_EXIST(temp) then
+									PHYSICS.DELETE_ROPE(temp)
+									counter += 1
+								end
+								util.yield()
+							end
+							break
+						case 6:
+							local coords = players.get_position(players.user())
+							MISC.CLEAR_AREA_OF_PROJECTILES(coords.x, coords.y, coords.z, 1000, 0)
+							counter = "all"
+							break
+						case 4:
+							for i = 0, 99 do
+								AUDIO.STOP_SOUND(i)
+								util.yield()
+							end
+						break
+					end
+					util.toast("Cleared "..tostring(counter).." "..name:lower()..".")end)
+				menu.action(lobbyoptions, "Clear Everything", {"ptclean"}, "Warning: It really clears everything.", function()
+					local cleanse_entitycount = 0
+					for _, ped in pairs(entities.get_all_peds_as_handles()) do
+						if ped ~= players.user_ped() and not PED.IS_PED_A_PLAYER(ped) then
+							entities.delete_by_handle(ped)
+							cleanse_entitycount += 1
+						end
+					end
+					--util.toast("Cleared " .. cleanse_entitycount .. " Peds")
+					cleanse_entitycount = 0
+					for _, veh in ipairs(entities.get_all_vehicles_as_handles()) do
+						entities.delete_by_handle(veh)
+						cleanse_entitycount += 1
+						util.yield()
+					end
+					--util.toast("Cleared ".. cleanse_entitycount .." Vehicles")
+					cleanse_entitycount = 0
+					for _, object in pairs(entities.get_all_objects_as_handles()) do
+						entities.delete_by_handle(object)
+						cleanse_entitycount += 1
+					end
+					--util.toast("Cleared " .. cleanse_entitycount .. " Objects")
+					cleanse_entitycount = 0
+					for _, pickup in pairs(entities.get_all_pickups_as_handles()) do
+						entities.delete_by_handle(pickup)
+						cleanse_entitycount += 1
+					end
+					--util.toast("Cleared " .. cleanse_entitycount .. " Pickups")
+					local temp = memory.alloc(4)
+					for i = 0, 100 do
+						memory.write_int(temp, i)
+						PHYSICS.DELETE_ROPE(temp)
+					end
+					--util.toast("Cleared All Ropes")
+					local pos = ENTITY.GET_ENTITY_COORDS(players.user_ped())
+					MISC.CLEAR_AREA_OF_PROJECTILES(pos.x, pos.y, pos.z, 400, 0)
+					--Assistant("> I have removed everything from your area.",colors.green)
+					end)
+			menu.divider(onlineoptions, "~~~> Trolling <~~~")
+			menu.action(onlineoptions, "Real localized \"DOX\"", {"dox"}, "", function(on_click)
+				chat.send_message("${name}: ${ip} | ${geoip.city}, ${geoip.region}, ${geoip.country}", false, true, true)end)
 
 		menu.divider(weaponsoptions, "~~~> Weapon Options <~~~")
 			weaponattachments = menu.list(weaponsoptions, "Weapon Attachment Manager", {}, "", function(); end)
@@ -1937,6 +2038,58 @@
 				end end)
 		
 		menu.divider(miscoptions, "~~~> Misc Options <~~~")
+			recoveryoptions = menu.list(miscoptions, "Recovery Options", {}, "Based on Heist Control Stuff", function(); end)
+				menu.divider(recoveryoptions, "~~~> Remote Access Apps <~~~")
+				menu.action(recoveryoptions, "Smuggler (Air Cargo)", {}, "", function()
+					START_SCRIPT("CEO", "appsmuggler")end)
+				menu.action(recoveryoptions, "Bunker", {}, "", function()
+					START_SCRIPT("CEO", "appbunkerbusiness")end)
+				menu.action(recoveryoptions, "Nightclub", {}, "", function()
+					START_SCRIPT("CEO", "appbusinesshub")end)
+				menu.action(recoveryoptions, "Biker Business (Only MC)", {}, "", function()
+					START_SCRIPT("MC", "appbikerbusiness")end)
+				menu.action(recoveryoptions, "Touchscreen Terminal (Terrorbyte)", {}, "", function()
+					START_SCRIPT("CEO", "apphackertruck")end)
+				menu.action(recoveryoptions, "Master Control Terminal (Arcade)", {}, "", function()
+						START_SCRIPT("CEO", "apparcadebusinesshub")end)
+				menu.divider(recoveryoptions, "~~~> Casino <~~~")
+				menu.toggle_loop(recoveryoptions, "Auto Black Jack", {}, "", function()
+					if not (isHelpMessageBeingDisplayed('BJACK_BET') or isHelpMessageBeingDisplayed('BJACK_TURN') or isHelpMessageBeingDisplayed('BJACK_TURN_D') or isHelpMessageBeingDisplayed('BJACK_TURN_S')) then return end
+					if isHelpMessageBeingDisplayed('BJACK_BET') then
+						PAD._SET_CONTROL_NORMAL(2, 204, 1) --max bet
+						PAD._SET_CONTROL_NORMAL(2, 201, 1) --bet
+					else
+						PAD._SET_CONTROL_NORMAL(2, 203, 1) --pass
+					end end)
+			teleport = menu.list(miscoptions, "Teleport Options", {}, "", function(); end)
+				menu.divider(teleport, "~~~> Teleport Options <~~~")
+				for index, data in interiors do
+					local location_name = data[1]
+					local location_coords = data[2]
+				menu.action(teleport, location_name, {}, "", function()
+					menu.trigger_commands("otr".." ".."on")
+					menu.trigger_commands("invisibility".." ".."on")
+					util.yield(1000)
+					ENTITY.SET_ENTITY_COORDS_NO_OFFSET(players.user_ped(), location_coords.x, location_coords.y, location_coords.z, false, false, false)
+					util.yield(100)
+					menu.trigger_commands("otr".." ".."off")
+					menu.trigger_commands("invisibility".." ".."off")end)end
+			cameraoptions = menu.list(miscoptions, "Camera Options", {}, "", function(); end)
+				menu.divider(cameraoptions, "~~~> Camera Options <~~~")
+				menu.toggle(cameraoptions, "FOV Tryhard FP", {}, "", function(on_toggle)
+					if on_toggle then
+						menu.trigger_commands("fovfponfoot".." ".."60")
+						menu.trigger_commands("fovaiming".." ".."60")
+					else
+						menu.trigger_commands("fovfponfoot".." ".."-1")
+						menu.trigger_commands("fovaiming".." ".."-1")
+					end end)
+				menu.toggle(cameraoptions, "FOV Dogfight FP", {}, "", function(on_toggle)
+					if on_toggle then
+						menu.trigger_commands("fovfpinveh".." ".."75")
+					else
+						menu.trigger_commands("fovfpinveh".." ".."-1")
+					end end)
 			funnyoptions = menu.list(miscoptions, "Funny Options", {}, "", function(); end)
 				menu.divider(funnyoptions, "~~~> Funny Options <~~~")
 				menu.action(funnyoptions, "Cum", {}, "", function()
@@ -1969,6 +2122,24 @@
 					TASK.TASK_PLAY_ANIM(player, agroup, anim1, 8.0, 8.0, 3000, 0, 0, false, false, false)
 					util.yield(1000)
 					entities.create_object(rshit, c)end)
+				menu.toggle_loop(funnyoptions, "Hands Up", {}, "Press: X", function(toggled)
+					if PAD.IS_CONTROL_PRESSED(1, 323) then
+						while not STREAMING.HAS_ANIM_DICT_LOADED("random@mugging3") do
+							STREAMING.REQUEST_ANIM_DICT("random@mugging3")
+							util.yield(100)
+						end
+						if not ENTITY.IS_ENTITY_PLAYING_ANIM(PLAYER.PLAYER_PED_ID(), "random@mugging3", "handsup_standing_base", 3) then
+							--WEAPON.SET_CURRENT_PED_WEAPON(PLAYER.PLAYER_PED_ID(), MISC.GET_HASH_KEY("WEAPON_UNARMED"), true)
+							TASK.TASK_PLAY_ANIM(PLAYER.PLAYER_PED_ID(), "random@mugging3", "handsup_standing_base", 3, 3, -1, 51, 0, false, false, false)
+							STREAMING.REMOVE_ANIM_DICT("random@mugging3")
+							PED.SET_ENABLE_HANDCUFFS(PLAYER.PLAYER_PED_ID(), true)
+						end
+					end
+					if PAD.IS_CONTROL_RELEASED(1, 323) and ENTITY.IS_ENTITY_PLAYING_ANIM(PLAYER.PLAYER_PED_ID(), "random@mugging3", "handsup_standing_base", 3) then
+						TASK.CLEAR_PED_SECONDARY_TASK(PLAYER.PLAYER_PED_ID())
+						PED.SET_ENABLE_HANDCUFFS(PLAYER.PLAYER_PED_ID(), false)
+					end
+					util.yield()end)
 			firework = menu.list(miscoptions, "Firework (PS3)", {}, "", function(); end)
 				menu.divider(firework, "~~~> Firework Rocket <~~~")
 				menu.action(firework, "Place Firework Rocket", {}, "", function(click_type)
@@ -2126,170 +2297,24 @@
 						entities.delete_by_handle(box)
 						placed_firework_boxes[box] = nil
 					end end)
-			menu.toggle_loop(miscoptions, "Hands Up", {}, "Press: X", function(toggled)
-				if PAD.IS_CONTROL_PRESSED(1, 323) then
-					while not STREAMING.HAS_ANIM_DICT_LOADED("random@mugging3") do
-						STREAMING.REQUEST_ANIM_DICT("random@mugging3")
-						util.yield(100)
-					end
-					if not ENTITY.IS_ENTITY_PLAYING_ANIM(PLAYER.PLAYER_PED_ID(), "random@mugging3", "handsup_standing_base", 3) then
-						--WEAPON.SET_CURRENT_PED_WEAPON(PLAYER.PLAYER_PED_ID(), MISC.GET_HASH_KEY("WEAPON_UNARMED"), true)
-						TASK.TASK_PLAY_ANIM(PLAYER.PLAYER_PED_ID(), "random@mugging3", "handsup_standing_base", 3, 3, -1, 51, 0, false, false, false)
-						STREAMING.REMOVE_ANIM_DICT("random@mugging3")
-						PED.SET_ENABLE_HANDCUFFS(PLAYER.PLAYER_PED_ID(), true)
-					end
-				end
-				if PAD.IS_CONTROL_RELEASED(1, 323) and ENTITY.IS_ENTITY_PLAYING_ANIM(PLAYER.PLAYER_PED_ID(), "random@mugging3", "handsup_standing_base", 3) then
-					TASK.CLEAR_PED_SECONDARY_TASK(PLAYER.PLAYER_PED_ID())
-					PED.SET_ENABLE_HANDCUFFS(PLAYER.PLAYER_PED_ID(), false)
-				end
-				util.yield()end)
-			menu.action(miscoptions, "Real localized \"DOX\"", {"dox"}, "", function(on_click)
-				chat.send_message("${name}: ${ip} | ${geoip.city}, ${geoip.region}, ${geoip.country}", false, true, true)end)
 			menu.action(miscoptions, "Custom Fake Banner", {"banner"}, "", function(on_click) menu.show_command_box("banner ") end, function(text)
 				custom_alert(text)end)
-			menu.divider(miscoptions, "~~~> Lobby Settings <~~~")	
-			menu.list_action(miscoptions, "Clear All...", {}, "", {"Peds", "Vehicles", "Objects", "Pickups", "Ropes", "Projectiles", "Sounds"}, function(index, name)
-				util.toast("Clearing "..name:lower().."...")
-				local counter = 0
-				pluto_switch index do
-					case 1:
-						for _, ped in ipairs(entities.get_all_peds_as_handles()) do
-							if ped ~= players.user_ped() and not PED.IS_PED_A_PLAYER(ped) then
-								entities.delete_by_handle(ped)
-								counter += 1
-								util.yield()
-							end
-						end
-						break
-					case 2:
-						for _, vehicle in ipairs(entities.get_all_vehicles_as_handles()) do
-							if vehicle ~= PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false) and DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle") == 0 and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
-								entities.delete_by_handle(vehicle)
-								counter += 1
-							end
-							util.yield()
-						end
-						break
-					case 3:
-						for _, object in ipairs(entities.get_all_objects_as_handles()) do
-							entities.delete_by_handle(object)
-							counter += 1
-							util.yield()
-						end
-						break
-					case 4:
-						for _, pickup in ipairs(entities.get_all_pickups_as_handles()) do
-							entities.delete_by_handle(pickup)
-							counter += 1
-							util.yield()
-						end
-						break
-					case 5:
-						local temp = memory.alloc(4)
-						for i = 0, 101 do
-							memory.write_int(temp, i)
-							if PHYSICS.DOES_ROPE_EXIST(temp) then
-								PHYSICS.DELETE_ROPE(temp)
-								counter += 1
-							end
-							util.yield()
-						end
-						break
-					case 6:
-						local coords = players.get_position(players.user())
-						MISC.CLEAR_AREA_OF_PROJECTILES(coords.x, coords.y, coords.z, 1000, 0)
-						counter = "all"
-						break
-					case 4:
-						for i = 0, 99 do
-							AUDIO.STOP_SOUND(i)
-							util.yield()
-						end
-					break
-				end
-				util.toast("Cleared "..tostring(counter).." "..name:lower()..".")end)
-			menu.action(miscoptions, "Clear Everything", {"ptclean"}, "Warning: It really clears everything.", function()
-				local cleanse_entitycount = 0
-				for _, ped in pairs(entities.get_all_peds_as_handles()) do
-					if ped ~= players.user_ped() and not PED.IS_PED_A_PLAYER(ped) then
-						entities.delete_by_handle(ped)
-						cleanse_entitycount += 1
+			menu.divider(miscoptions, "~~~> Game Features <~~~")
+			menu.toggle_loop(miscoptions, "Auto Accept", {}, "Auto accepts join screens.", function(on_toggle)
+				local message_hash = HUD._GET_WARNING_MESSAGE_TITLE_HASH()
+				    if message_hash == 15890625 or message_hash == -587688989 then
+						PAD._SET_CONTROL_NORMAL(2, 201, 1.0)
+					util.yield(50)
+				end end)
+			menu.toggle_loop(miscoptions, "Voice Chat", {}, "Detects who is talking in game chat.", function ()
+				for players.list_except() as pid do
+					if NETWORK.NETWORK_IS_PLAYER_TALKING(pid) then
+						util.toast("[Mira] <3\n".."> "..players.get_name(pid).." is talking in Voice Chat.")
+						log("Voice Chat: (Playername: "..players.get_name(pid).." / RID: "..players.get_rockstar_id(pid))
 					end
-				end
-				--util.toast("Cleared " .. cleanse_entitycount .. " Peds")
-				cleanse_entitycount = 0
-				for _, veh in ipairs(entities.get_all_vehicles_as_handles()) do
-					entities.delete_by_handle(veh)
-					cleanse_entitycount += 1
-					util.yield()
-				end
-				--util.toast("Cleared ".. cleanse_entitycount .." Vehicles")
-				cleanse_entitycount = 0
-				for _, object in pairs(entities.get_all_objects_as_handles()) do
-					entities.delete_by_handle(object)
-					cleanse_entitycount += 1
-				end
-				--util.toast("Cleared " .. cleanse_entitycount .. " Objects")
-				cleanse_entitycount = 0
-				for _, pickup in pairs(entities.get_all_pickups_as_handles()) do
-					entities.delete_by_handle(pickup)
-					cleanse_entitycount += 1
-				end
-				--util.toast("Cleared " .. cleanse_entitycount .. " Pickups")
-				local temp = memory.alloc(4)
-				for i = 0, 100 do
-					memory.write_int(temp, i)
-					PHYSICS.DELETE_ROPE(temp)
-				end
-				--util.toast("Cleared All Ropes")
-				local pos = ENTITY.GET_ENTITY_COORDS(players.user_ped())
-				MISC.CLEAR_AREA_OF_PROJECTILES(pos.x, pos.y, pos.z, 400, 0)
-				--Assistant("> I have removed everything from your area.",colors.green)
-				end)
+				end end)
 
 		menu.divider(settings, "~~~> Customizations <~~~")
-			translater = menu.list(settings, "Translater", {}, "", function(); end)
-				menu.divider(translater, "~~~> Translater <~~~")
-				menu.toggle(translater, "On", {}, "Turns translating on/off", function(on)
-					do_translate = on end, false)
-				menu.toggle(translater, "Only translate foreign game lang", {}, "Only translates messages from users with a different game language, thus saving API calls. You should leave this on to prevent the chance of Google temporarily blocking your requests.", function(on)
-					only_translate_foreign = on end, true)
-				local outgoing_list = menu.list(translater, "Send translation", {"nexttranslateout"}, "Send a translated, outgoing chat")
-					outgoing_list:divider("Select lang to translate to")
-					for lang_index, lang in pairs(language_display_names_by_enum) do
-						local cmd = "translateto" .. string.lower(lang):gsub(' ', ''):gsub('%(', ''):gsub('%)', '')
-						outgoing_list:action(lang, {cmd}, "", function()
-							util.toast("Enter text to translate")
-							menu.show_command_box(cmd .. " ")
-						end, function(entry)
-							if string.len(entry) > 254 then 
-								util.toast("That text is too long to be sent in chat, nerd")
-								return 
-							end
-							util.toast("Translating...")
-							google_translate(entry, language_codes_by_enum[lang_index], players.user(), true)
-						end)end
-						local whitelist_list = menu.list(translater, "Translation whitelist", {}, "Only translate languages toggled on in this list")
-						for id, iso_code in pairs(language_codes_by_enum) do
-							whitelist_list:toggle(language_display_names_by_enum[id], {}, "", function(on)
-								whitelisted_langs[iso_code] = on
-							end, true)end
-					chat.on_message(function(sender, reserved, text, team_chat, networked, is_auto)
-						if do_translate and networked then
-							local encoded_text = encode_for_web(text)
-							local player_lang = language_codes_by_enum[players.get_language(sender)]
-							if (only_translate_foreign and player_lang == my_lang) then
-								return
-							end
-							if not debug then 
-								if players.user() == sender then 
-									return 
-								end
-							end
-							-- credit to the original chat translator for the api code
-							google_translate(encoded_text, my_lang, sender, false)
-						end end)
 			watermark = menu.list(settings, "Watermark", {}, "", function(); end)
 				menu.divider(watermark, "~~~> Watermark <~~~")
 				local pos_settings = menu.list(watermark, "Position", {}, "", function(); end)
@@ -2329,22 +2354,6 @@
 						directx.draw_rect(x + add_x * 0.5, y, -(tx_size + 0.0105 + add_x), 0.025 + add_y, bg_color)
 						directx.draw_texture(icon, 0.0055, 0.0055, 0.5, 0.5, x - tx_size - 0.0055, y + 0.013, 0, {["r"] = 1.0,["g"] = 1.0,["b"] = 1.0,["a"] = 1.0})
 						directx.draw_text(x, y + 0.004, wm_text, ALIGN_TOP_RIGHT, 0.5, tx_color, false) end)
-			cameraoptions = menu.list(settings, "Camera Options", {}, "", function(); end)
-				menu.divider(cameraoptions, "~~~> Camera Options <~~~")
-				menu.toggle(cameraoptions, "FOV Tryhard FP", {}, "", function(on_toggle)
-					if on_toggle then
-						menu.trigger_commands("fovfponfoot".." ".."60")
-						menu.trigger_commands("fovaiming".." ".."60")
-					else
-						menu.trigger_commands("fovfponfoot".." ".."-1")
-						menu.trigger_commands("fovaiming".." ".."-1")
-					end end)
-				menu.toggle(cameraoptions, "FOV Dogfight FP", {}, "", function(on_toggle)
-					if on_toggle then
-						menu.trigger_commands("fovfpinveh".." ".."75")
-					else
-						menu.trigger_commands("fovfpinveh".." ".."-1")
-					end end)
 			nametag = menu.list(settings, "Change Nametag Color", {}, "", function(); end)
 				menu.list_select(nametag, "Color", {}, "", colors, chatColor, function(color)
 					chatColor = color end)
@@ -2352,20 +2361,6 @@
 					HUD._OVERRIDE_MULTIPLAYER_CHAT_COLOUR(1, chatColor)
 					end, function()
 					HUD._OVERRIDE_MULTIPLAYER_CHAT_COLOUR(0, chatColor)end)
-			menu.divider(settings, "~~~> Game Features <~~~")
-			menu.toggle_loop(settings, "Auto Accept", {}, "Auto accepts join screens.", function(on_toggle)
-				local message_hash = HUD._GET_WARNING_MESSAGE_TITLE_HASH()
-				    if message_hash == 15890625 or message_hash == -587688989 then
-						PAD._SET_CONTROL_NORMAL(2, 201, 1.0)
-					util.yield(50)
-				end end)
-			menu.toggle_loop(settings, "Voice Chat", {}, "Detects who is talking in game chat.", function ()
-				for players.list_except() as pid do
-					if NETWORK.NETWORK_IS_PLAYER_TALKING(pid) then
-						util.toast("[Mira] <3\n".."> "..players.get_name(pid).." is talking in Voice Chat.")
-						log("Voice Chat: (Playername: "..players.get_name(pid).." / RID: "..players.get_rockstar_id(pid))
-					end
-				end end)
 			menu.divider(settings, "~~~> Settings <~~~")
 			menu.action(settings, "Clear Log", {}, "", function()
 				io.remove(LogFile) end)
@@ -2377,9 +2372,10 @@
 		menu.readonly(credits, "Developer: ", DevName)
 		menu.readonly(credits, "Script Version: ", Version)
 		menu.readonly(credits, "GTA Online Version:", GTAOVersion)
-		menu.divider(credits, "~~~> Links <~~~")
-		menu.hyperlink(credits, "GitHub", "https://github.com/I3lackExo")
-		menu.hyperlink(credits, "NordVPN Tracker", "https://github.com/I3lackExo/NordVPN-Tracker")
+		menu.divider(credits, "~~~> Socials <~~~")
+		menu.hyperlink(credits, "Multigaming Discord", "https://discord.gg/bHpvhazv7T")
+		menu.hyperlink(credits, "GitHub (I3lackExo)", "https://github.com/I3lackExo")
+		--menu.hyperlink(credits, "NordVPN Tracker", "https://github.com/I3lackExo/NordVPN-Tracker")
 
 		local bailOnAdminJoin = false
 			if bailOnAdminJoin then
@@ -2899,3 +2895,15 @@
 					SET_INT_GLOBAL(2815059 + 933, 1)end)
 				menu.action(requestoptions, "Ballistic Armor", {}, "", function(on)
 					SET_INT_GLOBAL(2815059 + 884, 1)end)]]
+
+	-- [[ Get own Bounty ]]
+		--[[menu.toggle_loop(bountyoptions, "Auto Claim Bounties", {}, "Automatically claims bounties that are placed on you.", function ()
+				local bounty = players.get_bounty(players.user())
+					if bounty != nil then
+						repeat
+							menu.trigger_commands("removebounty")
+							util.yield(1000)
+							bounty = players.get_bounty(players.user())
+						until bounty == nil
+						util.toast("[Mira] <3\n".."> Bounty has been claimed.")
+					end end)]]
