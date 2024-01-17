@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora for Stand"
-	local Version = 3.1
+	local Version = 3.2
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 
@@ -129,6 +129,18 @@
 		--local lanip = players.get_lan_ip()
 		--local lanipport = players.get_lan_port()
 		--local hosttoken = players.get_host_token()
+
+		local kickPlayerList <const> = {"Smart Kick", "Host Kick", "Ban Kick"}
+		local KickType <const> = {smartkick = 0, hostkick = 1, bankick = 2}
+		local kicktype = 0
+
+		local crashPlayerList <const> = {"Elegant Crash"}
+		local CrashType <const> = {elegant = 0}
+		local crashtype = 0
+
+		local pTPlayerList <const> = {"Remove Explosive Shit", "Disable Ghost"}
+		local PtType <const> = {removeexplo = 0, disghost = 1}
+		local pttype = 0
 
 		local lockon
 		local x, y = 0.992, 0.008
@@ -772,23 +784,24 @@
 				return OBJECT.CREATE_OBJECT_NO_OFFSET(model, pos.x, pos.y, pos.z, networked, dynamic)end}			
 
 	-- [[ Functions ]]
-		local function player_list(pid)
+		local function player_list(playerID)
 			if NETWORK.NETWORK_IS_SESSION_ACTIVE() then
-				menus[pid] = menu.toggle(playerslist, players.get_name(pid), {}, "Tags: "..players.get_tags_string(pid), function(on_toggle)
+				menus[playerID] = menu.toggle(playerslist, players.get_name(playerID), {}, "ID: "..playerID.." & Tags: "..players.get_tags_string(playerID), function(on_toggle)
 					if on_toggle then
-						selectedplayer[pid] = true
+						selectedplayer[playerID] = true
 					else
-						selectedplayer[pid] = false
+						selectedplayer[playerID] = false
 					end
 				end)
 			end end
-		local function handle_player_list(pid)
-			local ref = menus[pid]
-				if not players.exists(pid) then
-					if ref then
-						menu.delete(ref)
-						menus[pid] = nil
-					end
+		local function handle_player_list(playerID)
+			local ref = menus[playerID]
+			if not players.exists(playerID) then
+				if ref then
+					selectedplayer[playerID] = false
+					menu.delete(ref)
+					menus[playerID] = nil
+				end
 			end end
 		local function get_session_code_for_user()
 			local applicable, code = util.get_session_code()
@@ -1603,65 +1616,103 @@
 						excludeselected = false
 					end end)
 			menu.divider(playerslist, "~~~> Actions <~~~")
-			menu.action(playerslist, "Smart Kick", {}, "Smartkick from Stand.", function()
-				for pid = 0, 31 do
-					if excludeselected then
-						if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
-							menu.trigger_commands("kick" .. PLAYER.GET_PLAYER_NAME(pid))
-							util.yield()
+			menu.textslider_stateful(playerslist, "Kicks:", {}, "", kickPlayerList, function(index)
+				if index == 1 then
+					kicktype = KickType.smartkick
+						for pid = 0, 31 do
+							if excludeselected then
+								if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
+									menu.trigger_commands("kick" .. PLAYER.GET_PLAYER_NAME(pid))
+								end
+							else
+								if pid ~= players.user() and selectedplayer[pid] and players.exists(pid) then
+									menu.trigger_commands("kick" .. PLAYER.GET_PLAYER_NAME(pid))
+								end
+							end
 						end
-					else
-						if pid ~= players.user() and selectedplayer[pid] and players.exists(pid) then
-							menu.trigger_commands("kick" .. PLAYER.GET_PLAYER_NAME(pid))
-							util.yield()
+				elseif index == 2 then
+					kicktype = KickType.hostkick
+						for pid = 0, 31 do
+							if excludeselected then
+								if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
+									if NETWORK.NETWORK_IS_HOST() then
+										local name = PLAYER.GET_PLAYER_NAME(pid)
+										log("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid)..")")
+										NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
+									end
+								end
+							else
+								if pid ~= players.user() and selectedplayer[pid] and players.exists(pid) then
+									if NETWORK.NETWORK_IS_HOST() then
+										local name = PLAYER.GET_PLAYER_NAME(pid)
+										log("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid)..")")
+										NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
+									end
+								end
+							end
 						end
-					end
+				elseif index == 3 then
+					kicktype = KickType.bankick
+						for pid = 0, 31 do
+							if excludeselected then
+								if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
+									menu.trigger_commands("ban" .. PLAYER.GET_PLAYER_NAME(pid))
+								end
+							else
+								if pid ~= players.user() and selectedplayer[pid] and players.exists(pid) then
+									menu.trigger_commands("ban" .. PLAYER.GET_PLAYER_NAME(pid))
+								end
+							end
+						end
 				end end)
-			menu.action(playerslist, "Host Kick", {}, "Only works if you are the host.", function()
-					for pid = 0, 31 do
-						if excludeselected then
-							if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
-								if NETWORK.NETWORK_IS_HOST() then
-									local name = PLAYER.GET_PLAYER_NAME(pid)
-									log("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid)..")")
-									NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
+			menu.textslider_stateful(playerslist, "Crashes:", {}, "", crashPlayerList, function(index)
+				if index == 1 then
+					crashtype = CrashType.elegant
+						for pid = 0, 31 do
+							if excludeselected then
+								if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
+									menu.trigger_commands("crash" .. PLAYER.GET_PLAYER_NAME(pid))
 								end
-							end
-						else
-							if pid ~= players.user() and selectedplayer[pid] and players.exists(pid) then
-								if NETWORK.NETWORK_IS_HOST() then
-									local name = PLAYER.GET_PLAYER_NAME(pid)
-									log("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid)..")")
-									NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
+							else
+								if pid ~= players.user() and selectedplayer[pid] and players.exists(pid) then
+									menu.trigger_commands("crash" .. PLAYER.GET_PLAYER_NAME(pid))
 								end
 							end
 						end
-					end end)
-			menu.action(playerslist, "Ban Kick", {}, "Only works if you are the host.", function()
-					for pid = 0, 31 do
-						if excludeselected then
-							if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
-								menu.trigger_commands("ban" .. PLAYER.GET_PLAYER_NAME(pid))
-								util.yield()
+				end end)
+			menu.textslider_stateful(playerslist, "PVP/Trolling:", {}, "", pTPlayerList, function(index)
+				if index == 1 then
+					pttype = PtType.removeexplo
+						for pid = 0, 31 do
+							if excludeselected then
+								if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
+									WEAPON.REMOVE_WEAPON_FROM_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0xA914799)
+									WEAPON.GIVE_WEAPON_TO_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0xA914799)
+									WEAPON.REMOVE_WEAPON_FROM_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0x6D544C99)
+									WEAPON.REMOVE_WEAPON_FROM_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0xFEA23564)
+								end
+							else
+								if pid ~= players.user() and selectedplayer[pid] and players.exists(pid) then
+									WEAPON.REMOVE_WEAPON_FROM_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0xA914799)
+									WEAPON.GIVE_WEAPON_TO_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0xA914799)
+									WEAPON.REMOVE_WEAPON_FROM_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0x6D544C99)
+									WEAPON.REMOVE_WEAPON_FROM_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0xFEA23564)
+								end
 							end
-						else
-							if pid ~= players.user() and selectedplayer[pid] and players.exists(pid) then
-								menu.trigger_commands("ban" .. PLAYER.GET_PLAYER_NAME(pid))
-								util.yield()
+						end
+				elseif index == 2 then
+					pttype = PtType.disghost
+						for pid = 0, 31 do
+							if excludeselected then
+								if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
+									menu.trigger_commands("bounty"..PLAYER.GET_PLAYER_NAME(pid).." 1000")
+								end
+							else
+								if pid ~= players.user() and selectedplayer[pid] and players.exists(pid) then
+									menu.trigger_commands("bounty"..PLAYER.GET_PLAYER_NAME(pid).." 1000")
+								end
 							end
-						end
-					end end)
-			menu.action(playerslist, "Elegant Crash", {}, "Elegant Crash from Stand.", function()
-				for pid = 0, 31 do
-					if excludeselected then
-						if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
-							menu.trigger_commands("crash" .. PLAYER.GET_PLAYER_NAME(pid))
-						end
-					else
-						if pid ~= players.user() and selectedplayer[pid] and players.exists(pid) then
-							menu.trigger_commands("crash" .. PLAYER.GET_PLAYER_NAME(pid))
-						end
-					end
+						end						
 				end end)
 			menu.divider(playerslist, "~~~> Players <~~~")
 			players.dispatch_on_join()
