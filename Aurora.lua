@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora for Stand"
-	local Version = 3.2
+	local Version = 3.3
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 
@@ -786,7 +786,7 @@
 	-- [[ Functions ]]
 		local function player_list(playerID)
 			if NETWORK.NETWORK_IS_SESSION_ACTIVE() then
-				menus[playerID] = menu.toggle(playerslist, players.get_name(playerID), {}, "ID: "..playerID.." & Tags: "..players.get_tags_string(playerID), function(on_toggle)
+				menus[playerID] = menu.toggle(playerslist, players.get_name(playerID), {}, "", function(on_toggle)
 					if on_toggle then
 						selectedplayer[playerID] = true
 					else
@@ -803,6 +803,12 @@
 					menus[playerID] = nil
 				end
 			end end
+		local function remove_explonsniper(playerID)
+			if NETWORK.NETWORK_IS_SESSION_ACTIVE() then
+				if WEAPON.HAS_PED_GOT_WEAPON(players.user_ped(playerID), 177293209) and WEAPON.HAS_PED_GOT_WEAPON_COMPONENT(players.user_ped(playerID), 177293209, 2313935527) and pid ~= players.user() then		
+					WEAPON.REMOVE_WEAPON_COMPONENT_FROM_PED(player.get_player_ped(playerID), 177293209, 2313935527)
+				end
+			end	end
 		local function get_session_code_for_user()
 			local applicable, code = util.get_session_code()
 			if applicable then
@@ -1178,6 +1184,7 @@
 
 	-- [[ Playerlist ]]
 		players.on_join(player_list)
+		players.on_join(remove_explonsniper)
 		players.on_leave(handle_player_list)
 
 	--[[ Start ]]
@@ -1865,12 +1872,12 @@
 						util.toast("[Mira] <3\n".."> I have turned off the block you can now rejoin.")
 					end end)
 			lobbyoptions = menu.list(onlineoptions, "Lobby Options", {}, "", function(); end)
-				menu.divider(lobbyoptions, "~~~> Lobby Options <~~~")
-				lobbyinfo = menu.list(lobbyoptions, "Session Info (Next Update)", {}, "", function(); end)
+				--menu.divider(lobbyoptions, "~~~> Lobby Options <~~~")
+				--lobbyinfo = menu.list(lobbyoptions, "Session Info (Next Update)", {}, "", function(); end)
 					--menu.readonly(lobbyinfo, "Session Host Name: ", host)
 					--menu.readonly(lobbyinfo, "Session Host RID: ", rid)
 
-				lastplayerinfo = menu.list(lobbyoptions, "Last Joined Player (Next Update)", {}, "", function(); end)
+				--lastplayerinfo = menu.list(lobbyoptions, "Last Joined Player (Next Update)", {}, "", function(); end)
 				menu.divider(lobbyoptions, "~~~> Bounty Options <~~~")
 				bountyloop = menu.list(lobbyoptions, "Bounty loop", {}, "", function(); end)	
 					menu.divider(bountyloop, "~~~> Bounty Loop <~~~")
@@ -1979,6 +1986,9 @@
 					--Assistant("> I have removed everything from your area.",colors.green)
 					end)
 			menu.divider(onlineoptions, "~~~> Trolling <~~~")
+			menu.toggle_loop(onlineoptions, "Auto Remove Explo-Sniper", {}, "Warning: Your friends Explosniper will also be removed.", function(toggle)
+				remove_explonsniper(pid)
+				util.yield(750)end)
 			menu.action(onlineoptions, "Real localized \"DOX\"", {"dox"}, "", function(on_click)
 				chat.send_message("${name}: ${ip} | ${geoip.city}, ${geoip.region}, ${geoip.country}", false, true, true)end)
 
@@ -2059,8 +2069,8 @@
 			menu.divider(vehicleoptions, "~~~> Other Options <~~~")
 			menu.toggle_loop(vehicleoptions, "Vehicle Godmode", {}, "", function(toggled)
 				ENTITY.SET_ENTITY_PROOFS(players_car, true, true, true, true, true, 0, 0, true)
-				end, function() ENTITY.SET_ENTITY_PROOFS(PED.GET_VEHICLE_PED_IS_IN(player), false, false, false, false, false, 0, 0, false)end)	
-			menu.toggle_loop(vehicleoptions, "Indicator Lights", {}, "", function()
+				end, function() ENTITY.SET_ENTITY_PROOFS(PED.GET_VEHICLE_PED_IS_IN(player), false, false, false, false, false, 0, 0, false)end)
+			--[[menu.toggle_loop(vehicleoptions, "Indicator Lights", {}, "", function()
 				if(PED.IS_PED_IN_ANY_VEHICLE(players.user_ped(), false)) then
 					local vehicle = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
 					local left = PAD.IS_CONTROL_PRESSED(34, 34)
@@ -2077,8 +2087,8 @@
 						VEHICLE.SET_VEHICLE_INDICATOR_LIGHTS(vehicle, 0, false)
 						VEHICLE.SET_VEHICLE_INDICATOR_LIGHTS(vehicle, 1, false)
 					end
-				end end)
-			menu.divider(vehicleoptions, "~~~> Helicopter Options <~~~")
+				end end)]]
+			menu.divider(vehicleoptions, "~~~> Helicopter & Plane Options <~~~")
 			menu.action(vehicleoptions, "Disable Auto-Stablization", {}, "", function ()
 				local CflyingHandling = get_sub_handling_types(entities.get_user_vehicle_as_handle(), 1)
 				if CflyingHandling then
@@ -2087,6 +2097,19 @@
 					end
 					util.toast("Auto-Stablization off.")
 				end end)
+			menu.toggle_loop(vehicleoptions, "Chaff (Controller Support)", {}, "Key: D-Pad Left", function(toggled)
+				if PAD.IS_CONTROL_PRESSED(1, 189) then
+					menu.trigger_commands("deploychaff")
+				end util.yield() end)
+			menu.toggle_loop(vehicleoptions, "Flares (Controller Support)", {}, "Key: D-Pad Left", function(toggled)
+				if PAD.IS_CONTROL_PRESSED(1, 189) then
+					menu.trigger_commands("deployflares")
+				end util.yield() end)
+			menu.toggle_loop(vehicleoptions, "Chaff & Flares (Controller Support)", {}, "Key: D-Pad Left", function(toggled)
+				if PAD.IS_CONTROL_PRESSED(1, 189) then
+					menu.trigger_commands("deployboth")
+				end util.yield() end)
+
 		
 		menu.divider(miscoptions, "~~~> Misc Options <~~~")
 			recoveryoptions = menu.list(miscoptions, "Recovery Options", {}, "Based on Heist Control Stuff", function(); end)
@@ -2417,7 +2440,9 @@
 				io.remove(LogFile) end)
 			menu.action(settings, "Clear Playerhistory", {}, "", function()
 				io.remove(HistoryFile) end)
-			menu.action(settings, "Restart Script", {"ptrestart"}, "Restarts the script to clean the errors.", function()
+			menu.action(settings, "Open Aurora Folder", {}, "", function()
+				util.open_folder(filesystem.scripts_dir() .. "lib\\AuroraScript\\") end)
+			menu.action(settings, "Restart Script", {"restartaurora"}, "Restarts the script to clean the errors.", function()
 				util.restart_script()end)
 		
 		menu.readonly(credits, "Developer: ", DevName)
@@ -2601,7 +2626,6 @@
 				menu.action(crash, "Host Kick", {"host"}, "", function()
 					--menu.trigger_commands("timeout"..PLAYER.GET_PLAYER_NAME(pid).." ".."on")
 					if NETWORK.NETWORK_IS_HOST() then
-						local ip = players.get_connect_ip(pid)
 						local name = PLAYER.GET_PLAYER_NAME(pid)
 						log("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid)..")")
 						NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
