@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora for Stand"
-	local Version = 3.3
+	local Version = 3.4
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 
@@ -803,12 +803,14 @@
 					menus[playerID] = nil
 				end
 			end end
-		local function remove_explonsniper(playerID)
-			if NETWORK.NETWORK_IS_SESSION_ACTIVE() then
-				if WEAPON.HAS_PED_GOT_WEAPON(players.user_ped(playerID), 177293209) and WEAPON.HAS_PED_GOT_WEAPON_COMPONENT(players.user_ped(playerID), 177293209, 2313935527) and pid ~= players.user() then		
-					WEAPON.REMOVE_WEAPON_COMPONENT_FROM_PED(player.get_player_ped(playerID), 177293209, 2313935527)
-				end
-			end	end
+		local function remove_explonsniper(pid)
+			for pid = 0,31 do
+				if NETWORK.NETWORK_IS_SESSION_ACTIVE() then
+					if WEAPON.HAS_PED_GOT_WEAPON(players.user_ped(pid), 177293209) and WEAPON.HAS_PED_GOT_WEAPON_COMPONENT(players.user_ped(pid), 177293209, 2313935527) and pid ~= players.user() then		
+						WEAPON.REMOVE_WEAPON_COMPONENT_FROM_PED(players.user_ped(pid), 177293209, 2313935527)
+					end
+				end	
+			end end
 		local function get_session_code_for_user()
 			local applicable, code = util.get_session_code()
 			if applicable then
@@ -1184,7 +1186,6 @@
 
 	-- [[ Playerlist ]]
 		players.on_join(player_list)
-		players.on_join(remove_explonsniper)
 		players.on_leave(handle_player_list)
 
 	--[[ Start ]]
