@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora for Stand"
-	local Version = 3.5
+	local Version = 3.6
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 
@@ -2098,7 +2098,7 @@
 				end end)
 
 		menu.divider(vehicleoptions, "~~~> Vehicle Options <~~~")
-			oldgtaoptions = menu.list(vehicleoptions, "Vehicle Buffing", {}, "Some features to get old things back.", function(); end)
+			oldgtaoptions = menu.list(vehicleoptions, "Vehicle Modifyer", {}, "Some features to get old things back.", function(); end)
 				menu.divider(oldgtaoptions, "~~~> Presets <~~~")
 				menu.textslider_stateful(oldgtaoptions, "P-996 Lazer:", {}, "", Lazerbuffing, function(index)
 					if index == 1 then
