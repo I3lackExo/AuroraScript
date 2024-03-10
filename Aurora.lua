@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora for Stand"
-	local Version = 3.4
+	local Version = 3.5
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 
@@ -15,7 +15,6 @@
 
 	local LogFile = filesystem.scripts_dir() .. "lib\\AuroraScript\\" .. "Log" .. ".log"
 	local HistoryFile = filesystem.scripts_dir() .. "lib\\AuroraScript\\" .. "Playerhistory" .. ".log"
-	local DeathLog = filesystem.scripts_dir() .. "lib\\AuroraScript\\" .. "Deathlog" .. ".log"
 
 	-- [[ Github Update ]]
 	-- Script Updater
@@ -115,21 +114,6 @@
 			util.toast("[Mira] <3\n".."> Warning: If you meet an admin the risk of being banned is high.") end end)
 
 	-- [[ Locals ]]
-		--local pidlist = players.user()
-
-		--local host = players.get_host(pidlist)
-		--local scripthost = players.get_script_host()
-		--local playername = players.get_name(pidlist)
-		--local rid = players.get_rockstar_id(pidlist)
-		--local vpn = players.is_using_vpn()
-		--local ip = players.get_ip()
-		--local ipport = players.get_port()
-		--local connectedip = players.get_connect_ip()
-		--local connectedipport = players.get_connect_port()
-		--local lanip = players.get_lan_ip()
-		--local lanipport = players.get_lan_port()
-		--local hosttoken = players.get_host_token()
-
 		local kickPlayerList <const> = {"Smart Kick", "Host Kick", "Ban Kick"}
 		local KickType <const> = {smartkick = 0, hostkick = 1, bankick = 2}
 		local kicktype = 0
@@ -141,6 +125,28 @@
 		local pTPlayerList <const> = {"Remove Explosive Shit", "Disable Ghost"}
 		local PtType <const> = {removeexplo = 0, disghost = 1}
 		local pttype = 0
+
+		local passivePlayerList <const> = {"Block", "Unblock"}
+		local PassiveType <const> = {onpassive = 0, offpassive = 1}
+		local passivetype = 0
+
+		-- [[ Buffing Settings ]]
+			local Lazerbuffing <const> = {"Modifyed Cannon", "Normal Cannon"}
+			local LazerType <const> = {modifyed = 0, normal = 1}
+			local lazerttype = 0
+
+			local B11buffing <const> = {"Modifyed Cannon", "Normal Cannon"}
+			local B11Type <const> = {modifyed = 0, normal = 1}
+			local b11ttype = 0
+
+			local Chernobuffing <const> = {"Shoot together", "Lock-On Range"}
+			local ChernoType <const> = {modifyed = 0, modifyed1 = 1}
+			local chernottype = 0
+
+
+
+
+
 
 		local lockon
 		local x, y = 0.992, 0.008
@@ -263,6 +269,10 @@
 		local placed_firework_cones = {}
 		local placed_firework_fontains = {}
 		local placed_firework_boxes = {}
+
+		local module_base <const> = memory.scan("")
+		if not module_base then util.toast("Cant Load") return end
+		local vehicle_data_t <const> ={lazer_t = {p99_explosive_type = module_base + 0x1037C03,alter_wait_time = module_base + 0x1E458B0,shoot_between_time = module_base + 0x1E45734 },}
 
 		local SessionBrokenAlteredSHQueue = false
 		local SessionBrokenBadScriptEvent = false
@@ -811,6 +821,25 @@
 					end
 				end	
 			end end
+		local function is_using_vehicle()
+			local my_veh = PED.GET_VEHICLE_PED_IS_USING(players.user_ped())
+			if my_veh and (VEHICLE.GET_PED_IN_VEHICLE_SEAT(my_veh,-1) == players.user_ped() or VEHICLE.GET_PED_IN_VEHICLE_SEAT(my_veh,0) == players.user_ped() ) then
+				return true
+			end
+			return false end
+		local function get_veh_name()
+			if is_using_vehicle() then
+				return VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(ENTITY.GET_ENTITY_MODEL(PED.GET_VEHICLE_PED_IS_USING(players.user_ped())))
+			end
+			return "No Veh" end
+		local function get_vehicle_weapon_info()
+			local my_ptr <const> = entities.handle_to_pointer(players.user_ped())
+			local weapon_manager_ptr = memory.read_long(my_ptr+0x10B8)
+			local vehicle_weapon_info_ptr = memory.read_long(weapon_manager_ptr+0x70)
+			if vehicle_weapon_info_ptr ~= 0 then
+				return vehicle_weapon_info_ptr
+			end
+			return 0 end
 		local function get_session_code_for_user()
 			local applicable, code = util.get_session_code()
 			if applicable then
@@ -950,23 +979,6 @@
 					end
 					local currTime = os.date("*t")
 					local file = io.open(HistoryFile, "a")
-					for i=1,#args do
-						file:write(string.format("[%02d-%02d-%02d | %02d:%02d:%02d] %s\n", currTime.day, currTime.month, currTime.year, currTime.hour, currTime.min, currTime.sec, tostring(args[i])))
-					end  
-					file:close()
-				end, ...)
-				if not success then
-					basePrint("Error writing log: " .. result)
-				end end
-		local function deathlog(...)
-			basePrint(...)
-				local success, result = pcall(function(...)
-					local args = {...}
-					if #args == 0 then
-						return
-					end
-					local currTime = os.date("*t")
-					local file = io.open(DeathLog, "a")
 					for i=1,#args do
 						file:write(string.format("[%02d-%02d-%02d | %02d:%02d:%02d] %s\n", currTime.day, currTime.month, currTime.year, currTime.hour, currTime.min, currTime.sec, tostring(args[i])))
 					end  
@@ -1722,6 +1734,34 @@
 							end
 						end						
 				end end)
+			menu.textslider_stateful(playerslist, "Passive Mode:", {}, "", passivePlayerList, function(index)
+				if index == 1 then
+					passivetype = PassiveType.onpassive
+						for pid = 0, 31 do
+							if excludeselected then
+								if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
+									menu.trigger_commands("nopassivemode"..PLAYER.GET_PLAYER_NAME(pid).." ".."on")
+								end
+							else
+								if pid ~= players.user() and selectedplayer[pid] and players.exists(pid) then
+									menu.trigger_commands("nopassivemode"..PLAYER.GET_PLAYER_NAME(pid).." ".."on")
+								end
+							end
+						end
+				elseif index == 2 then
+					passivetype = PassiveType.offpassive
+						for pid = 0, 31 do
+							if excludeselected then
+								if pid ~= players.user() and not selectedplayer[pid] and players.exists(pid) then
+									menu.trigger_commands("nopassivemode"..PLAYER.GET_PLAYER_NAME(pid).." ".."off")
+								end
+							else
+								if pid ~= players.user() and selectedplayer[pid] and players.exists(pid) then
+									menu.trigger_commands("nopassivemode"..PLAYER.GET_PLAYER_NAME(pid).." ".."off")
+								end
+							end
+						end						
+				end end)
 			menu.divider(playerslist, "~~~> Players <~~~")
 			players.dispatch_on_join()
 
@@ -1990,6 +2030,7 @@
 			menu.toggle_loop(onlineoptions, "Auto Remove Explo-Sniper", {}, "Warning: Your friends Explosniper will also be removed.", function(toggle)
 				remove_explonsniper(pid)
 				util.yield(750)end)
+			menu.divider(onlineoptions, "~~~> Scare some Players <~~~")
 			menu.action(onlineoptions, "Real localized \"DOX\"", {"dox"}, "", function(on_click)
 				chat.send_message("${name}: ${ip} | ${geoip.city}, ${geoip.region}, ${geoip.country}", false, true, true)end)
 
@@ -2056,7 +2097,96 @@
 					menu.trigger_commands("rangemultiplier".." ".."1.00")
 				end end)
 
-		menu.divider(vehicleoptions, "~~~> Vehicle Options <~~~")	
+		menu.divider(vehicleoptions, "~~~> Vehicle Options <~~~")
+			oldgtaoptions = menu.list(vehicleoptions, "Vehicle Buffing", {}, "Some features to get old things back.", function(); end)
+				menu.divider(oldgtaoptions, "~~~> Presets <~~~")
+				menu.textslider_stateful(oldgtaoptions, "P-996 Lazer:", {}, "", Lazerbuffing, function(index)
+					if index == 1 then
+						lazerttype = LazerType.modifyed
+							memory.write_int(vehicle_data_t.lazer_t.p99_explosive_type,0)
+							memory.write_float(vehicle_data_t.lazer_t.alter_wait_time,-1)
+							memory.write_float(vehicle_data_t.lazer_t.shoot_between_time,0.03999999911)
+							util.toast("Done")
+					elseif index == 2 then
+						lazerttype = LazerType.normal
+							memory.write_int(vehicle_data_t.lazer_t.p99_explosive_type,85)
+							memory.write_float(vehicle_data_t.lazer_t.alter_wait_time,0.125)
+							memory.write_float(vehicle_data_t.lazer_t.shoot_between_time,0.125)
+							util.toast("Done")
+					end	end)
+				menu.textslider_stateful(oldgtaoptions, "B-11 Strikeforce:", {}, "", B11buffing, function(index)
+					if index == 1 then
+						b11ttype = B11Type.modifyed
+							if is_using_vehicle() then
+								local vehicle_weapon_info_ptr <const> = get_vehicle_weapon_info()
+								if vehicle_weapon_info_ptr ~= 0 then
+									memory.write_float(vehicle_weapon_info_ptr+0x13C,0)
+									memory.write_float(vehicle_weapon_info_ptr+0x150,0)
+									memory.write_int(vehicle_weapon_info_ptr+0x24,0)
+									memory.write_float(vehicle_weapon_info_ptr+0x028C,1000)
+									util.toast("Done")
+								end
+							else
+								util.toast("Get in the car first.")
+							end
+					elseif index == 2 then
+						b11ttype = B11Type.normal
+							if is_using_vehicle() then
+								local vehicle_weapon_info_ptr <const> = get_vehicle_weapon_info()
+								if vehicle_weapon_info_ptr ~= 0 then
+									memory.write_float(vehicle_weapon_info_ptr+0x13C,0.125)
+									memory.write_float(vehicle_weapon_info_ptr+0x150,0.125)
+									memory.write_int(vehicle_weapon_info_ptr+0x24,57)
+									memory.write_float(vehicle_weapon_info_ptr+0x028C,300)
+									util.toast("Done")
+								end
+							else
+								util.toast("Get in the car first.")
+							end
+					end	end)
+				menu.divider(oldgtaoptions, "~~~> Other Vehicles <~~~")
+				menu.textslider_stateful(oldgtaoptions, "Chernobog:", {}, "", Chernobuffing, function(index)
+					if index == 1 then
+						chernottype = ChernoType.modifyed
+							if is_using_vehicle() then
+								local vehicle_weapon_info_ptr <const> = get_vehicle_weapon_info()
+								if vehicle_weapon_info_ptr ~= 0 then
+									memory.write_float(vehicle_weapon_info_ptr+0x13C,0)
+									memory.write_float(vehicle_weapon_info_ptr+0x150,0)
+									memory.write_int(vehicle_weapon_info_ptr+0x24,0)
+									memory.write_float(vehicle_weapon_info_ptr+0x128,0)
+									memory.write_float(vehicle_weapon_info_ptr+0x12C,0)
+									util.toast("Done")
+								end
+							else
+								util.toast("Get in the car first.")
+							end
+					elseif index == 2 then
+						chernottype = ChernoType.modifyed1
+							if is_using_vehicle() then
+								local vehicle_weapon_info_ptr <const> = get_vehicle_weapon_info()
+								if vehicle_weapon_info_ptr ~= 0 then
+									memory.write_float(vehicle_weapon_info_ptr+0x288,9999)
+									util.toast("Done")
+								end
+							else
+								util.toast("Get in the car first.")
+							end
+					end	end)
+				menu.action(oldgtaoptions, "Modify every Vehicle Weapon", {}, "Modifys all vehicle weapons u want.", function(on_toggle)
+						if is_using_vehicle() then
+							local vehicle_weapon_info_ptr <const> = get_vehicle_weapon_info()
+							if vehicle_weapon_info_ptr ~= 0 then
+								memory.write_float(vehicle_weapon_info_ptr+0x13C,0)
+								memory.write_float(vehicle_weapon_info_ptr+0x150,0)
+								memory.write_int(vehicle_weapon_info_ptr+0x24,0)
+								memory.write_float(vehicle_weapon_info_ptr+0x028C,2000)
+								util.toast("[  "..get_veh_name().."  ]".." Done")
+							end
+						else
+							util.toast("Get in the car first.")
+						end end)
+			menu.divider(vehicleoptions, "~~~> Other Options <~~~")
 			menu.action(vehicleoptions, "Apply Drift Ability", {}, "", function(toggle)
 				if not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(entities.get_user_vehicle_as_handle(pid)) then
 					NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(entities.get_user_vehicle_as_handle(pid))  
@@ -2067,7 +2197,6 @@
 				VEHICLE._SET_REDUCE_DRIFT_VEHICLE_SUSPENSION(players_car, toggle)end)
 			menu.toggle_loop(vehicleoptions, "Keep car clean", {}, "", function(toggled)
 				VEHICLE.SET_VEHICLE_DIRT_LEVEL(entities.get_user_vehicle_as_handle(), 0.0)end)
-			menu.divider(vehicleoptions, "~~~> Other Options <~~~")
 			menu.toggle_loop(vehicleoptions, "Vehicle Godmode", {}, "", function(toggled)
 				ENTITY.SET_ENTITY_PROOFS(players_car, true, true, true, true, true, 0, 0, true)
 				end, function() ENTITY.SET_ENTITY_PROOFS(PED.GET_VEHICLE_PED_IS_IN(player), false, false, false, false, false, 0, 0, false)end)
@@ -2983,3 +3112,17 @@
 						until bounty == nil
 						util.toast("[Mira] <3\n".."> Bounty has been claimed.")
 					end end)]]
+
+	-- [[ Info ]]
+		--local host = players.get_host(pidlist)
+		--local scripthost = players.get_script_host()
+		--local playername = players.get_name(pidlist)
+		--local rid = players.get_rockstar_id(pidlist)
+		--local vpn = players.is_using_vpn()
+		--local ip = players.get_ip()
+		--local ipport = players.get_port()
+		--local connectedip = players.get_connect_ip()
+		--local connectedipport = players.get_connect_port()
+		--local lanip = players.get_lan_ip()
+		--local lanipport = players.get_lan_port()
+		--local hosttoken = players.get_host_token()
