@@ -1927,8 +1927,8 @@
 					menu.toggle_loop(bountyloop, "Place Infinite Bounty", {}, "", function(click_type)
 						menu.trigger_commands("bountyall" .. " " .. tostring(infibounty_amt))
 						util.yield(60000)end)
-				menu.divider(lobbyoptions, "~~~> World Cleaning <~~~")	
-				menu.list_action(lobbyoptions, "Clear All...", {}, "", {"Peds", "Vehicles", "Objects", "Pickups", "Ropes", "Projectiles", "Sounds"}, function(index, name)
+				--menu.divider(lobbyoptions, "~~~> World Cleaning <~~~")	
+				--[[menu.list_action(lobbyoptions, "Clear All...", {}, "", {"Peds", "Vehicles", "Objects", "Pickups", "Ropes", "Projectiles", "Sounds"}, function(index, name)
 					util.toast("Clearing "..name:lower().."...")
 					local counter = 0
 					pluto_switch index do
@@ -1987,8 +1987,8 @@
 							end
 						break
 					end
-					util.toast("Cleared "..tostring(counter).." "..name:lower()..".")end)
-				menu.action(lobbyoptions, "Clear Everything", {"ptclean"}, "Warning: It really clears everything.", function()
+					util.toast("Cleared "..tostring(counter).." "..name:lower()..".")end)]]
+				--[[menu.action(lobbyoptions, "Clear Everything", {"ptclean"}, "Warning: It really clears everything.", function()
 					local cleanse_entitycount = 0
 					for _, ped in pairs(entities.get_all_peds_as_handles()) do
 						if ped ~= players.user_ped() and not PED.IS_PED_A_PLAYER(ped) then
@@ -2025,11 +2025,11 @@
 					local pos = ENTITY.GET_ENTITY_COORDS(players.user_ped())
 					MISC.CLEAR_AREA_OF_PROJECTILES(pos.x, pos.y, pos.z, 400, 0)
 					--Assistant("> I have removed everything from your area.",colors.green)
-					end)
-			menu.divider(onlineoptions, "~~~> Trolling <~~~")
-			menu.toggle_loop(onlineoptions, "Auto Remove Explo-Sniper", {}, "Warning: Your friends Explosniper will also be removed.", function(toggle)
+					end)]]
+			--menu.divider(onlineoptions, "~~~> Trolling <~~~")
+			--[[menu.toggle_loop(onlineoptions, "Auto Remove Explo-Sniper", {}, "Warning: Your friends Explosniper will also be removed.", function(toggle)
 				remove_explonsniper(pid)
-				util.yield(750)end)
+				util.yield(750)end)]]
 			menu.divider(onlineoptions, "~~~> Scare some Players <~~~")
 			menu.action(onlineoptions, "Real localized \"DOX\"", {"dox"}, "", function(on_click)
 				chat.send_message("${name}: ${ip} | ${geoip.city}, ${geoip.region}, ${geoip.country}", false, true, true)end)
