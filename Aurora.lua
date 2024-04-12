@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora for Stand"
-	local Version = 3.6
+	local Version = 3.7
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 
@@ -104,31 +104,57 @@
 	local miscoptions = menu.list(menu.my_root(), "Misc Options")
 	local settings = menu.list(menu.my_root(), "Settings")
 	local credits = menu.list(menu.my_root(), "Credits")
-	local bailOnAdminJoin = false
+	local admin_bail = true
 	menu.toggle(menu.my_root(), "R* Admin Protection", {}, "", function(on)
 		if on then
+			admin_bail = on
+			util.toast("[Mira] <3\n".."> Okay, I will notify you when I see an admin.")
+		else
+			admin_bail = off
+			util.toast("[Mira] <3\n".."> Warning: If you meet an admin the risk of being banned is high.")
+
+			while admin_bail do
+				if util.is_session_started() then
+					for _, pid in players.list(false, true, true) do 
+						if players.is_marked_as_admin(pid) then 
+							util.toast("[Mira] <3\n".."> I have spotted an admin. Launch protective countermeasures. (Admin: "..players.get_name(pid)..")")
+							log("R* Admin Protection: (Playername: "..players.get_name(pid).." / RID: "..players.get_rockstar_id(pid))
+							util.yield(1500)
+							menu.trigger_commands("quickbail")
+						end    
+					end
+				end
+				util.yield()
+			end
+		end end, true)
+
+
+
+
+		--[[if on then
 			bailOnAdminJoin = on
 			util.toast("[Mira] <3\n".."> Okay, I will notify you when I see an admin.")
 		else
 			bailOnAdminJoin = off
-			util.toast("[Mira] <3\n".."> Warning: If you meet an admin the risk of being banned is high.") end end)
+			util.toast("[Mira] <3\n".."> Warning: If you meet an admin the risk of being banned is high.") end end)]]
 
 	-- [[ Locals ]]
-		local kickPlayerList <const> = {"Smart Kick", "Host Kick", "Ban Kick"}
-		local KickType <const> = {smartkick = 0, hostkick = 1, bankick = 2}
-		local kicktype = 0
+		-- [[ Custom Playerlist ]]
+			local kickPlayerList <const> = {"Smart Kick", "Host Kick", "Ban Kick"}
+			local KickType <const> = {smartkick = 0, hostkick = 1, bankick = 2}
+			local kicktype = 0
 
-		local crashPlayerList <const> = {"Elegant Crash"}
-		local CrashType <const> = {elegant = 0}
-		local crashtype = 0
+			local crashPlayerList <const> = {"Elegant Crash"}
+			local CrashType <const> = {elegant = 0}
+			local crashtype = 0
 
-		local pTPlayerList <const> = {"Remove Explosive Shit", "Disable Ghost"}
-		local PtType <const> = {removeexplo = 0, disghost = 1}
-		local pttype = 0
+			local pTPlayerList <const> = {"Remove Explosive Shit", "Disable Ghost"}
+			local PtType <const> = {removeexplo = 0, disghost = 1}
+			local pttype = 0
 
-		local passivePlayerList <const> = {"Block", "Unblock"}
-		local PassiveType <const> = {onpassive = 0, offpassive = 1}
-		local passivetype = 0
+			local passivePlayerList <const> = {"Block", "Unblock"}
+			local PassiveType <const> = {onpassive = 0, offpassive = 1}
+			local passivetype = 0
 
 		-- [[ Buffing Settings ]]
 			local Lazerbuffing <const> = {"Modifyed Cannon", "Normal Cannon"}
@@ -143,10 +169,19 @@
 			local ChernoType <const> = {modifyed = 0, modifyed1 = 1}
 			local chernottype = 0
 
+		-- [[ Kicks & Crashes ]]
+			local PMKicks <const> = {"Host Kick", "Orbital Host Kick"}
+			local PmKicksType <const> = {hostkick = 0, orbitalkick = 1}
+			local PmKickstype = 0
 
+			local PMCrashes <const> = {"Mother Nature", "AI Generated"}
+			local PmCrashesType <const> = {crash1 = 0, crash2 = 1}
+			local PmCrashestype = 0
 
-
-
+		-- [[ Delete Log ]]
+			local LogDelete <const> = {"Playerhistory", "General Log"}
+			local LogDeleteType <const> = {log1 = 0, log2 = 1}
+			local LogDeletetype = 0
 
 		local lockon
 		local x, y = 0.992, 0.008
@@ -796,7 +831,7 @@
 	-- [[ Functions ]]
 		local function player_list(playerID)
 			if NETWORK.NETWORK_IS_SESSION_ACTIVE() then
-				menus[playerID] = menu.toggle(playerslist, players.get_name(playerID), {}, "", function(on_toggle)
+				menus[playerID] = menu.toggle(playerslist, players.get_name(playerID), {}, "Player Info:\n".."- Name: "..players.get_name(playerID).."\n".."- RID: "..players.get_rockstar_id(playerID).."\n".."- VPN: "..players.is_using_vpn(playerID), function(on_toggle)
 					if on_toggle then
 						selectedplayer[playerID] = true
 					else
@@ -1913,123 +1948,15 @@
 						util.toast("[Mira] <3\n".."> I have turned off the block you can now rejoin.")
 					end end)
 			lobbyoptions = menu.list(onlineoptions, "Lobby Options", {}, "", function(); end)
-				--menu.divider(lobbyoptions, "~~~> Lobby Options <~~~")
-				--lobbyinfo = menu.list(lobbyoptions, "Session Info (Next Update)", {}, "", function(); end)
-					--menu.readonly(lobbyinfo, "Session Host Name: ", host)
-					--menu.readonly(lobbyinfo, "Session Host RID: ", rid)
-
-				--lastplayerinfo = menu.list(lobbyoptions, "Last Joined Player (Next Update)", {}, "", function(); end)
 				menu.divider(lobbyoptions, "~~~> Bounty Options <~~~")
-				bountyloop = menu.list(lobbyoptions, "Bounty loop", {}, "", function(); end)	
+				bountyloop = menu.list(lobbyoptions, "Bounty loop", {}, "", function(); end)
 					menu.divider(bountyloop, "~~~> Bounty Loop <~~~")
 					menu.slider(bountyloop, "Bounty Amount", {}, "", 0, 10000, 10000, 1, function(s)
 						infibounty_amt = s end)
 					menu.toggle_loop(bountyloop, "Place Infinite Bounty", {}, "", function(click_type)
 						menu.trigger_commands("bountyall" .. " " .. tostring(infibounty_amt))
 						util.yield(60000)end)
-				--menu.divider(lobbyoptions, "~~~> World Cleaning <~~~")	
-				--[[menu.list_action(lobbyoptions, "Clear All...", {}, "", {"Peds", "Vehicles", "Objects", "Pickups", "Ropes", "Projectiles", "Sounds"}, function(index, name)
-					util.toast("Clearing "..name:lower().."...")
-					local counter = 0
-					pluto_switch index do
-						case 1:
-							for _, ped in ipairs(entities.get_all_peds_as_handles()) do
-								if ped ~= players.user_ped() and not PED.IS_PED_A_PLAYER(ped) then
-									entities.delete_by_handle(ped)
-									counter += 1
-									util.yield()
-								end
-							end
-							break
-						case 2:
-							for _, vehicle in ipairs(entities.get_all_vehicles_as_handles()) do
-								if vehicle ~= PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false) and DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle") == 0 and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
-									entities.delete_by_handle(vehicle)
-									counter += 1
-								end
-								util.yield()
-							end
-							break
-						case 3:
-							for _, object in ipairs(entities.get_all_objects_as_handles()) do
-								entities.delete_by_handle(object)
-								counter += 1
-								util.yield()
-							end
-							break
-						case 4:
-							for _, pickup in ipairs(entities.get_all_pickups_as_handles()) do
-								entities.delete_by_handle(pickup)
-								counter += 1
-								util.yield()
-							end
-							break
-						case 5:
-							local temp = memory.alloc(4)
-							for i = 0, 101 do
-								memory.write_int(temp, i)
-								if PHYSICS.DOES_ROPE_EXIST(temp) then
-									PHYSICS.DELETE_ROPE(temp)
-									counter += 1
-								end
-								util.yield()
-							end
-							break
-						case 6:
-							local coords = players.get_position(players.user())
-							MISC.CLEAR_AREA_OF_PROJECTILES(coords.x, coords.y, coords.z, 1000, 0)
-							counter = "all"
-							break
-						case 4:
-							for i = 0, 99 do
-								AUDIO.STOP_SOUND(i)
-								util.yield()
-							end
-						break
-					end
-					util.toast("Cleared "..tostring(counter).." "..name:lower()..".")end)]]
-				--[[menu.action(lobbyoptions, "Clear Everything", {"ptclean"}, "Warning: It really clears everything.", function()
-					local cleanse_entitycount = 0
-					for _, ped in pairs(entities.get_all_peds_as_handles()) do
-						if ped ~= players.user_ped() and not PED.IS_PED_A_PLAYER(ped) then
-							entities.delete_by_handle(ped)
-							cleanse_entitycount += 1
-						end
-					end
-					--util.toast("Cleared " .. cleanse_entitycount .. " Peds")
-					cleanse_entitycount = 0
-					for _, veh in ipairs(entities.get_all_vehicles_as_handles()) do
-						entities.delete_by_handle(veh)
-						cleanse_entitycount += 1
-						util.yield()
-					end
-					--util.toast("Cleared ".. cleanse_entitycount .." Vehicles")
-					cleanse_entitycount = 0
-					for _, object in pairs(entities.get_all_objects_as_handles()) do
-						entities.delete_by_handle(object)
-						cleanse_entitycount += 1
-					end
-					--util.toast("Cleared " .. cleanse_entitycount .. " Objects")
-					cleanse_entitycount = 0
-					for _, pickup in pairs(entities.get_all_pickups_as_handles()) do
-						entities.delete_by_handle(pickup)
-						cleanse_entitycount += 1
-					end
-					--util.toast("Cleared " .. cleanse_entitycount .. " Pickups")
-					local temp = memory.alloc(4)
-					for i = 0, 100 do
-						memory.write_int(temp, i)
-						PHYSICS.DELETE_ROPE(temp)
-					end
-					--util.toast("Cleared All Ropes")
-					local pos = ENTITY.GET_ENTITY_COORDS(players.user_ped())
-					MISC.CLEAR_AREA_OF_PROJECTILES(pos.x, pos.y, pos.z, 400, 0)
-					--Assistant("> I have removed everything from your area.",colors.green)
-					end)]]
 			--menu.divider(onlineoptions, "~~~> Trolling <~~~")
-			--[[menu.toggle_loop(onlineoptions, "Auto Remove Explo-Sniper", {}, "Warning: Your friends Explosniper will also be removed.", function(toggle)
-				remove_explonsniper(pid)
-				util.yield(750)end)]]
 			menu.divider(onlineoptions, "~~~> Scare some Players <~~~")
 			menu.action(onlineoptions, "Real localized \"DOX\"", {"dox"}, "", function(on_click)
 				chat.send_message("${name}: ${ip} | ${geoip.city}, ${geoip.region}, ${geoip.country}", false, true, true)end)
@@ -2219,7 +2146,7 @@
 					end
 				end end)]]
 			menu.divider(vehicleoptions, "~~~> Helicopter & Plane Options <~~~")
-			menu.action(vehicleoptions, "Disable Auto-Stablization", {}, "", function ()
+			menu.action(vehicleoptions, "Disable Auto-Stablization (Broken atm)", {}, "", function ()
 				local CflyingHandling = get_sub_handling_types(entities.get_user_vehicle_as_handle(), 1)
 				if CflyingHandling then
 					for _, offset in pairs(better_heli_handling_offsets) do
@@ -2313,7 +2240,7 @@
 						STREAMING.REQUEST_ANIM_DICT(agroup)
 						util.yield()
 					end
-					TASK.TASK_PLAY_ANIM(player, agroup, anim1, 8.0, 8.0, 3000, 0, 0, false, false, false)
+					TASK.TASK_PLAY_ANIM(player, agroup, anim1, 8.0, 8.0, 3000, -1, 0, 0, false, false, false)
 					util.yield(1000)
 					entities.create_object(mshit, c)end)
 				menu.action(funnyoptions, "Normal shit", {}, "Make a normale sized shit", function()
@@ -2566,10 +2493,14 @@
 					end, function()
 					HUD._OVERRIDE_MULTIPLAYER_CHAT_COLOUR(0, chatColor)end)
 			menu.divider(settings, "~~~> Settings <~~~")
-			menu.action(settings, "Clear Log", {}, "", function()
-				io.remove(LogFile) end)
-			menu.action(settings, "Clear Playerhistory", {}, "", function()
-				io.remove(HistoryFile) end)
+			menu.textslider_stateful(settings, "Delete Log:", {}, "", LogDelete, function(index)
+					if index == 1 then
+						LogDeletetype = LogDeleteType.log1
+							io.remove(HistoryFile)
+					elseif index == 2 then
+						LogDeletetype = LogDeleteType.log2
+							io.remove(LogFile)
+					end	end)
 			menu.action(settings, "Open Aurora Folder", {}, "", function()
 				util.open_folder(filesystem.scripts_dir() .. "lib\\AuroraScript\\") end)
 			menu.action(settings, "Restart Script", {"restartaurora"}, "Restarts the script to clean the errors.", function()
@@ -2582,16 +2513,6 @@
 		menu.hyperlink(credits, "Multigaming Discord", "https://discord.gg/bHpvhazv7T")
 		menu.hyperlink(credits, "GitHub (I3lackExo)", "https://github.com/I3lackExo")
 		--menu.hyperlink(credits, "NordVPN Tracker", "https://github.com/I3lackExo/NordVPN-Tracker")
-
-		local bailOnAdminJoin = false
-			if bailOnAdminJoin then
-				if players.is_marked_as_admin(pid) then
-					util.toast("[Mira] <3\n".."> I have spotted an admin. Launch protective countermeasures. (Admin: "..players.get_name(pid)..")")
-					log("R* Admin Protection: (Playername: "..players.get_name(pid).." / RID: "..players.get_rockstar_id(pid))
-					util.yield(2500)
-					menu.trigger_commands("quickbail")
-					return
-				end end
 
 		-- [[ Playerlist Options ]]
 			GenerateFeatures = function(pid)
@@ -2611,26 +2532,21 @@
 							chat.send_targeted_message(pid, players.user(), from_msg, true)
 							chat.send_message(to_msg, true, true, false)
 						end end)
-				menu.action(menu.player_root(pid), "Remove Godmode from Speedo", {}, "Turns off the godmode of the Speedo that was previously glitched.", function()
+				--[[menu.action(menu.player_root(pid), "Remove Godmode from Speedo", {}, "Turns off the godmode of the Speedo that was previously glitched.", function()
 					local vehicle = get_player_veh(pid,true)
 					if vehicle then	
 						ENTITY.SET_ENTITY_INVINCIBLE(vehicle, false) 
 						util.toast("[Mira] <3\n".."> (Target: "..PLAYER.GET_PLAYER_NAME(pid)..")".." his/her Speedo should not be in Godmode anymore.")
-					end end)	
-				menu.toggle_loop(menu.player_root(pid), "Remove Vehicle Godmode", {}, "", function()
+					end end)]]
+				--[[menu.toggle_loop(menu.player_root(pid), "Remove Vehicle Godmode", {}, "", function()
 					local vehicle = get_player_veh(pid,true)
 					if vehicle then	
 						ENTITY.SET_ENTITY_INVINCIBLE(vehicle, false) 
-					end end)
+					end end)]]
 				menu.toggle_loop(menu.player_root(pid), "Give Vehicle Godmode", {}, "", function(toggled)
 					ENTITY.SET_ENTITY_PROOFS(PED.GET_VEHICLE_PED_IS_IN(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)), true, true, true, true, true, 0, 0, true)
 					end, function() ENTITY.SET_ENTITY_PROOFS(PED.GET_VEHICLE_PED_IS_IN(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)), false, false, false, false, false, 0, 0, false)
 					end)
-				
-			accountoptions = menu.list(menu.player_root(pid), "Account Options", {}, "", function(); end)
-				menu.divider(accountoptions, "~~~> Account Options <~~~")
-				menu.action(accountoptions, "Rank Them Up", {"rankboost"}, "Gives them ~175k RP. Can boost a lvl 1 ~25 levels.", function()
-					menu.trigger_commands("givecollectibles"..PLAYER.GET_PLAYER_NAME(pid)) end)
 
 			--[[phistory = menu.list(menu.player_root(pid), "Player History", {}, "", function(); end)
 				menu.divider(phistory, "~~~> Add to Player History <~~~")
@@ -2751,7 +2667,7 @@
 					end
 					VEHICLE.SET_VEHICLE_HOMING_LOCKEDONTO_STATE(vehicle, 1)end)
 				
-			crash = menu.list(menu.player_root(pid), "Kicks & Crashes", {}, "", function(); end)
+			--[[crash = menu.list(menu.player_root(pid), "Kicks & Crashes", {}, "", function(); end)
 				menu.divider(crash, "~~~> Basic Kicks <~~~")
 				menu.action(crash, "Host Kick", {"host"}, "", function()
 					--menu.trigger_commands("timeout"..PLAYER.GET_PLAYER_NAME(pid).." ".."on")
@@ -2783,7 +2699,7 @@
 						NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
 					end end)
 				menu.divider(crash, "~~~> Crashes <~~~")
-				--[[menu.action(crash, "Broken World Crash", {"ptbwc"}, "The crash remains after leaving the lobby.", function()
+				menu.action(crash, "Broken World Crash", {"ptbwc"}, "The crash remains after leaving the lobby.", function()
 					local pos = ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
 					local hakuchou = util.joaat("hakuchou2")
     
@@ -2795,7 +2711,7 @@
 					local vehicle = entities.create_vehicle(hakuchou, pos, 0)
 					VEHICLE.SET_VEHICLE_MOD(vehicle, 34, 3, false)
 					util.yield(1000)
-					entities.delete_by_handle(vehicle)end)]]
+					entities.delete_by_handle(vehicle)end)
 				menu.action(crash, "AI Generated Crash", {"ptai"}, "Most mod menus will block this.", function()
 					local player_position = players.get_position(pid)
 					local joaat_hash = util.joaat("prop_fragtest_cnst_04")
@@ -2825,8 +2741,74 @@
 						ENTITY.SET_ENTITY_HEALTH(user, 0)
 						NETWORK.NETWORK_RESURRECT_LOCAL_PLAYER(oldPos.x, oldPos.y, oldPos.z, 0, false, false, 0)
 						ENTITY.SET_ENTITY_VISIBLE(user, true)
-					end)end)
-				menu.action(menu.player_root(pid), "Save Playerdata", {"save"}, "", function(on)
+					end)end)]]
+		
+			menu.textslider_stateful(menu.player_root(pid), "Kicks:", {}, "", PMKicks, function(index)
+				if index == 1 then
+					PmKickstype = PmKicksType.hostkick
+						if NETWORK.NETWORK_IS_HOST() then
+							local name = PLAYER.GET_PLAYER_NAME(pid)
+							log("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid)..")")
+							NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
+						end
+				elseif index == 2 then
+					PmKickstype = PmKicksType.orbitalkick
+						if NETWORK.NETWORK_IS_HOST() then
+							local ip = players.get_connect_ip(pid)
+							local name = PLAYER.GET_PLAYER_NAME(pid)
+							log("Orbital Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid)..")")
+							graphics.set_next_ptfx_asset("scr_xm_orbital")
+							while not graphics.has_named_ptfx_asset_loaded("scr_xm_orbital") do
+								graphics.request_named_ptfx_asset("scr_xm_orbital")
+								util.yield(0)
+							end
+							audio.play_sound_from_coord(1, "DLC_XM_Explosions_Orbital_Cannon", player.get_player_coords(pid), 0, true, 0, false)
+							fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
+							fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
+							fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
+							fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
+							fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
+							fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
+							graphics.start_networked_ptfx_non_looped_at_coord("scr_xm_orbital_blast", player.get_player_coords(pid), v3(0, 180, 0), 1, true, true, true)
+							util.yield(500)
+							NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
+						end
+				end	end)
+			menu.textslider_stateful(menu.player_root(pid), "Crashes:", {}, "", PMCrashes, function(index)
+				if index == 1 then
+					PmCrashestype = PmCrashesType.crash1
+						local user = PLAYER.GET_PLAYER_PED(players.user())
+						local model = util.joaat("h4_prop_bush_mang_ad")
+						local pos = players.get_position(pid)
+						local oldPos = players.get_position(players.user())
+						BlockSyncs(pid, function()
+							util.yield(100)
+							ENTITY.SET_ENTITY_VISIBLE(user, false)
+							ENTITY.SET_ENTITY_COORDS_NO_OFFSET(user, pos.x, pos.y, pos.z, false, false, false)
+							PLAYER.SET_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(players.user(), model)
+							PED.SET_PED_COMPONENT_VARIATION(user, 5, 8, 0, 0)
+							util.yield(500)
+							PLAYER.CLEAR_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(players.user())
+							util.yield(2500)
+							TASK.CLEAR_PED_TASKS_IMMEDIATELY(user)
+							for i = 1, 5 do
+								util.spoof_script("freemode", SYSTEM.WAIT)
+							end
+							ENTITY.SET_ENTITY_HEALTH(user, 0)
+							NETWORK.NETWORK_RESURRECT_LOCAL_PLAYER(oldPos.x, oldPos.y, oldPos.z, 0, false, false, 0)
+							ENTITY.SET_ENTITY_VISIBLE(user, true)
+						end)
+				elseif index == 2 then
+					PmCrashestype = PmCrashesType.crash2
+						local player_position = players.get_position(pid)
+						local joaat_hash = util.joaat("prop_fragtest_cnst_04")
+						util.request_model(joaat_hash)
+						local object_handle = entities.create_object(joaat_hash, player_position)
+						OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object_handle, 3, false)
+						util.yield(1000)
+						entities.delete_by_handle(object_handle)
+				end	end)
+			menu.action(menu.player_root(pid), "Save Playerdata", {"save"}, "", function(on)
 					local ip = players.get_connect_ip(pid)
 					local name = PLAYER.GET_PLAYER_NAME(pid)
 					history("Saved Playerdata: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid).." / IP: "..string.format("%i.%i.%i.%i)", ip >> 24 & 255, ip >> 16 & 255, ip >> 8 & 255, ip & 255))
