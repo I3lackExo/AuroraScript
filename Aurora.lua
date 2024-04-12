@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora for Stand"
-	local Version = 3.7
+	local Version = 3.8
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 
@@ -182,6 +182,10 @@
 			local LogDelete <const> = {"Playerhistory", "General Log"}
 			local LogDeleteType <const> = {log1 = 0, log2 = 1}
 			local LogDeletetype = 0
+
+		local levelPly = 120
+		local delayPly = 0
+		local rpLoopPlyr
 
 		local lockon
 		local x, y = 0.992, 0.008
@@ -2574,9 +2578,41 @@
 					menu.trigger_commands("historynote"..PLAYER.GET_PLAYER_NAME(pid).."")
 					util.toast(PLAYER.GET_PLAYER_NAME(pid).." delete from your list.")end)
 				menu.divider(phistory, "~~~> "..PLAYER.GET_PLAYER_NAME(pid).." | RID: "..players.get_rockstar_id(pid).." <~~~")]]
-			
+			recovery = menu.list(menu.player_root(pid), "Recovery Options", {}, "", function(); end)
+				menu.divider(recovery, "~~~> Recovery Options <~~~")
+				rploop = menu.list(recovery, "RP Loop", {}, "", function(); end)
+					menu.divider(rploop, "~~~> RP Loop <~~~")
+					menu.slider(rploop, "Stop At Level...", {}, "", 1, 8000, 120, 1, function(val)
+						levelPly = val end)
+					menu.slider(rploop, "Loop Delay", {}, "", 0, 2500, 0, 10, function(val)
+						delayPly = val end)
+					menu.toggle_loop(rploop, "Enable Loop", {}, "", function()
+						if players.get_rank(pid) >= levelPly then 
+							util.toast(players.get_name(pid).."is already at or above level "..levelPly..". :)")
+							menu.value = false
+							return 
+						end
+						repeat
+							for i = 21, 24 do
+								if players.get_rank(pid) >= levelPly then break end
+								util.trigger_script_event(1 << pid, {968269233, players.user(), 4, i, 1, 1, 1})
+								util.trigger_script_event(1 << pid, {968269233, players.user(), 8, -1, 1, 1, 1})
+								if delayPly > 0 then
+									util.yield(delayPly)
+								end
+							end
+							util.yield()
+						until players.get_rank(pid) >= levelPly or not menu.value
+						if players.get_rank(pid) >= levelPly then 
+							util.toast(players.get_name(pid).." is now at level "..levelPly..". :)")
+							menu.value = false
+							util.yield()
+							util.yield()
+							return 
+						end end)
+
 			trolling = menu.list(menu.player_root(pid), "Trolling Options", {}, "", function(); end)
-				menu.divider(trolling, "~~~> 2Take1 Meteor <~~~")
+				menu.divider(trolling, "~~~> Meteor Script [2Take1] <~~~")
 				menu.action(trolling, "Send to Gas Chamber", {}, "", function()
 						--TASK.CLEAR_PED_TASKS_IMMEDIATELY(players.user_ped(pid))
 						local object = object.create_object(959275690, player.get_player_coords(pid) - v3(0, 0, 0), true, false)
@@ -2593,7 +2629,7 @@
 							FIRE.ADD_EXPLOSION(pos.x + math.random(-2, 2), pos.y + math.random(-2, 2), pos.z + math.random(-2, 2), 70, 1, true, false, 0.2, false)
 							util.yield(math.random(0, 1))
 						end end)
-				menu.divider(trolling, "~~~> 2Take1 CRWX <~~~")
+				menu.divider(trolling, "~~~> CRWX Script [2Take1] <~~~")
 				menu.action(trolling, "Send Orb", {"orb"}, "", function()
 						graphics.set_next_ptfx_asset("scr_xm_orbital")
 						while not graphics.has_named_ptfx_asset_loaded("scr_xm_orbital") do
