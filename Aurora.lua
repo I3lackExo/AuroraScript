@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora for Stand"
-	local Version = 3.8
+	local Version = 3.9
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 
@@ -1951,16 +1951,42 @@
 						menu.trigger_commands("spoofhost".." ".."off")
 						util.toast("[Mira] <3\n".."> I have turned off the block you can now rejoin.")
 					end end)
-			lobbyoptions = menu.list(onlineoptions, "Lobby Options", {}, "", function(); end)
-				menu.divider(lobbyoptions, "~~~> Bounty Options <~~~")
-				bountyloop = menu.list(lobbyoptions, "Bounty loop", {}, "", function(); end)
+			recoveryoptions = menu.list(onlineoptions, "Recovery Options", {}, "", function(); end)
+				menu.divider(recoveryoptions, "~~~> Casino <~~~")
+				menu.toggle_loop(recoveryoptions, "Auto Black Jack", {}, "", function()
+					if not (isHelpMessageBeingDisplayed('BJACK_BET') or isHelpMessageBeingDisplayed('BJACK_TURN') or isHelpMessageBeingDisplayed('BJACK_TURN_D') or isHelpMessageBeingDisplayed('BJACK_TURN_S')) then return end
+					if isHelpMessageBeingDisplayed('BJACK_BET') then
+						PAD._SET_CONTROL_NORMAL(2, 204, 1) --max bet
+						PAD._SET_CONTROL_NORMAL(2, 201, 1) --bet
+					else
+						PAD._SET_CONTROL_NORMAL(2, 203, 1) --pass
+					end end)
+			terminaloptions = menu.list(onlineoptions, "Remote Access Apps", {}, "Based on Heist Control Stuff", function(); end)
+				menu.divider(terminaloptions, "~~~> Remote Access Apps <~~~")
+				menu.action(terminaloptions, "Smuggler (Air Cargo)", {}, "", function()
+					START_SCRIPT("CEO", "appsmuggler")end)
+				menu.action(terminaloptions, "Bunker", {}, "", function()
+					START_SCRIPT("CEO", "appbunkerbusiness")end)
+				menu.action(terminaloptions, "Nightclub", {}, "", function()
+					START_SCRIPT("CEO", "appbusinesshub")end)
+				menu.action(terminaloptions, "Biker Business (Only MC)", {}, "", function()
+					START_SCRIPT("MC", "appbikerbusiness")end)
+				menu.action(terminaloptions, "Touchscreen Terminal (Terrorbyte)", {}, "", function()
+					START_SCRIPT("CEO", "apphackertruck")end)
+				menu.action(terminaloptions, "Master Control Terminal (Arcade)", {}, "", function()
+						START_SCRIPT("CEO", "apparcadebusinesshub")end)
+				menu.action(terminaloptions, "Agency", {}, "", function()
+					START_SCRIPT("CEO", "appfixersecurity")end)
+				menu.action(terminaloptions, "San Andreas Mercenaries Terminal (Avenger)", {}, "", function()
+					START_SCRIPT("CEO", "appavengeroperations")end)
+			menu.divider(onlineoptions, "~~~> Trolling <~~~")
+			bountyloop = menu.list(onlineoptions, "Bounty loop", {}, "", function(); end)
 					menu.divider(bountyloop, "~~~> Bounty Loop <~~~")
 					menu.slider(bountyloop, "Bounty Amount", {}, "", 0, 10000, 10000, 1, function(s)
 						infibounty_amt = s end)
 					menu.toggle_loop(bountyloop, "Place Infinite Bounty", {}, "", function(click_type)
 						menu.trigger_commands("bountyall" .. " " .. tostring(infibounty_amt))
 						util.yield(60000)end)
-			--menu.divider(onlineoptions, "~~~> Trolling <~~~")
 			menu.divider(onlineoptions, "~~~> Scare some Players <~~~")
 			menu.action(onlineoptions, "Real localized \"DOX\"", {"dox"}, "", function(on_click)
 				chat.send_message("${name}: ${ip} | ${geoip.city}, ${geoip.region}, ${geoip.country}", false, true, true)end)
@@ -2173,29 +2199,6 @@
 
 		
 		menu.divider(miscoptions, "~~~> Misc Options <~~~")
-			recoveryoptions = menu.list(miscoptions, "Recovery Options", {}, "Based on Heist Control Stuff", function(); end)
-				menu.divider(recoveryoptions, "~~~> Remote Access Apps <~~~")
-				menu.action(recoveryoptions, "Smuggler (Air Cargo)", {}, "", function()
-					START_SCRIPT("CEO", "appsmuggler")end)
-				menu.action(recoveryoptions, "Bunker", {}, "", function()
-					START_SCRIPT("CEO", "appbunkerbusiness")end)
-				menu.action(recoveryoptions, "Nightclub", {}, "", function()
-					START_SCRIPT("CEO", "appbusinesshub")end)
-				menu.action(recoveryoptions, "Biker Business (Only MC)", {}, "", function()
-					START_SCRIPT("MC", "appbikerbusiness")end)
-				menu.action(recoveryoptions, "Touchscreen Terminal (Terrorbyte)", {}, "", function()
-					START_SCRIPT("CEO", "apphackertruck")end)
-				menu.action(recoveryoptions, "Master Control Terminal (Arcade)", {}, "", function()
-						START_SCRIPT("CEO", "apparcadebusinesshub")end)
-				menu.divider(recoveryoptions, "~~~> Casino <~~~")
-				menu.toggle_loop(recoveryoptions, "Auto Black Jack", {}, "", function()
-					if not (isHelpMessageBeingDisplayed('BJACK_BET') or isHelpMessageBeingDisplayed('BJACK_TURN') or isHelpMessageBeingDisplayed('BJACK_TURN_D') or isHelpMessageBeingDisplayed('BJACK_TURN_S')) then return end
-					if isHelpMessageBeingDisplayed('BJACK_BET') then
-						PAD._SET_CONTROL_NORMAL(2, 204, 1) --max bet
-						PAD._SET_CONTROL_NORMAL(2, 201, 1) --bet
-					else
-						PAD._SET_CONTROL_NORMAL(2, 203, 1) --pass
-					end end)
 			teleport = menu.list(miscoptions, "Teleport Options", {}, "", function(); end)
 				menu.divider(teleport, "~~~> Teleport Options <~~~")
 				for index, data in interiors do
@@ -2702,83 +2705,13 @@
 						return 
 					end
 					VEHICLE.SET_VEHICLE_HOMING_LOCKEDONTO_STATE(vehicle, 1)end)
-				
-			--[[crash = menu.list(menu.player_root(pid), "Kicks & Crashes", {}, "", function(); end)
-				menu.divider(crash, "~~~> Basic Kicks <~~~")
-				menu.action(crash, "Host Kick", {"host"}, "", function()
-					--menu.trigger_commands("timeout"..PLAYER.GET_PLAYER_NAME(pid).." ".."on")
-					if NETWORK.NETWORK_IS_HOST() then
-						local name = PLAYER.GET_PLAYER_NAME(pid)
-						log("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid)..")")
-						NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
-					end end)
-				menu.action(crash, "Orbital Host Kick", {"orbhost"}, "", function()
-					--menu.trigger_commands("timeout"..PLAYER.GET_PLAYER_NAME(pid).." ".."on")
-					if NETWORK.NETWORK_IS_HOST() then
-						local ip = players.get_connect_ip(pid)
-						local name = PLAYER.GET_PLAYER_NAME(pid)
-						log("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid)..")")
-						graphics.set_next_ptfx_asset("scr_xm_orbital")
-						while not graphics.has_named_ptfx_asset_loaded("scr_xm_orbital") do
-							graphics.request_named_ptfx_asset("scr_xm_orbital")
-							util.yield(0)
-						end
-						audio.play_sound_from_coord(1, "DLC_XM_Explosions_Orbital_Cannon", player.get_player_coords(pid), 0, true, 0, false)
-						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
-						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
-						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
-						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
-						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
-						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
-						graphics.start_networked_ptfx_non_looped_at_coord("scr_xm_orbital_blast", player.get_player_coords(pid), v3(0, 180, 0), 1, true, true, true)
-						util.yield(500)
-						NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
-					end end)
-				menu.divider(crash, "~~~> Crashes <~~~")
-				menu.action(crash, "Broken World Crash", {"ptbwc"}, "The crash remains after leaving the lobby.", function()
-					local pos = ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
-					local hakuchou = util.joaat("hakuchou2")
-    
-					STREAMING.REQUEST_MODEL(hakuchou)
-					while not STREAMING.HAS_MODEL_LOADED(hakuchou) do
-						util.yield()
-					end
-    
-					local vehicle = entities.create_vehicle(hakuchou, pos, 0)
-					VEHICLE.SET_VEHICLE_MOD(vehicle, 34, 3, false)
-					util.yield(1000)
-					entities.delete_by_handle(vehicle)end)
-				menu.action(crash, "AI Generated Crash", {"ptai"}, "Most mod menus will block this.", function()
-					local player_position = players.get_position(pid)
-					local joaat_hash = util.joaat("prop_fragtest_cnst_04")
-					util.request_model(joaat_hash)
-					local object_handle = entities.create_object(joaat_hash, player_position)
-					OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object_handle, 3, false)
-					util.yield(1000)
-					entities.delete_by_handle(object_handle)end)
-				menu.action(crash, "Mother Nature Crash", {"ptmncrash"}, "Most mod menus will block this.", function()
-					local user = PLAYER.GET_PLAYER_PED(players.user())
-					local model = util.joaat("h4_prop_bush_mang_ad")
-					local pos = players.get_position(pid)
-					local oldPos = players.get_position(players.user())
-					BlockSyncs(pid, function()
-						util.yield(100)
-						ENTITY.SET_ENTITY_VISIBLE(user, false)
-						ENTITY.SET_ENTITY_COORDS_NO_OFFSET(user, pos.x, pos.y, pos.z, false, false, false)
-						PLAYER.SET_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(players.user(), model)
-						PED.SET_PED_COMPONENT_VARIATION(user, 5, 8, 0, 0)
-						util.yield(500)
-						PLAYER.CLEAR_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(players.user())
-						util.yield(2500)
-						TASK.CLEAR_PED_TASKS_IMMEDIATELY(user)
-						for i = 1, 5 do
-							util.spoof_script("freemode", SYSTEM.WAIT)
-						end
-						ENTITY.SET_ENTITY_HEALTH(user, 0)
-						NETWORK.NETWORK_RESURRECT_LOCAL_PLAYER(oldPos.x, oldPos.y, oldPos.z, 0, false, false, 0)
-						ENTITY.SET_ENTITY_VISIBLE(user, true)
-					end)end)]]
-		
+			
+			--[[menu.action(menu.player_root(pid), "Invite to CEO/MC", {"ceoinvite"}, "Invite player to your current organization (SecuroServ CEO or Motorcycle Club)", function(on)
+				if players.get_org_type(players.user()) == -1 then
+					util.toast("[Mira] <3\n".."> Cannot send invite until you create an organization (ServoServ CEO or Motorcycle Club)")
+					return end
+
+					util.trigger_script_event(1 << pid, {-245642440, players.user(), 4, 10000, 0, 0, 0, 0, memory.read_int(memory.script_global(1924276 + 9)), memory.read_int(memory.script_global(1924276 + 10)),})end)]]
 			menu.textslider_stateful(menu.player_root(pid), "Kicks:", {}, "", PMKicks, function(index)
 				if index == 1 then
 					PmKickstype = PmKicksType.hostkick
@@ -3130,6 +3063,83 @@
 						until bounty == nil
 						util.toast("[Mira] <3\n".."> Bounty has been claimed.")
 					end end)]]
+
+	-- [[ Kicks & Crashes ]]
+		--[[crash = menu.list(menu.player_root(pid), "Kicks & Crashes", {}, "", function(); end)
+				menu.divider(crash, "~~~> Basic Kicks <~~~")
+				menu.action(crash, "Host Kick", {"host"}, "", function()
+					--menu.trigger_commands("timeout"..PLAYER.GET_PLAYER_NAME(pid).." ".."on")
+					if NETWORK.NETWORK_IS_HOST() then
+						local name = PLAYER.GET_PLAYER_NAME(pid)
+						log("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid)..")")
+						NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
+					end end)
+				menu.action(crash, "Orbital Host Kick", {"orbhost"}, "", function()
+					--menu.trigger_commands("timeout"..PLAYER.GET_PLAYER_NAME(pid).." ".."on")
+					if NETWORK.NETWORK_IS_HOST() then
+						local ip = players.get_connect_ip(pid)
+						local name = PLAYER.GET_PLAYER_NAME(pid)
+						log("Host Kick: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid)..")")
+						graphics.set_next_ptfx_asset("scr_xm_orbital")
+						while not graphics.has_named_ptfx_asset_loaded("scr_xm_orbital") do
+							graphics.request_named_ptfx_asset("scr_xm_orbital")
+							util.yield(0)
+						end
+						audio.play_sound_from_coord(1, "DLC_XM_Explosions_Orbital_Cannon", player.get_player_coords(pid), 0, true, 0, false)
+						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
+						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
+						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
+						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
+						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
+						fire.add_explosion(player.get_player_coords(pid), 59, 1000000, 1, 1, 0, false, player.get_player_ped(player.player_id()))
+						graphics.start_networked_ptfx_non_looped_at_coord("scr_xm_orbital_blast", player.get_player_coords(pid), v3(0, 180, 0), 1, true, true, true)
+						util.yield(500)
+						NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
+					end end)
+				menu.divider(crash, "~~~> Crashes <~~~")
+				menu.action(crash, "Broken World Crash", {"ptbwc"}, "The crash remains after leaving the lobby.", function()
+					local pos = ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
+					local hakuchou = util.joaat("hakuchou2")
+    
+					STREAMING.REQUEST_MODEL(hakuchou)
+					while not STREAMING.HAS_MODEL_LOADED(hakuchou) do
+						util.yield()
+					end
+    
+					local vehicle = entities.create_vehicle(hakuchou, pos, 0)
+					VEHICLE.SET_VEHICLE_MOD(vehicle, 34, 3, false)
+					util.yield(1000)
+					entities.delete_by_handle(vehicle)end)
+				menu.action(crash, "AI Generated Crash", {"ptai"}, "Most mod menus will block this.", function()
+					local player_position = players.get_position(pid)
+					local joaat_hash = util.joaat("prop_fragtest_cnst_04")
+					util.request_model(joaat_hash)
+					local object_handle = entities.create_object(joaat_hash, player_position)
+					OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object_handle, 3, false)
+					util.yield(1000)
+					entities.delete_by_handle(object_handle)end)
+				menu.action(crash, "Mother Nature Crash", {"ptmncrash"}, "Most mod menus will block this.", function()
+					local user = PLAYER.GET_PLAYER_PED(players.user())
+					local model = util.joaat("h4_prop_bush_mang_ad")
+					local pos = players.get_position(pid)
+					local oldPos = players.get_position(players.user())
+					BlockSyncs(pid, function()
+						util.yield(100)
+						ENTITY.SET_ENTITY_VISIBLE(user, false)
+						ENTITY.SET_ENTITY_COORDS_NO_OFFSET(user, pos.x, pos.y, pos.z, false, false, false)
+						PLAYER.SET_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(players.user(), model)
+						PED.SET_PED_COMPONENT_VARIATION(user, 5, 8, 0, 0)
+						util.yield(500)
+						PLAYER.CLEAR_PLAYER_PARACHUTE_PACK_MODEL_OVERRIDE(players.user())
+						util.yield(2500)
+						TASK.CLEAR_PED_TASKS_IMMEDIATELY(user)
+						for i = 1, 5 do
+							util.spoof_script("freemode", SYSTEM.WAIT)
+						end
+						ENTITY.SET_ENTITY_HEALTH(user, 0)
+						NETWORK.NETWORK_RESURRECT_LOCAL_PLAYER(oldPos.x, oldPos.y, oldPos.z, 0, false, false, 0)
+						ENTITY.SET_ENTITY_VISIBLE(user, true)
+					end)end)]]
 
 	-- [[ Info ]]
 		--local host = players.get_host(pidlist)
