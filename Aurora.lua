@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora for Stand"
-	local Version = 3.9
+	local Version = 4.0
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 
@@ -155,6 +155,11 @@
 			local passivePlayerList <const> = {"Block", "Unblock"}
 			local PassiveType <const> = {onpassive = 0, offpassive = 1}
 			local passivetype = 0
+
+		-- [[ Requests ]]
+			local RequestsType <const> = {"MOC", "Avenger", "Terrorbyte", "Kosatka", "Acid Lab"}
+			local requestsType <const> = {moc = 0, avenger = 1, terrorbyte = 2, kosatka = 3, acidlab = 4}
+			local requeststype = 0
 
 		-- [[ Buffing Settings ]]
 			local Lazerbuffing <const> = {"Modifyed Cannon", "Normal Cannon"}
@@ -1951,6 +1956,24 @@
 						menu.trigger_commands("spoofhost".." ".."off")
 						util.toast("[Mira] <3\n".."> I have turned off the block you can now rejoin.")
 					end end)
+			terminaloptions = menu.list(onlineoptions, "Remote Access Apps", {}, "Based on Heist Control Stuff", function(); end)
+				menu.divider(terminaloptions, "~~~> Remote Access Apps <~~~")
+				menu.action(terminaloptions, "(Arcade) Master Control Terminal", {}, "", function()
+					START_SCRIPT("CEO", "apparcadebusinesshub")end)
+				menu.action(terminaloptions, "(Hangar) Free Trade Shipping Co.", {}, "", function()
+					START_SCRIPT("CEO", "appsmuggler")end)
+				menu.action(terminaloptions, "(Bunker) Disruption Logistics", {}, "", function()
+					START_SCRIPT("CEO", "appbunkerbusiness")end)
+				menu.action(terminaloptions, "(Agency) F. Clinton & Partner", {}, "", function()
+					START_SCRIPT("CEO", "appfixersecurity")end)
+				menu.action(terminaloptions, "(Terrorbyte) Touchscreen Terminal", {}, "", function()
+					START_SCRIPT("CEO", "apphackertruck")end)
+				menu.action(terminaloptions, "(Avenger) San Andreas Mercenaries Terminal", {}, "", function()
+					START_SCRIPT("CEO", "appavengeroperations")end)
+				menu.action(terminaloptions, "(Only MC) Biker Business", {}, "", function()
+					START_SCRIPT("MC", "appbikerbusiness")end)
+				menu.action(terminaloptions, "Nightclub", {}, "", function()
+					START_SCRIPT("CEO", "appbusinesshub")end)
 			recoveryoptions = menu.list(onlineoptions, "Recovery Options", {}, "", function(); end)
 				menu.divider(recoveryoptions, "~~~> Casino <~~~")
 				menu.toggle_loop(recoveryoptions, "Auto Black Jack", {}, "", function()
@@ -1961,26 +1984,31 @@
 					else
 						PAD._SET_CONTROL_NORMAL(2, 203, 1) --pass
 					end end)
-			terminaloptions = menu.list(onlineoptions, "Remote Access Apps", {}, "Based on Heist Control Stuff", function(); end)
-				menu.divider(terminaloptions, "~~~> Remote Access Apps <~~~")
-				menu.action(terminaloptions, "Smuggler (Air Cargo)", {}, "", function()
-					START_SCRIPT("CEO", "appsmuggler")end)
-				menu.action(terminaloptions, "Bunker", {}, "", function()
-					START_SCRIPT("CEO", "appbunkerbusiness")end)
-				menu.action(terminaloptions, "Nightclub", {}, "", function()
-					START_SCRIPT("CEO", "appbusinesshub")end)
-				menu.action(terminaloptions, "Biker Business (Only MC)", {}, "", function()
-					START_SCRIPT("MC", "appbikerbusiness")end)
-				menu.action(terminaloptions, "Touchscreen Terminal (Terrorbyte)", {}, "", function()
-					START_SCRIPT("CEO", "apphackertruck")end)
-				menu.action(terminaloptions, "Master Control Terminal (Arcade)", {}, "", function()
-						START_SCRIPT("CEO", "apparcadebusinesshub")end)
-				menu.action(terminaloptions, "Agency", {}, "", function()
-					START_SCRIPT("CEO", "appfixersecurity")end)
-				menu.action(terminaloptions, "San Andreas Mercenaries Terminal (Avenger)", {}, "", function()
-					START_SCRIPT("CEO", "appavengeroperations")end)
+			
+					
+			menu.divider(onlineoptions, "~~~> Requests <~~~")
+			menu.textslider_stateful(onlineoptions, "Request:", {}, "", RequestsType, function(index)
+				if index == 1 then
+					requeststype = requestsType.moc
+						SET_INT_GLOBAL(2738587 + 930, 1)
+				elseif index == 2 then
+					requeststype = requestsType.avenger
+						SET_INT_GLOBAL(2738587 + 938, 1)
+				elseif index == 3 then
+					requeststype = requestsType.terrorbyte
+						SET_INT_GLOBAL(2738587 + 943, 1)
+				elseif index == 4 then
+					requeststype = requestsType.kosatka
+						SET_INT_GLOBAL(2738587 + 960, 1)
+				elseif index == 5 then
+					requeststype = requestsType.acidlab
+						SET_INT_GLOBAL(2738587 + 944, 1)
+				end	end)
+				
+
+
 			menu.divider(onlineoptions, "~~~> Trolling <~~~")
-			bountyloop = menu.list(onlineoptions, "Bounty loop", {}, "", function(); end)
+			bountyloop = menu.list(onlineoptions, "Bounty Loop", {}, "", function(); end)
 					menu.divider(bountyloop, "~~~> Bounty Loop <~~~")
 					menu.slider(bountyloop, "Bounty Amount", {}, "", 0, 10000, 10000, 1, function(s)
 						infibounty_amt = s end)
@@ -2196,7 +2224,6 @@
 				if PAD.IS_CONTROL_PRESSED(1, 189) then
 					menu.trigger_commands("deployboth")
 				end util.yield() end)
-
 		
 		menu.divider(miscoptions, "~~~> Misc Options <~~~")
 			teleport = menu.list(miscoptions, "Teleport Options", {}, "", function(); end)
