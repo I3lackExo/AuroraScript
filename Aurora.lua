@@ -5,9 +5,10 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora for Stand"
-	local Version = 4.0
+	local Version = 4.1
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
+	local GameVersion = "3179"
 
 	require("lib/AuroraScript/Natives")
 	local required <const> = {"lib/AuroraScript/Natives.lua"}
@@ -128,66 +129,7 @@
 			end
 		end end, true)
 
-
-
-
-		--[[if on then
-			bailOnAdminJoin = on
-			util.toast("[Mira] <3\n".."> Okay, I will notify you when I see an admin.")
-		else
-			bailOnAdminJoin = off
-			util.toast("[Mira] <3\n".."> Warning: If you meet an admin the risk of being banned is high.") end end)]]
-
 	-- [[ Locals ]]
-		-- [[ Custom Playerlist ]]
-			local kickPlayerList <const> = {"Smart Kick", "Host Kick", "Ban Kick"}
-			local KickType <const> = {smartkick = 0, hostkick = 1, bankick = 2}
-			local kicktype = 0
-
-			local crashPlayerList <const> = {"Elegant Crash"}
-			local CrashType <const> = {elegant = 0}
-			local crashtype = 0
-
-			local pTPlayerList <const> = {"Remove Explosive Shit", "Disable Ghost"}
-			local PtType <const> = {removeexplo = 0, disghost = 1}
-			local pttype = 0
-
-			local passivePlayerList <const> = {"Block", "Unblock"}
-			local PassiveType <const> = {onpassive = 0, offpassive = 1}
-			local passivetype = 0
-
-		-- [[ Requests ]]
-			local RequestsType <const> = {"MOC", "Avenger", "Terrorbyte", "Kosatka", "Acid Lab"}
-			local requestsType <const> = {moc = 0, avenger = 1, terrorbyte = 2, kosatka = 3, acidlab = 4}
-			local requeststype = 0
-
-		-- [[ Buffing Settings ]]
-			local Lazerbuffing <const> = {"Modifyed Cannon", "Normal Cannon"}
-			local LazerType <const> = {modifyed = 0, normal = 1}
-			local lazerttype = 0
-
-			local B11buffing <const> = {"Modifyed Cannon", "Normal Cannon"}
-			local B11Type <const> = {modifyed = 0, normal = 1}
-			local b11ttype = 0
-
-			local Chernobuffing <const> = {"Shoot together", "Lock-On Range"}
-			local ChernoType <const> = {modifyed = 0, modifyed1 = 1}
-			local chernottype = 0
-
-		-- [[ Kicks & Crashes ]]
-			local PMKicks <const> = {"Host Kick", "Orbital Host Kick"}
-			local PmKicksType <const> = {hostkick = 0, orbitalkick = 1}
-			local PmKickstype = 0
-
-			local PMCrashes <const> = {"Mother Nature", "AI Generated"}
-			local PmCrashesType <const> = {crash1 = 0, crash2 = 1}
-			local PmCrashestype = 0
-
-		-- [[ Delete Log ]]
-			local LogDelete <const> = {"Playerhistory", "General Log"}
-			local LogDeleteType <const> = {log1 = 0, log2 = 1}
-			local LogDeletetype = 0
-
 		local levelPly = 120
 		local delayPly = 0
 		local rpLoopPlyr
@@ -840,7 +782,7 @@
 	-- [[ Functions ]]
 		local function player_list(playerID)
 			if NETWORK.NETWORK_IS_SESSION_ACTIVE() then
-				menus[playerID] = menu.toggle(playerslist, players.get_name(playerID), {}, "Player Info:\n".."- Name: "..players.get_name(playerID).."\n".."- RID: "..players.get_rockstar_id(playerID).."\n".."- VPN: "..players.is_using_vpn(playerID), function(on_toggle)
+				menus[playerID] = menu.toggle(playerslist, players.get_name(playerID), {}, "Player Info:\n".."- Name: "..players.get_name(playerID).."\n".."- RID: "..players.get_rockstar_id(playerID), function(on_toggle)
 					if on_toggle then
 						selectedplayer[playerID] = true
 					else
@@ -857,14 +799,14 @@
 					menus[playerID] = nil
 				end
 			end end
-		local function remove_explonsniper(pid)
+		--[[local function remove_explonsniper(pid)
 			for pid = 0,31 do
 				if NETWORK.NETWORK_IS_SESSION_ACTIVE() then
 					if WEAPON.HAS_PED_GOT_WEAPON(players.user_ped(pid), 177293209) and WEAPON.HAS_PED_GOT_WEAPON_COMPONENT(players.user_ped(pid), 177293209, 2313935527) and pid ~= players.user() then		
 						WEAPON.REMOVE_WEAPON_COMPONENT_FROM_PED(players.user_ped(pid), 177293209, 2313935527)
 					end
 				end	
-			end end
+			end end]]
 		local function is_using_vehicle()
 			local my_veh = PED.GET_VEHICLE_PED_IS_USING(players.user_ped())
 			if my_veh and (VEHICLE.GET_PED_IN_VEHICLE_SEAT(my_veh,-1) == players.user_ped() or VEHICLE.GET_PED_IN_VEHICLE_SEAT(my_veh,0) == players.user_ped() ) then
@@ -1187,6 +1129,7 @@
 			else
 				util.toast(players.get_name(pid) .. " sent a message, but is on cooldown from translations. Consider kicking this player if they are spamming the chat to prevent a possible temporary ban from Google translate.")
 			end end
+
 		get_vtable_entry_pointer = function(address, index)
 				return memory.read_long(memory.read_long(address) + (8 * index))end
 		get_sub_handling_types = function(vehicle, type)
@@ -1246,7 +1189,6 @@
 
 	--[[ Start ]]
 		util.show_corner_help(colorcodes.small..colorcodes.red.."WARNING: Codes were taken from other scripts and are therefore not my codes. DO NOT PUBLISH THE SCRIPT!")
-		--util.toast("[Mira] <3\n".."> Hello @"..SOCIALCLUB._SC_GET_NICKNAME().."! :)")
 		menu.trigger_commands("edithudlbdfmp".." ".."Universe "..tostring(math.random(1, 999999)).." (Public, ~1~)")
 		util.toast("[Mira] <3\n".."> Hello "..SOCIALCLUB._SC_GET_NICKNAME().."! Welcome to Aurora!")
 
@@ -1624,12 +1566,8 @@
 							util.yield()
 						end
 						WEAPON.SET_CURRENT_PED_WEAPON(players.user_ped(), MISC.GET_HASH_KEY("WEAPON_UNARMED"), true)
-						TASK.TASK_PLAY_ANIM(players.user_ped(), dict, name, 8.0, 8.0, -1, 1, 0, false, false, false)end)
-			menu.toggle_loop(selfoptions, "Keep me clean", {}, "", function(toggled)
-				PED.CLEAR_PED_BLOOD_DAMAGE(players.user_ped())
-				PED.CLEAR_PED_WETNESS(players.user_ped())
-				PED.CLEAR_PED_ENV_DIRT(players.user_ped())end)
-			menu.divider(selfoptions, "~~~> PVP Options <~~~")
+						TASK.TASK_PLAY_ANIM(players.user_ped(), dict, name, 8.0, 8.0, -1, 1, 0, false, false, false)end)		
+			menu.divider(selfoptions, "~~~> Player <~~~")
 			menu.toggle_loop(selfoptions, "Refill Snacks & Armours Automatically", {}, "", function(toggled)
 				STAT_SET_INT("NO_BOUGHT_YUM_SNACKS", 30)
 				STAT_SET_INT("NO_BOUGHT_HEALTH_SNACKS", 15)
@@ -1654,6 +1592,19 @@
 				PLAYER.SET_PLAYER_WEAPON_DAMAGE_MODIFIER(players.user(), toggled ? 1.44 : 0.72)
 				PLAYER.SET_PLAYER_MELEE_WEAPON_DAMAGE_MODIFIER(players.user(), toggled ? 2.0 : 1.0)
 				PLAYER.SET_PLAYER_MELEE_WEAPON_DEFENSE_MODIFIER(players.user(), toggled ? 0.5 : 1.0)end)
+			menu.toggle_loop(selfoptions, "Keep me clean", {}, "", function(toggled)
+				PED.CLEAR_PED_BLOOD_DAMAGE(players.user_ped())
+				PED.CLEAR_PED_WETNESS(players.user_ped())
+				PED.CLEAR_PED_ENV_DIRT(players.user_ped())end)
+			menu.divider(selfoptions, "~~~> Movement <~~~")
+			menu.toggle_loop(selfoptions, "Reload when rolling", {}, "Reloads your weapon when doing a roll.", function()
+				if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 4) and PAD.IS_CONTROL_PRESSED(22, 22) and not PED.IS_PED_SHOOTING(players.user_ped())  then --checking if player is rolling
+					util.yield(900)
+					WEAPON.REFILL_AMMO_INSTANTLY(players.user_ped())
+				end end)
+			menu.toggle_loop(selfoptions, "Modded Roll (PS3)", {}, "", function()
+				STATS.STAT_SET_INT(util.joaat("MP0_SHOOTING_ABILITY"), 200, true) end)
+			menu.divider(selfoptions, "~~~> Respawning <~~~")
 			menu.toggle_loop(selfoptions, "Fast Respawn", {}, "", function()
 				local gwobaw = memory.script_global(2672524 + 1685 + 756) -- Global_2672524.f_1685.f_756
 					if PED.IS_PED_DEAD_OR_DYING(players.user_ped()) then
@@ -1664,22 +1615,31 @@
 					local gwobaw = memory.script_global(2672524 + 1685 + 756)
 					memory.write_int(gwobaw, memory.read_int(gwobaw) &~ (1 << 1))
 				end)
-			menu.toggle_loop(selfoptions, "Reload when rolling", {}, "Reloads your weapon when doing a roll.", function()
-				if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 4) and PAD.IS_CONTROL_PRESSED(22, 22) and not PED.IS_PED_SHOOTING(players.user_ped())  then --checking if player is rolling
-					util.yield(900)
-					WEAPON.REFILL_AMMO_INSTANTLY(players.user_ped())
-				end end)
-			menu.toggle_loop(selfoptions, "Modded Roll (PS3)", {}, "", function()
-				STATS.STAT_SET_INT(util.joaat("MP0_SHOOTING_ABILITY"), 200, true) end)
 		
 		menu.divider(playerslist, "~~~> Custom Playerlist <~~~")
+			-- [[ Custom Playerlist ]]
+				local kickPlayerList <const> = {"Smart Kick", "Host Kick", "Ban Kick"}
+				local KickType <const> = {smartkick = 0, hostkick = 1, bankick = 2}
+				local kicktype = 0
+
+				local crashPlayerList <const> = {"Elegant Crash"}
+				local CrashType <const> = {elegant = 0}
+				local crashtype = 0
+
+				local pTPlayerList <const> = {"Remove Explosive Shit", "Disable Ghost"}
+				local PtType <const> = {removeexplo = 0, disghost = 1}
+				local pttype = 0
+
+				local passivePlayerList <const> = {"Block", "Unblock"}
+				local PassiveType <const> = {onpassive = 0, offpassive = 1}
+				local passivetype = 0
 			menu.toggle(playerslist, "Exclude Selected", {}, "", function(on_toggle)
 					if on_toggle then
 						excludeselected = true
 					else
 						excludeselected = false
 					end end)
-			menu.divider(playerslist, "~~~> Actions <~~~")
+			menu.divider(playerslist, "~~~> Actions <~~~")--»«‹›
 			menu.textslider_stateful(playerslist, "Kicks:", {}, "", kickPlayerList, function(index)
 				if index == 1 then
 					kicktype = KickType.smartkick
@@ -1860,7 +1820,7 @@
 							google_translate(encoded_text, my_lang, sender, false)
 						end end)
 			paboptions = menu.list(onlineoptions, "Protections & Blocks", {}, "", function(); end)
-				menu.divider(paboptions, "~~~> Protections<~~~")
+				menu.divider(paboptions, "~~~> Protections & Blocks <~~~")
 				menu.list_select(paboptions, "Jammer Delay", {}, "The speed in which your name will flicker at for orbital cannon users.", {"Slow", "Medium", "Fast"}, 3, function(index, value)
 					switch value do
 						case "Slow":
@@ -1975,7 +1935,7 @@
 				menu.action(terminaloptions, "Nightclub", {}, "", function()
 					START_SCRIPT("CEO", "appbusinesshub")end)
 			recoveryoptions = menu.list(onlineoptions, "Recovery Options", {}, "", function(); end)
-				menu.divider(recoveryoptions, "~~~> Casino <~~~")
+				menu.divider(recoveryoptions, "~~~> Recovery Options <~~~")
 				menu.toggle_loop(recoveryoptions, "Auto Black Jack", {}, "", function()
 					if not (isHelpMessageBeingDisplayed('BJACK_BET') or isHelpMessageBeingDisplayed('BJACK_TURN') or isHelpMessageBeingDisplayed('BJACK_TURN_D') or isHelpMessageBeingDisplayed('BJACK_TURN_S')) then return end
 					if isHelpMessageBeingDisplayed('BJACK_BET') then
@@ -1984,9 +1944,11 @@
 					else
 						PAD._SET_CONTROL_NORMAL(2, 203, 1) --pass
 					end end)
-			
-					
 			menu.divider(onlineoptions, "~~~> Requests <~~~")
+			-- [[ Requests ]]
+				local RequestsType <const> = {"MOC", "Avenger", "Terrorbyte", "Kosatka", "Acid Lab"}
+				local requestsType <const> = {moc = 0, avenger = 1, terrorbyte = 2, kosatka = 3, acidlab = 4}
+				local requeststype = 0
 			menu.textslider_stateful(onlineoptions, "Request:", {}, "", RequestsType, function(index)
 				if index == 1 then
 					requeststype = requestsType.moc
@@ -2004,9 +1966,6 @@
 					requeststype = requestsType.acidlab
 						SET_INT_GLOBAL(2738587 + 944, 1)
 				end	end)
-				
-
-
 			menu.divider(onlineoptions, "~~~> Trolling <~~~")
 			bountyloop = menu.list(onlineoptions, "Bounty Loop", {}, "", function(); end)
 					menu.divider(bountyloop, "~~~> Bounty Loop <~~~")
@@ -2083,8 +2042,20 @@
 				end end)
 
 		menu.divider(vehicleoptions, "~~~> Vehicle Options <~~~")
+			-- [[ Buffing Settings ]]
+				local Lazerbuffing <const> = {"Modifyed Cannon", "Normal Cannon"}
+				local LazerType <const> = {modifyed = 0, normal = 1}
+				local lazerttype = 0
+
+				local B11buffing <const> = {"Modifyed Cannon", "Normal Cannon"}
+				local B11Type <const> = {modifyed = 0, normal = 1}
+				local b11ttype = 0
+
+				local Chernobuffing <const> = {"Shoot together", "Lock-On Range"}
+				local ChernoType <const> = {modifyed = 0, modifyed1 = 1}
+				local chernottype = 0
 			oldgtaoptions = menu.list(vehicleoptions, "Vehicle Modifyer", {}, "Some features to get old things back.", function(); end)
-				menu.divider(oldgtaoptions, "~~~> Presets <~~~")
+				menu.divider(oldgtaoptions, "~~~> Vehicle Modifyer <~~~")
 				menu.textslider_stateful(oldgtaoptions, "P-996 Lazer:", {}, "", Lazerbuffing, function(index)
 					if index == 1 then
 						lazerttype = LazerType.modifyed
@@ -2185,24 +2156,6 @@
 			menu.toggle_loop(vehicleoptions, "Vehicle Godmode", {}, "", function(toggled)
 				ENTITY.SET_ENTITY_PROOFS(players_car, true, true, true, true, true, 0, 0, true)
 				end, function() ENTITY.SET_ENTITY_PROOFS(PED.GET_VEHICLE_PED_IS_IN(player), false, false, false, false, false, 0, 0, false)end)
-			--[[menu.toggle_loop(vehicleoptions, "Indicator Lights", {}, "", function()
-				if(PED.IS_PED_IN_ANY_VEHICLE(players.user_ped(), false)) then
-					local vehicle = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
-					local left = PAD.IS_CONTROL_PRESSED(34, 34)
-					local right = PAD.IS_CONTROL_PRESSED(35, 35)
-					local rear = PAD.IS_CONTROL_PRESSED(130, 130)
-					if left and not right and not rear then
-						VEHICLE.SET_VEHICLE_INDICATOR_LIGHTS(vehicle, 1, true)
-					elseif right and not left and not rear then
-						VEHICLE.SET_VEHICLE_INDICATOR_LIGHTS(vehicle, 0, true)
-					elseif rear and not left and not right then
-						VEHICLE.SET_VEHICLE_INDICATOR_LIGHTS(vehicle, 1, true)
-						VEHICLE.SET_VEHICLE_INDICATOR_LIGHTS(vehicle, 0, true)
-					else
-						VEHICLE.SET_VEHICLE_INDICATOR_LIGHTS(vehicle, 0, false)
-						VEHICLE.SET_VEHICLE_INDICATOR_LIGHTS(vehicle, 1, false)
-					end
-				end end)]]
 			menu.divider(vehicleoptions, "~~~> Helicopter & Plane Options <~~~")
 			menu.action(vehicleoptions, "Disable Auto-Stablization (Broken atm)", {}, "", function ()
 				local CflyingHandling = get_sub_handling_types(entities.get_user_vehicle_as_handle(), 1)
@@ -2527,6 +2480,10 @@
 					end, function()
 					HUD._OVERRIDE_MULTIPLAYER_CHAT_COLOUR(0, chatColor)end)
 			menu.divider(settings, "~~~> Settings <~~~")
+			-- [[ Delete Log ]]
+				local LogDelete <const> = {"Playerhistory", "General Log"}
+				local LogDeleteType <const> = {log1 = 0, log2 = 1}
+				local LogDeletetype = 0
 			menu.textslider_stateful(settings, "Delete Log:", {}, "", LogDelete, function(index)
 					if index == 1 then
 						LogDeletetype = LogDeleteType.log1
@@ -2539,10 +2496,13 @@
 				util.open_folder(filesystem.scripts_dir() .. "lib\\AuroraScript\\") end)
 			menu.action(settings, "Restart Script", {"restartaurora"}, "Restarts the script to clean the errors.", function()
 				util.restart_script()end)
-		
+
+		menu.divider(credits, "~~~> Credits <~~~")
 		menu.readonly(credits, "Developer: ", DevName)
 		menu.readonly(credits, "Script Version: ", Version)
 		menu.readonly(credits, "GTA Online Version:", GTAOVersion)
+		menu.readonly(credits, "Game Version:", GameVersion)
+
 		menu.divider(credits, "~~~> Socials <~~~")
 		menu.hyperlink(credits, "Multigaming Discord", "https://discord.gg/bHpvhazv7T")
 		menu.hyperlink(credits, "GitHub (I3lackExo)", "https://github.com/I3lackExo")
@@ -2582,32 +2542,6 @@
 					end, function() ENTITY.SET_ENTITY_PROOFS(PED.GET_VEHICLE_PED_IS_IN(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)), false, false, false, false, false, 0, 0, false)
 					end)
 
-			--[[phistory = menu.list(menu.player_root(pid), "Player History", {}, "", function(); end)
-				menu.divider(phistory, "~~~> Add to Player History <~~~")
-				menu.action(phistory, "Add to Friendlist", {"addfriend"}, "", function(on)
-					if players.exists(pid) then
-						menu.trigger_commands("historynote"..PLAYER.GET_PLAYER_NAME(pid).." > Friendlist")
-						util.toast(PLAYER.GET_PLAYER_NAME(pid).." added to your friendlist.")
-					else
-						util.toast("Failed.")
-					end end)
-				menu.action(phistory, "Add to Flaggedlist", {"addflagged"}, "", function(on)
-					menu.trigger_commands("historynote"..PLAYER.GET_PLAYER_NAME(pid).." > Flaggedlist")
-					menu.trigger_commands("track"..PLAYER.GET_PLAYER_NAME(pid).." on")
-					util.toast(PLAYER.GET_PLAYER_NAME(pid).." added to your Flagged list.")end)
-				menu.action(phistory, "Add to Whitelist", {"addwhitelist"}, "", function(on)
-					menu.trigger_commands("historynote"..PLAYER.GET_PLAYER_NAME(pid).." > Whitelist")
-					util.toast(PLAYER.GET_PLAYER_NAME(pid).." added to your Whitelist.")end)
-				menu.action(phistory, "Add to Blocklist", {"addblocklist"}, "", function(on)
-					menu.trigger_commands("historynote"..PLAYER.GET_PLAYER_NAME(pid).." > Blocklist")
-					menu.trigger_commands("track"..PLAYER.GET_PLAYER_NAME(pid).." on")
-					menu.trigger_commands("historyblock"..PLAYER.GET_PLAYER_NAME(pid).." on")
-					util.toast(PLAYER.GET_PLAYER_NAME(pid).." added to your blocklist.")end)
-				menu.divider(phistory, "~~~> Delete from Player History <~~~")
-				menu.action(phistory, "Delete Note", {"deletenote"}, "", function(on)
-					menu.trigger_commands("historynote"..PLAYER.GET_PLAYER_NAME(pid).."")
-					util.toast(PLAYER.GET_PLAYER_NAME(pid).." delete from your list.")end)
-				menu.divider(phistory, "~~~> "..PLAYER.GET_PLAYER_NAME(pid).." | RID: "..players.get_rockstar_id(pid).." <~~~")]]
 			recovery = menu.list(menu.player_root(pid), "Recovery Options", {}, "", function(); end)
 				menu.divider(recovery, "~~~> Recovery Options <~~~")
 				rploop = menu.list(recovery, "RP Loop", {}, "", function(); end)
@@ -2739,6 +2673,15 @@
 					return end
 
 					util.trigger_script_event(1 << pid, {-245642440, players.user(), 4, 10000, 0, 0, 0, 0, memory.read_int(memory.script_global(1924276 + 9)), memory.read_int(memory.script_global(1924276 + 10)),})end)]]
+
+			-- [[ Kicks & Crashes ]]
+				local PMKicks <const> = {"Host Kick", "Orbital Host Kick"}
+				local PmKicksType <const> = {hostkick = 0, orbitalkick = 1}
+				local PmKickstype = 0
+
+				local PMCrashes <const> = {"Mother Nature", "AI Generated"}
+				local PmCrashesType <const> = {crash1 = 0, crash2 = 1}
+				local PmCrashestype = 0
 			menu.textslider_stateful(menu.player_root(pid), "Kicks:", {}, "", PMKicks, function(index)
 				if index == 1 then
 					PmKickstype = PmKicksType.hostkick
@@ -2805,11 +2748,10 @@
 						entities.delete_by_handle(object_handle)
 				end	end)
 			menu.action(menu.player_root(pid), "Save Playerdata", {"save"}, "", function(on)
-					local ip = players.get_connect_ip(pid)
-					local name = PLAYER.GET_PLAYER_NAME(pid)
-					history("Saved Playerdata: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid).." / IP: "..string.format("%i.%i.%i.%i)", ip >> 24 & 255, ip >> 16 & 255, ip >> 8 & 255, ip & 255))
-					util.toast("[Mira] <3\n".."> I have saved you all the important data of the player ("..name..").")end)
-			end
+				local ip = players.get_connect_ip(pid)
+				local name = PLAYER.GET_PLAYER_NAME(pid)
+				history("Saved Playerdata: (Playername: "..name.." / RID: "..players.get_rockstar_id(pid).." / IP: "..string.format("%i.%i.%i.%i)", ip >> 24 & 255, ip >> 16 & 255, ip >> 8 & 255, ip & 255))
+				util.toast("[Mira] <3\n".."> I have saved you all the important data of the player ("..name..").")end)end
 
 			local InitialPlayersList = players.list(true, true, true)
 				for i=1, #InitialPlayersList do
@@ -3064,20 +3006,6 @@
 					util.yield(250)
 				end
 			end end)]]
-
-	-- [[ Request Options ]]
-		--[[requestoptions = menu.list(onlineoptions, "> Request's", {}, "", function(); end)
-			menu.divider(requestoptions, "---> Request's <---")
-				menu.action(requestoptions, "MOC", {}, "", function(on)
-					SET_INT_GLOBAL(2815059 + 913, 1)end)
-				menu.action(requestoptions, "Avenger", {}, "", function(on)
-					SET_INT_GLOBAL(2815059 + 921, 1)end)
-				menu.action(requestoptions, "Terrorbyte", {}, "", function(on)
-					SET_INT_GLOBAL(2815059 + 925, 1)end)
-				menu.action(requestoptions, "Kosatka", {}, "", function(on)
-					SET_INT_GLOBAL(2815059 + 933, 1)end)
-				menu.action(requestoptions, "Ballistic Armor", {}, "", function(on)
-					SET_INT_GLOBAL(2815059 + 884, 1)end)]]
 
 	-- [[ Get own Bounty ]]
 		--[[menu.toggle_loop(bountyoptions, "Auto Claim Bounties", {}, "Automatically claims bounties that are placed on you.", function ()
