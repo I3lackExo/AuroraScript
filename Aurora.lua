@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora for Stand"
-	local Version = 4.2
+	local Version = 4.3
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 	local GameVersion = "3179"
@@ -1784,25 +1784,33 @@
 			spoofing = menu.list(onlineoptions, "Spoofing", {}, "", function(); end)
 				menu.divider(spoofing, "~~~> Spoofing <~~~")
 					-- [[ Spoofing ]]
-						local spoofingList <const> = {"Queue #1", "Queue #2", "Queue #3", "Queue #4", "Queue #5"}
-						local SpoofingType <const> = {queue1 = 0, queue2 = 1, queue3 = 2, queue4 = 3, queue5 = 4}
+						local spoofingList <const> = {"Queue #1", "Queue #2", "Queue #3", "Queue #4", "Queue #5", "Off"}
+						local SpoofingType <const> = {queue1 = 0, queue2 = 1, queue3 = 2, queue4 = 3, queue5 = 4, queueoff = 5}
 						local spoofingtype = 0
 					menu.textslider_stateful(spoofing, "Spoof Host Token:", {}, "", spoofingList, function(index)
 						if index == 1 then
 							spoofingtype = SpoofingType.queue1
-								menu.trigger_commands("spoofedhosttoken".." ".."0000000000000001" )
+								menu.trigger_commands("spoofedhosttoken".." ".."0000000000000001")
+								menu.trigger_commands("hosttokenspoofing".." ".."on")
 						elseif index == 2 then
 							spoofingtype = SpoofingType.queue2
-								menu.trigger_commands("spoofedhosttoken".." ".."0000000000000002" )
+								menu.trigger_commands("spoofedhosttoken".." ".."0000000000000002")
+								menu.trigger_commands("hosttokenspoofing".." ".."on")
 						elseif index == 3 then
 							spoofingtype = SpoofingType.queue3
-								menu.trigger_commands("spoofedhosttoken".." ".."0000000000000003" )
+								menu.trigger_commands("spoofedhosttoken".." ".."0000000000000003")
+								menu.trigger_commands("hosttokenspoofing".." ".."on")
 						elseif index == 4 then
 							spoofingtype = SpoofingType.queue4
-								menu.trigger_commands("spoofedhosttoken".." ".."0000000000000004" )
+								menu.trigger_commands("spoofedhosttoken".." ".."0000000000000004")
+								menu.trigger_commands("hosttokenspoofing".." ".."on")
 						elseif index == 5 then
 							spoofingtype = SpoofingType.queue5
-								menu.trigger_commands("spoofedhosttoken".." ".."0000000000000005" )
+								menu.trigger_commands("spoofedhosttoken".." ".."0000000000000005")
+								menu.trigger_commands("hosttokenspoofing".." ".."on")
+						elseif index == 6 then
+							spoofingtype = SpoofingType.queueoff
+								menu.trigger_commands("hosttokenspoofing".." ".."off")
 						end	end)
 
 			translater = menu.list(onlineoptions, "Translater", {}, "", function(); end)
