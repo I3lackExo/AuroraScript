@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora for Stand"
-	local Version = 4.3
+	local Version = 4.4
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 	local GameVersion = "3179"
@@ -2010,7 +2010,7 @@
 				end	end)
 			menu.divider(onlineoptions, "~~~> Trolling <~~~")
 			menu.action(onlineoptions, "Real localized \"DOX\"", {"dox"}, "", function(on_click)
-				chat.send_message("${name}: ${ip}, ${lanip} | ${geoip.city}, ${geoip.region}, ${geoip.country}", false, true, true)end)
+				chat.send_message("${name}: ${ip} | ${geoip.city}, ${geoip.region}, ${geoip.country}", false, true, true)end)
 
 		menu.divider(weaponsoptions, "~~~> Weapon Options <~~~")
 			weaponattachments = menu.list(weaponsoptions, "Weapon Attachment Manager", {}, "", function(); end)
