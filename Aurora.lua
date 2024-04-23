@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------------
 -- [[ Aurora Script ]]
 	local Name = "Aurora for Stand"
-	local Version = 4.1
+	local Version = 4.2
 	local DevName = "I3lackExo."
 	local GTAOVersion = "1.68"
 	local GameVersion = "3179"
@@ -1191,6 +1191,9 @@
 		util.show_corner_help(colorcodes.small..colorcodes.red.."WARNING: Codes were taken from other scripts and are therefore not my codes. DO NOT PUBLISH THE SCRIPT!")
 		menu.trigger_commands("edithudlbdfmp".." ".."Universe "..tostring(math.random(1, 999999)).." (Public, ~1~)")
 		util.toast("[Mira] <3\n".."> Hello "..SOCIALCLUB._SC_GET_NICKNAME().."! Welcome to Aurora!")
+		AUDIO.PLAY_SOUND_FROM_ENTITY(-1, "Pre_Screen_Stinger", players.user_ped(), "DLC_HEISTS_FINALE_SCREEN_SOUNDS", true, 20)
+		util.yield(750)
+		AUDIO.PLAY_SOUND_FROM_ENTITY(-1, "SPAWN", players.user_ped(), "BARRY_01_SOUNDSET", true, 20)
 
 	-- [[ Source Code ]]
 		menu.divider(selfoptions, "~~~> Self Options <~~~")
@@ -1778,6 +1781,30 @@
 						gen_fren_funcs(name)
 						::yes::
 					end
+			spoofing = menu.list(onlineoptions, "Spoofing", {}, "", function(); end)
+				menu.divider(spoofing, "~~~> Spoofing <~~~")
+					-- [[ Spoofing ]]
+						local spoofingList <const> = {"Queue #1", "Queue #2", "Queue #3", "Queue #4", "Queue #5"}
+						local SpoofingType <const> = {queue1 = 0, queue2 = 1, queue3 = 2, queue4 = 3, queue5 = 4}
+						local spoofingtype = 0
+					menu.textslider_stateful(spoofing, "Spoof Host Token:", {}, "", spoofingList, function(index)
+						if index == 1 then
+							spoofingtype = SpoofingType.queue1
+								menu.trigger_commands("spoofedhosttoken".." ".."0000000000000001" )
+						elseif index == 2 then
+							spoofingtype = SpoofingType.queue2
+								menu.trigger_commands("spoofedhosttoken".." ".."0000000000000002" )
+						elseif index == 3 then
+							spoofingtype = SpoofingType.queue3
+								menu.trigger_commands("spoofedhosttoken".." ".."0000000000000003" )
+						elseif index == 4 then
+							spoofingtype = SpoofingType.queue4
+								menu.trigger_commands("spoofedhosttoken".." ".."0000000000000004" )
+						elseif index == 5 then
+							spoofingtype = SpoofingType.queue5
+								menu.trigger_commands("spoofedhosttoken".." ".."0000000000000005" )
+						end	end)
+
 			translater = menu.list(onlineoptions, "Translater", {}, "", function(); end)
 				menu.divider(translater, "~~~> Translater <~~~")
 				menu.toggle(translater, "On", {}, "Turns translating on/off", function(on)
@@ -1936,6 +1963,13 @@
 					START_SCRIPT("CEO", "appbusinesshub")end)
 			recoveryoptions = menu.list(onlineoptions, "Recovery Options", {}, "", function(); end)
 				menu.divider(recoveryoptions, "~~~> Recovery Options <~~~")
+				bountyloop = menu.list(recoveryoptions, "Bounty Loop", {}, "", function(); end)
+					menu.divider(bountyloop, "~~~> Bounty Loop <~~~")
+					menu.slider(bountyloop, "Bounty Amount", {}, "", 0, 10000, 10000, 1, function(s)
+						infibounty_amt = s end)
+					menu.toggle_loop(bountyloop, "Place Infinite Bounty", {}, "", function(click_type)
+						menu.trigger_commands("bountyall" .. " " .. tostring(infibounty_amt))
+						util.yield(60000)end)
 				menu.toggle_loop(recoveryoptions, "Auto Black Jack", {}, "", function()
 					if not (isHelpMessageBeingDisplayed('BJACK_BET') or isHelpMessageBeingDisplayed('BJACK_TURN') or isHelpMessageBeingDisplayed('BJACK_TURN_D') or isHelpMessageBeingDisplayed('BJACK_TURN_S')) then return end
 					if isHelpMessageBeingDisplayed('BJACK_BET') then
@@ -1967,16 +2001,8 @@
 						SET_INT_GLOBAL(2738587 + 944, 1)
 				end	end)
 			menu.divider(onlineoptions, "~~~> Trolling <~~~")
-			bountyloop = menu.list(onlineoptions, "Bounty Loop", {}, "", function(); end)
-					menu.divider(bountyloop, "~~~> Bounty Loop <~~~")
-					menu.slider(bountyloop, "Bounty Amount", {}, "", 0, 10000, 10000, 1, function(s)
-						infibounty_amt = s end)
-					menu.toggle_loop(bountyloop, "Place Infinite Bounty", {}, "", function(click_type)
-						menu.trigger_commands("bountyall" .. " " .. tostring(infibounty_amt))
-						util.yield(60000)end)
-			menu.divider(onlineoptions, "~~~> Scare some Players <~~~")
 			menu.action(onlineoptions, "Real localized \"DOX\"", {"dox"}, "", function(on_click)
-				chat.send_message("${name}: ${ip} | ${geoip.city}, ${geoip.region}, ${geoip.country}", false, true, true)end)
+				chat.send_message("${name}: ${ip}, ${lanip} | ${geoip.city}, ${geoip.region}, ${geoip.country}", false, true, true)end)
 
 		menu.divider(weaponsoptions, "~~~> Weapon Options <~~~")
 			weaponattachments = menu.list(weaponsoptions, "Weapon Attachment Manager", {}, "", function(); end)
